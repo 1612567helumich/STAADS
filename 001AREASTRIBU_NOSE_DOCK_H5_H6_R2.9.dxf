@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461314.670173611
+2461314.6714351852
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461314.670173611
+2461314.6714351852
   9
 $TDUUPDATE
  40
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{90F425A0-5A91-45FD-B6FB-FD16B44C407A}
+{EF6FAE33-3791-42E4-9C1B-A6A66400F327}
   9
 $VERSIONGUID
   2
-{E03BF71C-0665-4376-AD88-92F5602333CF}
+{4915EAA6-D159-4F15-A0A2-9E49F1E66C3C}
   9
 $EXTNAMES
 290
@@ -26081,7 +26081,7 @@ AcDbMText
  71
 5
   1
-N7 · cabeza de columna A-1\PA = 5.04 × 5.000 = 25.20 m²\PSismo (caso 4): FX = FZ = 486.9 kg
+N7 · cabeza de columna A-1\PA = 5.04 × 5.000 = 25.20 m²\PMasa por CM: 19.32 kg/m² × 25.20 m² = 486.9 kg
   7
 ARIAL
   0
@@ -26227,7 +26227,7 @@ AcDbMText
  71
 5
   1
-N8 · cabeza de columna B-1\PA = 5.04 × 5.000 = 25.20 m²\PSismo (caso 4): FX = FZ = 486.9 kg
+N8 · cabeza de columna B-1\PA = 5.04 × 5.000 = 25.20 m²\PMasa por CM: 19.32 kg/m² × 25.20 m² = 486.9 kg
   7
 ARIAL
   0
@@ -26373,7 +26373,7 @@ AcDbMText
  71
 5
   1
-N75 · cabeza de columna A-2\PA = 5.04 × 8.000 = 40.32 m²\PSismo (caso 4): FX = FZ = 779.0 kg
+N75 · cabeza de columna A-2\PA = 5.04 × 8.000 = 40.32 m²\PMasa por CM: 19.32 kg/m² × 40.32 m² = 779.0 kg
   7
 ARIAL
   0
@@ -26519,7 +26519,7 @@ AcDbMText
  71
 5
   1
-N76 · cabeza de columna B-2\PA = 5.04 × 8.000 = 40.32 m²\PSismo (caso 4): FX = FZ = 779.0 kg
+N76 · cabeza de columna B-2\PA = 5.04 × 8.000 = 40.32 m²\PMasa por CM: 19.32 kg/m² × 40.32 m² = 779.0 kg
   7
 ARIAL
   0
@@ -26665,7 +26665,7 @@ AcDbMText
  71
 5
   1
-N9 · cabeza de columna A-3\PA = 5.04 × 3.000 = 15.12 m²\PSismo (caso 4): FX = FZ = 292.1 kg
+N9 · cabeza de columna A-3\PA = 5.04 × 3.000 = 15.12 m²\PMasa por CM: 19.32 kg/m² × 15.12 m² = 292.1 kg
   7
 ARIAL
   0
@@ -26811,7 +26811,7 @@ AcDbMText
  71
 5
   1
-N10 · cabeza de columna B-3\PA = 5.04 × 3.000 = 15.12 m²\PSismo (caso 4): FX = FZ = 292.1 kg
+N10 · cabeza de columna B-3\PA = 5.04 × 3.000 = 15.12 m²\PMasa por CM: 19.32 kg/m² × 15.12 m² = 292.1 kg
   7
 ARIAL
   0
@@ -43157,7 +43157,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-09-30T16:05:03.179155+00:00
+1.4.4 @ 2026-09-30T16:06:52.486447+00:00
   0
 VISUALSTYLE
   5
@@ -49719,7 +49719,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-09-30T16:05:03.221955+00:00
+1.4.4 @ 2026-09-30T16:06:52.531139+00:00
   0
 ENDSEC
   0
