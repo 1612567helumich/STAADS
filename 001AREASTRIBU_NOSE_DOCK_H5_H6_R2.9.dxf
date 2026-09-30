@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461314.6714351852
+2461314.7215625
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461314.6714351852
+2461314.7215625
   9
 $TDUUPDATE
  40
@@ -933,11 +933,11 @@ $PSTYLEMODE
   9
 $FINGERPRINTGUID
   2
-{EF6FAE33-3791-42E4-9C1B-A6A66400F327}
+{91ACB864-08F4-4820-9900-B67F23F174BB}
   9
 $VERSIONGUID
   2
-{4915EAA6-D159-4F15-A0A2-9E49F1E66C3C}
+{C92A899B-1563-4C74-98FC-6BCC5C88191B}
   9
 $EXTNAMES
 290
@@ -1327,9 +1327,9 @@ ISM
   0
 CLASS
   1
-ACDBPLACEHOLDER
+LAYOUT
   2
-AcDbPlaceHolder
+AcDbLayout
   3
 ObjectDBX Classes
  90
@@ -1343,9 +1343,9 @@ ObjectDBX Classes
   0
 CLASS
   1
-LAYOUT
+ACDBPLACEHOLDER
   2
-AcDbLayout
+AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
@@ -26077,11 +26077,13 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
+  3
+N7 · cabeza de columna A-1\PFranja X = 0.00 a 5.04 m, Z = 0.00 a 5.00 m\PVM-1: 0.50 × 5.04 = 2.52 m²\PLT-1: 1.25 × 5.04 = 6.30 m²\PLT-2: 1.50 × 5.04 = 7.56 m²\PLT-3: 1.50 × 5.04 = 7.56 m²\PLT-4 (parte): 0.25 × 5.04 = 1.26 m²\PA = 25.20 m²\PFuerza en 
   1
-N7 · cabeza de columna A-1\PA = 5.04 × 5.000 = 25.20 m²\PMasa por CM: 19.32 kg/m² × 25.20 m² = 486.9 kg
+el nodo (FX = FZ):\P19.32 kg/m² × 25.20 m² = 486.9 kg
   7
 ARIAL
   0
@@ -26223,11 +26225,13 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
+  3
+N8 · cabeza de columna B-1\PFranja X = 5.04 a 10.08 m, Z = 0.00 a 5.00 m\PVM-1: 0.50 × 5.04 = 2.52 m²\PLT-1: 1.25 × 5.04 = 6.30 m²\PLT-2: 1.50 × 5.04 = 7.56 m²\PLT-3: 1.50 × 5.04 = 7.56 m²\PLT-4 (parte): 0.25 × 5.04 = 1.26 m²\PA = 25.20 m²\PFuerza en
   1
-N8 · cabeza de columna B-1\PA = 5.04 × 5.000 = 25.20 m²\PMasa por CM: 19.32 kg/m² × 25.20 m² = 486.9 kg
+ el nodo (FX = FZ):\P19.32 kg/m² × 25.20 m² = 486.9 kg
   7
 ARIAL
   0
@@ -26369,11 +26373,13 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
+  3
+N75 · cabeza de columna A-2\PFranja X = 0.00 a 5.04 m, Z = 5.00 a 13.00 m\PLT-4 (parte): 1.25 × 5.04 = 6.30 m²\PLT-5: 1.50 × 5.04 = 7.56 m²\PLT-6: 1.50 × 5.04 = 7.56 m²\PVM-2: 1.50 × 5.04 = 7.56 m²\PLT-7: 1.50 × 5.04 = 7.56 m²\PLT-8 (parte): 0.75 × 5
   1
-N75 · cabeza de columna A-2\PA = 5.04 × 8.000 = 40.32 m²\PMasa por CM: 19.32 kg/m² × 40.32 m² = 779.0 kg
+.04 = 3.78 m²\PA = 40.32 m²\PFuerza en el nodo (FX = FZ):\P19.32 kg/m² × 40.32 m² = 779.0 kg
   7
 ARIAL
   0
@@ -26515,11 +26521,13 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
+  3
+N76 · cabeza de columna B-2\PFranja X = 5.04 a 10.08 m, Z = 5.00 a 13.00 m\PLT-4 (parte): 1.25 × 5.04 = 6.30 m²\PLT-5: 1.50 × 5.04 = 7.56 m²\PLT-6: 1.50 × 5.04 = 7.56 m²\PVM-2: 1.50 × 5.04 = 7.56 m²\PLT-7: 1.50 × 5.04 = 7.56 m²\PLT-8 (parte): 0.75 × 
   1
-N76 · cabeza de columna B-2\PA = 5.04 × 8.000 = 40.32 m²\PMasa por CM: 19.32 kg/m² × 40.32 m² = 779.0 kg
+5.04 = 3.78 m²\PA = 40.32 m²\PFuerza en el nodo (FX = FZ):\P19.32 kg/m² × 40.32 m² = 779.0 kg
   7
 ARIAL
   0
@@ -26661,11 +26669,11 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
   1
-N9 · cabeza de columna A-3\PA = 5.04 × 3.000 = 15.12 m²\PMasa por CM: 19.32 kg/m² × 15.12 m² = 292.1 kg
+N9 · cabeza de columna A-3\PFranja X = 0.00 a 5.04 m, Z = 13.00 a 16.00 m\PLT-8 (parte): 0.75 × 5.04 = 3.78 m²\PLT-9: 1.50 × 5.04 = 7.56 m²\PVM-3: 0.75 × 5.04 = 3.78 m²\PA = 15.12 m²\PFuerza en el nodo (FX = FZ):\P19.32 kg/m² × 15.12 m² = 292.1 kg
   7
 ARIAL
   0
@@ -26807,11 +26815,11 @@ AcDbMText
  30
 0.0
  40
-0.15
+0.13
  71
 5
   1
-N10 · cabeza de columna B-3\PA = 5.04 × 3.000 = 15.12 m²\PMasa por CM: 19.32 kg/m² × 15.12 m² = 292.1 kg
+N10 · cabeza de columna B-3\PFranja X = 5.04 a 10.08 m, Z = 13.00 a 16.00 m\PLT-8 (parte): 0.75 × 5.04 = 3.78 m²\PLT-9: 1.50 × 5.04 = 7.56 m²\PVM-3: 0.75 × 5.04 = 3.78 m²\PA = 15.12 m²\PFuerza en el nodo (FX = FZ):\P19.32 kg/m² × 15.12 m² = 292.1 kg
   7
 ARIAL
   0
@@ -43157,7 +43165,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-09-30T16:06:52.486447+00:00
+1.4.4 @ 2026-09-30T17:19:03.176210+00:00
   0
 VISUALSTYLE
   5
@@ -49719,7 +49727,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-09-30T16:06:52.531139+00:00
+1.4.4 @ 2026-09-30T17:19:03.232178+00:00
   0
 ENDSEC
   0
