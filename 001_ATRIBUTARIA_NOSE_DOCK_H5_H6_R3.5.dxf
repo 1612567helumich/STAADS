@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461316.7066319445
+2461316.709039352
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461316.7066319445
+2461316.709039352
   9
 $TDUUPDATE
  40
@@ -553,7 +553,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-681
+683
   9
 $SURFTAB1
  70
@@ -937,7 +937,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{0FDEB8A6-1D15-4D4D-A097-08818A3A91ED}
+{9FD6BC19-6616-4083-9827-194CE6F99AC3}
   9
 $EXTNAMES
 290
@@ -2237,7 +2237,7 @@ LAYER
 100
 AcDbSymbolTable
  70
-22
+23
   0
 LAYER
   5
@@ -2760,6 +2760,30 @@ MC10-14
 0
  62
 40
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+681
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+MC6-14
+ 70
+0
+ 62
+30
   6
 Continuous
 370
@@ -28325,7 +28349,7 @@ AcDbMText
  71
 5
   1
-L1-1.1\PA=0.72\Pm46
+L1-1.1\PA=0.72\Pm46\PMC6-14
   7
 ARIAL
   0
@@ -28449,7 +28473,7 @@ AcDbMText
  71
 5
   1
-L1-1.2\PA=0.60\Pm159
+L1-1.2\PA=0.60\Pm159\PMC6-14
   7
 ARIAL
   0
@@ -28743,7 +28767,7 @@ AcDbMText
  71
 5
   1
-L1-2.1\PA=0.72\Pm23
+L1-2.1\PA=0.72\Pm23\PMC6-14
   7
 ARIAL
   0
@@ -28867,7 +28891,7 @@ AcDbMText
  71
 5
   1
-L1-2.2\PA=0.73\Pm204
+L1-2.2\PA=0.73\Pm204\PMC6-14
   7
 ARIAL
   0
@@ -28991,7 +29015,7 @@ AcDbMText
  71
 5
   1
-L1-2.3\PA=0.60\Pm203
+L1-2.3\PA=0.60\Pm203\PMC6-14
   7
 ARIAL
   0
@@ -31753,7 +31777,7 @@ LINE
 100
 AcDbEntity
   8
-MCC10-14
+MC6-14
 100
 AcDbLine
  10
@@ -31777,7 +31801,7 @@ LINE
 100
 AcDbEntity
   8
-MCC10-14
+MC6-14
 100
 AcDbLine
  10
@@ -31825,7 +31849,7 @@ LINE
 100
 AcDbEntity
   8
-MCC10-14
+MC6-14
 100
 AcDbLine
  10
@@ -31849,7 +31873,7 @@ LINE
 100
 AcDbEntity
   8
-MCC10-14
+MC6-14
 100
 AcDbLine
  10
@@ -31873,7 +31897,7 @@ LINE
 100
 AcDbEntity
   8
-MCC10-14
+MC6-14
 100
 AcDbLine
  10
@@ -43427,6 +43451,38 @@ ARIAL
 100
 AcDbText
   0
+TEXT
+  5
+682
+330
+17
+100
+AcDbEntity
+  8
+TEXTO-AT
+100
+AcDbText
+ 10
+-2.5
+ 20
+-35.85
+ 30
+0.0
+ 40
+0.12
+  1
+Largueros de la puerta (m23, m46, m159, m203, m204): monten C sencillo 6" cal. 14 (MC6-14), alma horizontal (BETA 90) · grupo _LARGUEROS_MURO1
+  7
+ARIAL
+ 11
+-2.5
+ 21
+-35.85
+ 31
+0.0
+100
+AcDbText
+  0
 ENDSEC
   0
 SECTION
@@ -51091,7 +51147,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-02T16:57:33.388433+00:00
+1.4.4 @ 2026-10-02T17:01:01.706147+00:00
   0
 ENDSEC
   0
