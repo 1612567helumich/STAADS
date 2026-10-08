@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461322.1947916667
+2461322.206400463
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461322.1947916667
+2461322.206400463
   9
 $TDUUPDATE
  40
@@ -937,7 +937,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{9B0A8402-638C-4D16-A161-52F3B442BB68}
+{F5798484-7AA1-491A-A306-D2ADA2A6BBC0}
   9
 $EXTNAMES
 290
@@ -76301,7 +76301,7 @@ AcDbMText
   3
 N7 · cabeza de columna A-1\PFranja X = 0.00 a 5.04 m, Z = 0.00 a 4.00 m\PVM-1: 0.67 × 5.04 = 3.36 m²\PLT-1: 1.33 × 5.04 = 6.72 m²\PLT-2: 1.33 × 5.04 = 6.72 m²\PLT-3 (parte): 0.67 × 5.04 = 3.36 m²\PA = 20.16 m²\PTecho en el nodo: 19.32 kg/m² × 20.16 m
   1
-² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1034.78 kg
+² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1006.45 kg
   7
 ARIAL
   0
@@ -76447,7 +76447,7 @@ AcDbMText
   3
 N8 · cabeza de columna B-1\PFranja X = 5.04 a 10.08 m, Z = 0.00 a 4.00 m\PVM-1: 0.67 × 5.04 = 3.36 m²\PLT-1: 1.33 × 5.04 = 6.72 m²\PLT-2: 1.33 × 5.04 = 6.72 m²\PLT-3 (parte): 0.67 × 5.04 = 3.36 m²\PA = 20.16 m²\PTecho en el nodo: 19.32 kg/m² × 20.16 
   1
-m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1034.78 kg
+m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1033.96 kg
   7
 ARIAL
   0
@@ -76593,7 +76593,7 @@ AcDbMText
   3
 N75 · cabeza de columna A-2\PFranja X = 0.00 a 5.04 m, Z = 4.00 a 12.00 m\PLT-3 (parte): 0.67 × 5.04 = 3.36 m²\PLT-4: 1.33 × 5.04 = 6.72 m²\PLT-5: 1.33 × 5.04 = 6.72 m²\PVM-2: 1.33 × 5.04 = 6.72 m²\PLT-6: 1.33 × 5.04 = 6.72 m²\PLT-7: 1.33 × 5.04 = 6.
   1
-72 m²\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PA = 40.32 m²\PTecho en el nodo: 19.32 kg/m² × 40.32 m² = 779.0 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1253.24 kg
+72 m²\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PA = 40.32 m²\PTecho en el nodo: 19.32 kg/m² × 40.32 m² = 779.0 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1233.64 kg
   7
 ARIAL
   0
@@ -76739,7 +76739,7 @@ AcDbMText
   3
 N76 · cabeza de columna B-2\PFranja X = 5.04 a 10.08 m, Z = 4.00 a 12.00 m\PLT-3 (parte): 0.67 × 5.04 = 3.36 m²\PLT-4: 1.33 × 5.04 = 6.72 m²\PLT-5: 1.33 × 5.04 = 6.72 m²\PVM-2: 1.33 × 5.04 = 6.72 m²\PLT-6: 1.33 × 5.04 = 6.72 m²\PLT-7: 1.33 × 5.04 = 6
   1
-.72 m²\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PA = 40.32 m²\PTecho en el nodo: 19.32 kg/m² × 40.32 m² = 779.0 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1253.24 kg
+.72 m²\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PA = 40.32 m²\PTecho en el nodo: 19.32 kg/m² × 40.32 m² = 779.0 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 1233.64 kg
   7
 ARIAL
   0
@@ -76885,7 +76885,7 @@ AcDbMText
   3
 N9 · cabeza de columna A-3\PFranja X = 0.00 a 5.04 m, Z = 12.00 a 16.00 m\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PLT-9: 1.33 × 5.04 = 6.72 m²\PLT-10: 1.33 × 5.04 = 6.72 m²\PVM-3: 0.67 × 5.04 = 3.36 m²\PA = 20.16 m²\PTecho en el nodo: 19.32 kg/m² × 20.1
   1
-6 m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 619.25 kg
+6 m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 609.54 kg
   7
 ARIAL
   0
@@ -77031,7 +77031,7 @@ AcDbMText
   3
 N10 · cabeza de columna B-3\PFranja X = 5.04 a 10.08 m, Z = 12.00 a 16.00 m\PLT-8 (parte): 0.67 × 5.04 = 3.36 m²\PLT-9: 1.33 × 5.04 = 6.72 m²\PLT-10: 1.33 × 5.04 = 6.72 m²\PVM-3: 0.67 × 5.04 = 3.36 m²\PA = 20.16 m²\PTecho en el nodo: 19.32 kg/m² × 20
   1
-.16 m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 619.25 kg
+.16 m² = 389.5 kg\PCaso 4 (techo + muros y cortina): FX = FZ = 609.54 kg
   7
 ARIAL
   0
@@ -93045,7 +93045,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-08T04:40:30.245343+00:00
+1.4.4 @ 2026-10-08T04:57:13.934955+00:00
   0
 DICTIONARY
   5
