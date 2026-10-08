@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461322.177800926
+2461322.1816435186
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461322.177800926
+2461322.1816435186
   9
 $TDUUPDATE
  40
@@ -937,7 +937,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{E6588F4B-61FD-4793-96E2-9729CB0E7F33}
+{1F02409D-F189-46F8-87C8-8B8B7AE27971}
   9
 $EXTNAMES
 290
@@ -63401,7 +63401,7 @@ AcDbLine
  10
 15.0
  20
--34.0
+-33.4
  30
 0.0
  11
@@ -63425,7 +63425,7 @@ AcDbLine
  10
 23.0
  20
--34.0
+-33.4
  30
 0.0
  11
@@ -63449,7 +63449,7 @@ AcDbLine
  10
 23.0
  20
--34.0
+-33.4
  30
 0.0
  11
@@ -63479,7 +63479,7 @@ AcDbLine
  11
 31.0
  21
--34.0
+-33.4
  31
 0.0
   0
@@ -64459,7 +64459,7 @@ AcDbText
  40
 0.12
   1
-Tensores en X (Ø1/2", PRIS YD 1.27, MEMBER TENSION): STAAD 845, 846, 847, 848; anclados abajo en la base de las columnas y arriba en los largueros de 9.45 m (claro 1-2) y de 9.00 y 9.45 m (claro 2-3)
+Tensores en X (Ø1/2", PRIS YD 1.27, MEMBER TENSION): STAAD 845, 846, 847, 848; claro 1-2 del larguero de 0.60 m al de 9.45 m, claro 2-3 del de 0.60 m a los de 9.00 y 9.45 m
   7
 ARIAL
  11
@@ -69095,7 +69095,7 @@ AcDbLine
  11
 43.0
  21
--34.0
+-33.4
  31
 0.0
   0
@@ -69113,7 +69113,7 @@ AcDbLine
  10
 51.0
  20
--34.0
+-33.4
  30
 0.0
  11
@@ -69143,7 +69143,7 @@ AcDbLine
  11
 35.0
  21
--34.0
+-33.4
  31
 0.0
   0
@@ -69161,7 +69161,7 @@ AcDbLine
  10
 43.0
  20
--34.0
+-33.4
  30
 0.0
  11
@@ -70147,7 +70147,7 @@ AcDbText
  40
 0.12
   1
-Tensores en X (Ø1/2", PRIS YD 1.27, MEMBER TENSION): STAAD 849, 850, 851, 852; anclados abajo en la base de las columnas y arriba en los largueros de 9.45 m (claro 1-2) y de 9.00 y 9.45 m (claro 2-3)
+Tensores en X (Ø1/2", PRIS YD 1.27, MEMBER TENSION): STAAD 849, 850, 851, 852; claro 1-2 del larguero de 0.60 m al de 9.45 m, claro 2-3 del de 0.60 m a los de 9.00 y 9.45 m
   7
 ARIAL
  11
@@ -93045,7 +93045,7 @@ DictionaryVariables
 280
 0
   1
-1.4.4 @ 2026-10-08T04:16:02.116717+00:00
+1.4.4 @ 2026-10-08T04:21:34.746793+00:00
   0
 DICTIONARY
   5
