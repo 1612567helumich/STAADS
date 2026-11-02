@@ -56,7 +56,8 @@ button,select,input{font:inherit;color:inherit}
 
 /* ---------- top bar ---------- */
 .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
-.brand{display:flex;flex-direction:column;min-width:0;margin-right:auto}
+.brand{display:flex;flex-direction:column;flex:1 1 300px;min-width:0}
+.ctls{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 16px}
 .brand h1{margin:0;font:700 1.55rem/1 var(--f-display);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 .brand p{margin:3px 0 0;color:var(--muted);font:400 .78rem/1.3 var(--f-mono)}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--surface-2)}
@@ -92,6 +93,14 @@ button,select,input{font:inherit;color:inherit}
 .legend summary::-webkit-details-marker{display:none}
 .legend ul{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
 .legend li{display:flex;align-items:center;gap:6px;min-width:0}
+.legend li.lg-h{grid-column:1 / -1;margin-top:4px;font:600 .64rem/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.legend li.lg-h:first-child{margin-top:0}
+.sec-row{display:flex;gap:8px;align-items:center;min-width:0}
+.sec-pic{flex:none;width:58px;display:grid;place-items:center;color:var(--ink)}
+.sec-pic svg{max-width:58px;height:auto}
+.secs tfoot td{font-weight:600;border-bottom:0}
+.tip-sec{display:flex;gap:10px;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);color:var(--ink)}
+.tip-sec svg{flex:none;max-width:140px;height:auto}
 .sw{display:inline-block;vertical-align:middle;width:11px;height:11px;border-radius:2px;flex:none;border:1px solid rgb(0 0 0 / .25)}
 @media (max-width: 600px){ .tag{padding:2px 4px 1px} .tag b{font-size:.74rem} .tag small{display:none} .bubble{width:20px;height:20px;font-size:.75rem} .hint{display:none} }
 .hint{position:absolute;right:10px;top:10px;z-index:4;font:400 .72rem/1.3 var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface-2) 85%,transparent);padding:4px 7px;border-radius:4px}
@@ -249,6 +258,7 @@ tr[data-act]:hover td{background:var(--surface)}
   .app{height:auto}
   .work{grid-template-columns:1fr}
   .stage{height:58vh;min-height:340px}
+  .ctls{justify-content:flex-start}
   .panel{max-height:none}
   .tabpanel{overflow:visible}
   .legend ul{grid-template-columns:1fr}
@@ -262,12 +272,19 @@ tr[data-act]:hover td{background:var(--surface)}
       <h1>Conexiones Villahermosa</h1>
       <p>Planos GMI S07713000573–579 (SYR-01…07) · STAAD 001_VILLAHERMOSA_SAYER R1.3</p>
     </div>
+    <div class="ctls">
     <div class="ctl"><span class="seg-label">Vista</span>
       <div class="seg" id="views">
         <button type="button" data-view="iso" aria-pressed="true">Iso</button>
         <button type="button" data-view="plan" aria-pressed="false">Planta</button>
         <button type="button" data-view="front" aria-pressed="false">Elev. X</button>
         <button type="button" data-view="side" aria-pressed="false">Elev. Z</button>
+      </div>
+    </div>
+    <div class="ctl"><span class="seg-label">Barras</span>
+      <div class="seg" id="barmode">
+        <button type="button" data-bm="sec" aria-pressed="true" title="Cada barra extruida con la forma de su perfil">Perfiles 3D</button>
+        <button type="button" data-bm="lin" aria-pressed="false" title="Modelo analítico: una línea por barra, del color de su perfil">Líneas</button>
       </div>
     </div>
     <div class="ctl"><span class="seg-label">Nivel</span>
@@ -277,6 +294,7 @@ tr[data-act]:hover td{background:var(--surface)}
         <button type="button" data-level="mez" aria-pressed="false">Mezz.</button>
         <button type="button" data-level="inf" aria-pressed="false">Base</button>
       </div>
+    </div>
     </div>
   </header>
   <div class="work">
@@ -469,6 +487,7 @@ function loadAssign() {
   try { const s = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (s && typeof s === 'object') return { ...DEFAULT_ASSIGN, ...s }; } catch (e) { /* sin almacenamiento */ }
   return { ...DEFAULT_ASSIGN };
 }
+function loadBarMode() { try { const v = localStorage.getItem('conexiones-villahermosa-barras'); if (v === 'lin' || v === 'sec') return v; } catch (e) { /* sin almacenamiento */ } return 'sec'; }
 function saveAssign() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state.assign)); } catch (e) { /* sin almacenamiento */ } }
 
 /* Dirección local del plano (N = arriba en las vistas en planta, E = derecha) -> eje global STAAD, por giro k·90° */
@@ -478,7 +497,7 @@ const L2G = [
   { E: '-X', N: '+Z', W: '+X', S: '-Z' },
   { E: '+Z', N: '+X', W: '-Z', S: '-X' },
 ];
-const DEPTH_MM = { 'MCE10-14': 254, 'MCE10-12': 254, 'MC10-14': 254, 'W8X10': 200.7, 'MCE6-14': 152.4, 'MCC8-14': 203.2 };
+const DEPTH_MM = { 'MCE10-14': 254, 'MCE10-12': 254, 'MC10-14': 254, 'W8X10': 200.4, 'MCE6-14': 152.4, 'MCC8-14': 203.2 };
 const LEVEL_NAME = { cub: 'Cubierta', mez: 'Mezzanine', fac: 'Fachada (inferior)', base: 'Base', col: 'Columna' };
 
 /* =====================================================================
@@ -753,73 +772,142 @@ const GROUP_STYLE = {
   '(sin grupo)': { c: '#c0703c', o: 0.95, n: 'Enlaces rígidos W16X36', layer: 'fach' },
 };
 const lineObjs = [];
-(function buildLines() {
+function buildLines() {
   const per = {};
-  for (const [id, m] of Object.entries(MEM)) (per[GRP[m[3]]] ||= []).push(+id);
-  for (const [g, ids] of Object.entries(per)) {
-    const st = GROUP_STYLE[g] || { c: '#999999', o: 0.7, n: g, layer: 'otros' };
+  for (const [id, m] of Object.entries(MEM)) {
+    const sec = SEC[m[2]], layer = (GROUP_STYLE[GRP[m[3]]] || {}).layer || 'otros';
+    (per[`${sec}|${layer}`] ||= { sec, layer, ids: [] }).ids.push(+id);
+  }
+  for (const { sec, layer, ids } of Object.values(per)) {
     const arr = new Float32Array(ids.length * 6);
     ids.forEach((id, i) => { const [a, b] = MEM[id]; const A = S(...J[a]), B = S(...J[b]); arr.set([A.x, A.y, A.z, B.x, B.y, B.z], i * 6); });
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
-    const ln = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: st.c, transparent: true, opacity: st.o }));
-    ln.userData = { kind: 'lines', group: g, ids, layer: st.layer };
+    const ln = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: SECDEF[sec]?.c || '#999999', transparent: true, opacity: 0.95 }));
+    ln.userData = { kind: 'lines', sec, ids, layer, op0: 0.95 };
     scene.add(ln); lineObjs.push(ln);
   }
-})();
-
-const PROFILE = {
-  'MCE10-14': { k: 'I', d: .254, b: .1778, tw: .0038, tf: .0019 },
-  'MCE10-12': { k: 'I', d: .254, b: .1778, tw: .0053, tf: .0027 },
-  'W8X10': { k: 'I', d: .2007, b: .1001, tw: .0043, tf: .0052 },
-  'MCE6-14': { k: 'I', d: .1524, b: .127, tw: .0038, tf: .0019 },
-  'MC10-14': { k: 'C', d: .254, b: .0889, tw: .0019, tf: .0019 },
-  'MCC8-14': { k: 'B', d: .2032, b: .127, tw: .0019, tf: .0019 },
-};
-function profileShape(P) {
-  const d = P.d / 2, b = P.b / 2, tw = P.tw, tf = P.tf, lip = 0.022;
-  if (P.k === 'I') return makeShape([[-b, -d], [b, -d], [b, -d + lip], [b - tf, -d + lip], [b - tf, -d + tf], [tw / 2, -d + tf], [tw / 2, d - tf], [b - tf, d - tf], [b - tf, d - lip], [b, d - lip], [b, d], [-b, d], [-b, d - lip], [-b + tf, d - lip], [-b + tf, d - tf], [-tw / 2, d - tf], [-tw / 2, -d + tf], [-b + tf, -d + tf], [-b + tf, -d + lip], [-b, -d + lip]]);
-  if (P.k === 'C') return makeShape([[-b, -d], [b, -d], [b, -d + lip], [b - tf, -d + lip], [b - tf, -d + tf], [-b + tw, -d + tf], [-b + tw, d - tf], [b - tf, d - tf], [b - tf, d - lip], [b, d - lip], [b, d], [-b, d]]);
-  return makeShape(rect(-b, -d, b, d), [rect(-b + tw, -d + tf, b - tw, d - tf)]);
 }
-const SOLID_GROUPS = new Set(['_VIG_PRINC_MEZZ', '_VIG_SEC_MEZ', '_VIG_PRINC_CUB', '_VIGA_APOY_INF']);
-const beamMeshes = [];
-const beamMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, metalness: 0.15, transparent: true, opacity: 0.55, depthWrite: false });
-const BEAM_COLOR = new THREE.Color('#7f97ab'), BEAM_HOVER = new THREE.Color('#ff8a3d');
-(function buildBeams() {
-  const bySec = {};
-  for (const [id, m] of Object.entries(MEM)) {
-    if (!SOLID_GROUPS.has(GRP[m[3]]) || !PROFILE[SEC[m[2]]]) continue;
-    (bySec[SEC[m[2]]] ||= []).push(+id);
+
+/* ---------- 6c-bis. Sección real de cada perfil del STAAD (m) ----------
+   Coordenadas de la sección: u = ancho (−z local de STAAD), v = peralte (y local).
+   Los perfiles laminados en frío se generan desde su línea media con el espesor del calibre. */
+const T12 = .00266, T14 = .0019, T16 = .00152, T20 = .00091, T24 = .00061;
+function thick(pts, t) {
+  const h = t / 2, L = [], R = [], n = pts.length;
+  const unit = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+  for (let i = 0; i < n; i++) {
+    const a = i > 0 ? unit(pts[i - 1], pts[i]) : null, b = i < n - 1 ? unit(pts[i], pts[i + 1]) : null;
+    let nx, ny;
+    if (a && b) { const ax = -a[1], ay = a[0], bx = -b[1], by = b[0]; let mx = ax + bx, my = ay + by; const ml = Math.hypot(mx, my) || 1; mx /= ml; my /= ml; const c = mx * ax + my * ay || 1; nx = mx / c; ny = my / c; }
+    else { const d = a || b; nx = -d[1]; ny = d[0]; }
+    L.push([pts[i][0] + nx * h, pts[i][1] + ny * h]); R.push([pts[i][0] - nx * h, pts[i][1] - ny * h]);
   }
+  return [...L, ...R.reverse()];
+}
+const thin = (path, t) => ({ o: thick(path, t), h: [] });
+const solidSec = pts => ({ o: pts, h: [] });
+function cPath(d, b, lip, t, s, u0) {
+  const top = d / 2 - t / 2, w = u0 + s * t / 2, tip = u0 + s * (b - t / 2), p = [];
+  if (lip) p.push([tip, top - lip]);
+  p.push([tip, top], [w, top], [w, -top], [tip, -top]);
+  if (lip) p.push([tip, -top + lip]);
+  return p;
+}
+const backToBack = (d, b, lip, t) => [thin(cPath(d, b, lip, t, 1, 0), t), thin(cPath(d, b, lip, t, -1, 0), t)];
+const boxed = (d, b, lip, t) => [thin(cPath(d, b, lip, t, -1, b), t), thin(cPath(d, b, lip, t, 1, -b), t)];
+const singleC = (d, b, lip, t) => [thin(cPath(d, b, lip, t, 1, -b / 2), t)];
+function zPath(d, b, lip, t) { const top = d / 2 - t / 2, e = b - t / 2; return [[e, top - lip], [e, top], [0, top], [0, -top], [-e, -top], [-e, -top + lip]]; }
+const iSec = (d, b, tw, tf) => solidSec([[-b / 2, -d / 2], [b / 2, -d / 2], [b / 2, -d / 2 + tf], [tw / 2, -d / 2 + tf], [tw / 2, d / 2 - tf], [b / 2, d / 2 - tf], [b / 2, d / 2], [-b / 2, d / 2], [-b / 2, d / 2 - tf], [-tw / 2, d / 2 - tf], [-tw / 2, -d / 2 + tf], [-b / 2, -d / 2 + tf]]);
+const teeSec = (d, b, tw, tf) => solidSec([[-b / 2, d / 2], [-b / 2, d / 2 - tf], [-tw / 2, d / 2 - tf], [-tw / 2, -d / 2], [tw / 2, -d / 2], [tw / 2, d / 2 - tf], [b / 2, d / 2 - tf], [b / 2, d / 2]]);
+const pipeSec = (r, t) => ({ o: circ(0, 0, 2 * r, 28), h: [circ(0, 0, 2 * (r - t), 28)] });
+const HAT = [[-.046, -.02], [-.026, -.02], [-.015, .02], [.015, .02], [.026, -.02], [.046, -.02]];
+const SECDEF = {
+  'TUB60604': { c: '#9aa3ab', n: 'HSS 6″×6″×1/4″ · tubo cuadrado', dim: '152.4 × 152.4 × 6.35', sh: () => [{ o: rrect(-.0762, -.0762, .0762, .0762, .0127), h: [rrect(-.0703, -.0703, .0703, .0703, .0064)] }] },
+  'MCE10-14': { c: '#3f7cc0', n: '2 Monten 10″ cal 14 espalda con espalda', dim: '254 × 177.8 · e 1.9', sh: () => backToBack(.254, .0889, .025, T14) },
+  'MCE10-12': { c: '#24589a', n: '2 Monten 10″ cal 12 espalda con espalda', dim: '254 × 177.8 · e 2.7', sh: () => backToBack(.254, .0889, .025, T12) },
+  'MC10-14': { c: '#79b0e0', n: 'Monten 10″ cal 14 sencillo', dim: '254 × 88.9 · e 1.9', sh: () => singleC(.254, .0889, .025, T14) },
+  'MCE6-14': { c: '#2f9e8f', n: '2 Monten 6″ cal 14 espalda con espalda', dim: '152.4 × 127 · e 1.9', sh: () => backToBack(.1524, .0635, .02, T14) },
+  'MCC8-14': { c: '#5c9e48', n: '2 Monten 8″ cal 14 en cajón', dim: '203.2 × 127 · e 1.9', sh: () => boxed(.2032, .0635, .02, T14) },
+  'W8X10': { c: '#c0504d', n: 'IR 8″ × 14.9 kg/m (W8X10)', dim: '200.4 × 100.1 · alma 4.3 · patín 5.2', sh: () => [iSec(.2004, .1001, .0043, .0052)] },
+  'W16X36': { c: '#e07b39', n: 'T cortada de W16X36 (WT8X18) · enlace rígido', dim: '203 × 177.4 · alma 7.5 · patín 10.9', sh: () => [teeSec(.203, .1774, .0075, .0109)] },
+  'NNZ_S_CAL20': { c: '#b09f6c', n: 'Z 89 cal 20 · armadura Intra', dim: '89 × 41 · e 0.9', sh: () => [thin(zPath(.089, .041, .008, T20), T20)] },
+  'TOPHAT40CAL24': { c: '#cf9f3c', n: 'Larguero top hat 40 cal 24', dim: '40 × 92 · e 0.6', sh: () => [thin(HAT, T24)] },
+  'POSTE-C16': { c: '#8e6fc1', n: 'Poste C 60 cal 16 · fachada Intra', dim: '60 × 60 · e 1.5', sh: () => singleC(.06, .06, .015, T16) },
+  'PIPS5': { c: '#d16ba5', n: 'Tubo 1/2″ estándar (PIPS5)', dim: 'Ø 21.3 × 2.8', sh: () => [pipeSec(.01065, .00277)] },
+  'D-14': { c: '#8a7560', n: 'C 1½″ × 1″ cal 14 · diagonal D-14', dim: '38.1 × 25.4 · e 1.9', sh: () => singleC(.0381, .0254, .006, T14) },
+};
+function sectionSVG(sec, px = 92) {
+  const def = SECDEF[sec]; if (!def) return '';
+  const shapes = def.sh(); const xs = [], ys = [];
+  for (const s of shapes) for (const p of s.o) { xs.push(p[0]); ys.push(p[1]); }
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = px / Math.max(x1 - x0, y1 - y0), pad = 6, W = (x1 - x0) * k + 2 * pad, H = (y1 - y0) * k + 2 * pad;
+  const P = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${((p[0] - x0) * k + pad).toFixed(1)} ${((y1 - p[1]) * k + pad).toFixed(1)}`).join('') + 'Z';
+  const d = shapes.map(s => P(s.o) + s.h.map(P).join('')).join('');
+  return `<svg class="secsvg" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="Sección ${esc(sec)}"><path d="${d}" fill="${def.c}" fill-rule="evenodd" stroke="currentColor" stroke-width=".7" stroke-linejoin="round"/></svg>`;
+}
+const beamMeshes = [];
+const BEAM_HOVER = new THREE.Color('#ff8a3d');
+(function buildSections() {
+  const bySec = {};
+  for (const [id, m] of Object.entries(MEM)) (bySec[SEC[m[2]]] ||= []).push(+id);
   for (const [sec, ids] of Object.entries(bySec)) {
-    const geo = new THREE.ExtrudeGeometry(profileShape(PROFILE[sec]), { depth: 1, bevelEnabled: false });
-    const mesh = new THREE.InstancedMesh(geo, beamMat, ids.length);
-    mesh.userData = { kind: 'beam', sec, ids, layerOf: ids.map(id => GROUP_STYLE[grpName(id)].layer) };
-    for (let i = 0; i < ids.length; i++) mesh.setColorAt(i, BEAM_COLOR);
+    const def = SECDEF[sec]; if (!def) continue;
+    const geo = new THREE.ExtrudeGeometry(def.sh().map(s => makeShape(s.o, s.h)), { depth: 1, bevelEnabled: false, curveSegments: 6 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.15 });
+    const mesh = new THREE.InstancedMesh(geo, mat, ids.length);
+    const col = new THREE.Color(def.c);
+    mesh.userData = { kind: 'beam', sec, ids, color: col, layerOf: ids.map(id => (GROUP_STYLE[grpName(id)] || {}).layer || 'otros') };
+    for (let i = 0; i < ids.length; i++) mesh.setColorAt(i, col);
     scene.add(mesh); beamMeshes.push(mesh);
   }
 })();
+buildLines();
 const levelShift = y => (Math.abs(y - 604) < 1 ? (AXIS_MM.cub - STAAD_MM.cub) : Math.abs(y - 327) < 1 ? (AXIS_MM.mez - STAAD_MM.mez) : Math.abs(y - 20) < 1 ? (AXIS_MM.fac - STAAD_MM.fac) : 0) / 1000;
 const HIDE = new THREE.Matrix4().makeScale(0, 0, 0);
+const UPV = new THREE.Vector3(0, 1, 0);
+// Ejes locales STAAD: x del nudo inicial al final; z = x × Y global (en barras verticales z = Z global); y = z × x; BETA gira y, z alrededor de x
+function memberFrame(id) {
+  const [a, b] = MEM[id]; const A = S(...J[a]), B = S(...J[b]);
+  const x = B.clone().sub(A).normalize();
+  const z = Math.abs(x.y) > 0.9999 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3().crossVectors(x, UPV).normalize();
+  let y = new THREE.Vector3().crossVectors(z, x).normalize(), zz = z;
+  const beta = (MEM[id][4] || 0) * Math.PI / 180;
+  if (beta) { const c = Math.cos(beta), s = Math.sin(beta); const y2 = y.clone().multiplyScalar(c).addScaledVector(z, s); zz = z.clone().multiplyScalar(c).addScaledVector(y, -s); y = y2; }
+  return { A, B, x, y, z: zz };
+}
 function updateBeams() {
-  const up = new THREE.Vector3(0, 1, 0);
+  const secMode = state.barMode === 'sec';
   for (const mesh of beamMeshes) {
-    const { ids, layerOf } = mesh.userData;
+    const { ids, layerOf, sec } = mesh.userData;
+    const shrink = sec === 'TUB60604' ? 0.985 : 1;   // queda dentro del HSS del plano, sin parpadeo
     ids.forEach((id, i) => {
-      if (!state.layers[layerOf[i]] || !state.layers.solids) { mesh.setMatrixAt(i, HIDE); return; }
-      const [a, b] = MEM[id];
-      const A = S(...J[a]), B = S(...J[b]);
+      if (!state.layers[layerOf[i]] || !secMode) { mesh.setMatrixAt(i, HIDE); return; }
+      const f = memberFrame(id); const [a, b] = MEM[id];
+      const A = f.A, B = f.B;
       if (state.align) { A.y += levelShift(J[a][1]); B.y += levelShift(J[b][1]); }
       const dir = B.clone().sub(A); const L = dir.length(); dir.normalize();
-      const t0 = COLNODES.has(a) ? 0.088 : 0, t1 = COLNODES.has(b) ? 0.088 : 0;
+      const horiz = Math.abs(dir.y) < 0.05 && grpName(id) !== '_COLUMNAS';
+      const t0 = horiz && COLNODES.has(a) ? 0.088 : 0, t1 = horiz && COLNODES.has(b) ? 0.088 : 0;
       A.addScaledVector(dir, t0);
       const len = Math.max(0.005, L - t0 - t1);
-      const side = new THREE.Vector3().crossVectors(up, dir).normalize();
-      const m = new THREE.Matrix4().makeBasis(side, up, dir.clone().multiplyScalar(len)); m.setPosition(A);
+      const m = new THREE.Matrix4().makeBasis(f.z.clone().multiplyScalar(-shrink), f.y.clone().multiplyScalar(shrink), dir.multiplyScalar(len)); m.setPosition(A);
       mesh.setMatrixAt(i, m);
     });
     mesh.instanceMatrix.needsUpdate = true; mesh.computeBoundingSphere(); mesh.computeBoundingBox?.();
   }
+  applySectionLook();
+}
+// Opacidad de las barras según modo (secciones opacas / líneas con vigas translúcidas), pieza enfocada o perfil aislado
+function applySectionLook() {
+  for (const mesh of beamMeshes) {
+    const mat = mesh.material; let op = 1;
+    if (focus.mesh) op = 0.06; else if (state.secIso && state.secIso !== mesh.userData.sec) op = 0.06;
+    const tr = op < 1;
+    if (mat.transparent !== tr) { mat.transparent = tr; mat.needsUpdate = true; }
+    mat.opacity = op; mat.depthWrite = !tr;
+  }
+  for (const ln of lineObjs) ln.material.opacity = focus.mesh ? 0.1 : state.secIso && state.secIso !== ln.userData.sec ? 0.06 : ln.userData.op0;
   markDirty();
 }
 
@@ -870,7 +958,7 @@ function cssLabel(html, cls, pos) { const el = document.createElement('div'); el
    7. Estado y reconstrucción
    ===================================================================== */
 const state = {
-  assign: loadAssign(), sel: '1-A', part: null, level: 'all', tab: 'col', align: true, finding: null, hss: 'staad',
+  assign: loadAssign(), sel: '1-A', part: null, level: 'all', tab: 'col', align: true, finding: null, hss: 'staad', barMode: loadBarMode(), secIso: null,
   layers: { plates: true, solids: true, mez: true, cub: true, arm: true, larg: true, fach: true, colstaad: true, losa: false, muros: false, labels: true, grid: true, marks: true },
 };
 let ANA = {};
@@ -1019,13 +1107,12 @@ const passesClip = pt => { const R = LEVEL_RANGE[state.level]; return !R || (pt.
    ===================================================================== */
 const LAYERS = [
   ['plates', 'Placas y columnas de los planos', '#d9622b'],
-  ['solids', 'Vigas STAAD en sólido', '#7f97ab'],
   ['mez', 'Vigas de mezzanine', '#2f6aa0'],
   ['cub', 'Vigas de cubierta', '#2f6aa0'],
   ['arm', 'Armaduras (NNZ cal 20)', '#8d9aa4'],
   ['larg', 'Largueros (TOPHAT)', '#aab4bb'],
   ['fach', 'Fachada: postes, apoyo inferior, fijaciones', '#3d8a68'],
-  ['colstaad', 'Columnas STAAD (línea de eje)', '#6f7d87'],
+  ['colstaad', 'Columnas STAAD (TUB60604)', '#9aa3ab'],
   ['losa', 'Losa de mezzanine (Structucrete)', '#9aa9b4'],
   ['muros', 'Muros Megawall', '#c7b79a'],
   ['marks', 'Marcadores de observaciones', '#b8342a'],
@@ -1035,7 +1122,7 @@ const LAYERS = [
 function applyLayerVisibility() {
   const L = state.layers;
   plateRoot.visible = L.plates; ghostRoot.visible = L.plates;
-  for (const ln of lineObjs) ln.visible = !!L[ln.userData.layer];
+  for (const ln of lineObjs) ln.visible = !!L[ln.userData.layer] && state.barMode === 'lin';
   if (shellObjs._STRUCTUCRETE) shellObjs._STRUCTUCRETE.visible = L.losa;
   if (shellObjs._MUROS_MW) shellObjs._MUROS_MW.visible = L.muros;
   labelRoot.visible = L.labels; gridRoot.visible = L.grid;
@@ -1066,7 +1153,8 @@ function memberInfo(mid) {
   const c = CHK[mid]; const [a, b] = MEM[mid];
   const L = Math.hypot(...[0, 1, 2].map(i => J[b][i] - J[a][i]));
   const lc = c ? `${c[2]} · ${esc(D.loads[c[2]] || '')}` : '';
-  return `<b>Barra ${mid} · ${esc(secName(mid))}</b><div class="mono">${esc(GROUP_STYLE[grpName(mid)]?.n || grpName(mid))} · L = ${nf(L, 1)} cm · nudos ${a}→${b}</div>${c ? `<div>Relación ${nf(c[1], 3)} (${c[0] === 'P' ? 'pasa' : 'no pasa'}) · LC ${lc}</div>` : ''}`;
+  const sd = SECDEF[secName(mid)], beta = MEM[mid][4];
+  return `<b>Barra ${mid} · ${esc(secName(mid))}${D.secType?.[secName(mid)] === 'T' ? ' (T)' : ''}</b>${sd ? `<div>${esc(sd.n)} · ${esc(sd.dim)} mm${beta ? ` · β = ${beta}°` : ''}</div>` : ''}<div class="mono">${esc(GROUP_STYLE[grpName(mid)]?.n || grpName(mid))} · L = ${nf(L, 1)} cm · nudos ${a}→${b}</div>${c ? `<div>Relación ${nf(c[1], 3)} (${c[0] === 'P' ? 'pasa' : 'no pasa'}) · LC ${lc}</div>` : ''}`;
 }
 function hitInfo(h) {
   const o = h.object, u = o.userData;
@@ -1094,7 +1182,7 @@ function showTip(html, x, y, pinned = false) {
 }
 function setHover(h) {
   if (hovered && hovered.obj) {
-    if (hovered.obj.isInstancedMesh) { hovered.obj.setColorAt(hovered.i, BEAM_COLOR); hovered.obj.instanceColor.needsUpdate = true; }
+    if (hovered.obj.isInstancedMesh) { hovered.obj.setColorAt(hovered.i, hovered.obj.userData.color); hovered.obj.instanceColor.needsUpdate = true; }
     else if (hovered.obj.userData.kind === 'plate') hovered.obj.material = baseMatFor(hovered.obj);
   }
   hovered = null;
@@ -1135,7 +1223,7 @@ renderer.domElement.addEventListener('pointerup', ev => {
     const [a, b] = MEM[mid];
     const p = POS.find(q => [q.nFac, q.nMez, q.nCub].some(n => n === a || n === b));
     if (p) selectPos(p.id, { focus: false });
-    pinned = true; showTip(hitInfo(h), ev.clientX, ev.clientY, true); setHover(h);
+    pinned = true; showTip(`${hitInfo(h)}<div class="tip-sec">${sectionSVG(secName(mid), 120)}<span class="small muted">Sección vista desde el nudo inicial (${MEM[mid][0]}).<br>Clic en otro lado para cerrar.</span></div>`, ev.clientX, ev.clientY, true); setHover(h);
   }
 });
 
@@ -1313,7 +1401,7 @@ function findings() {
     b: `<p>En columnas de borde el plano solo trae placas de cubierta en dos direcciones opuestas; STAAD tiene una tercera viga MCE6-14 empotrada (sin liberaciones) en la dirección perpendicular.</p><ul>${sp.map(i => `<li>Eje ${i.pos} (${i.mark}) · ${LEVEL_NAME[i.lvl]} · ${i.dir}: barra ${i.members.join(', ')} ${esc(secName(i.members[0]))}</li>`).join('')}</ul>`, pos: posBtns(sp) });
   const pr = by('peralte');
   if (pr.length) F.push({ sev: 'crit', code: 'peralte', t: 'W8X10 en el eje 3 con placas para viga de 10″',
-    b: `<p>Las placas de mezzanine quedan a 257.2 mm libres (para MCE10, 254 mm). En STAAD la línea W8X10 del eje 3 entre B y C (barras 2316, 2463 y 4066; peralte 200.7 mm, patín 100 mm) llega a las columnas 3-B y 3-C. Ningún plano trae detalle para esa viga.</p><ul>${pr.map(i => `<li>Eje ${i.pos} (${i.mark}) · ${i.dir}: barra ${i.members.join(', ')}</li>`).join('')}</ul>`, pos: posBtns(pr) });
+    b: `<p>Las placas de mezzanine quedan a 257.2 mm libres (para MCE10, 254 mm). En STAAD la línea W8X10 del eje 3 entre B y C (barras 2316, 2463 y 4066; peralte 200.4 mm, patín 100 mm) llega a las columnas 3-B y 3-C. Ningún plano trae detalle para esa viga.</p><ul>${pr.map(i => `<li>Eje ${i.pos} (${i.mark}) · ${i.dir}: barra ${i.members.join(', ')}</li>`).join('')}</ul>`, pos: posBtns(pr) });
   const kRows = hssWallRows();
   if (kRows.length) {
     const over = kRows.filter(r => r.ratio > 1);
@@ -1374,15 +1462,36 @@ function renderReviewTab() {
 /* =====================================================================
    14. Panel: Capas y leyenda
    ===================================================================== */
+function sectionRows() {
+  const cnt = {}, len = {};
+  for (const [id, m] of Object.entries(MEM)) { const s = SEC[m[2]]; cnt[s] = (cnt[s] || 0) + 1; const a = J[m[0]], b = J[m[1]]; len[s] = (len[s] || 0) + Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]); }
+  const tk = Object.fromEntries((D.takeoff || []).map(t => [t.profile, t]));
+  const order = (D.takeoff || []).map(t => t.profile).filter(s => cnt[s]);
+  for (const s of Object.keys(cnt)) if (!order.includes(s)) order.push(s);
+  return order.map(s => ({ s, n: cnt[s], m: (tk[s]?.length_cm ?? len[s]) / 100, kg: tk[s]?.weight_kg, type: D.secType?.[s] }));
+}
 function renderLayersTab() {
-  $('#p-cap').innerHTML = `<div><h2>Capas</h2><p class="small muted">Las líneas son el modelo analítico de STAAD; los sólidos de las vigas usan el perfil real de cada barra.</p></div>
+  const rows = sectionRows();
+  const tot = rows.reduce((a, r) => ({ n: a.n + r.n, m: a.m + r.m }), { n: 0, m: 0 });
+  const secTable = `<div><h2>Perfiles del STAAD</h2><p class="small muted">En «Perfiles 3D» cada barra se extruye con su sección real, orientada con sus ejes locales y su BETA; en «Líneas» se ve como rayita del mismo color. Toca un perfil para aislarlo. Longitud y peso del STEEL TAKE OFF del .ANL.</p></div>
+    ${state.secIso ? `<div class="row"><span class="chip info">Aislando ${esc(state.secIso)}</span><button type="button" class="btn sm" data-act="sec-clear">Ver todos</button></div>` : ''}
+    <div class="tbl"><table class="parts secs"><thead><tr><th></th><th>Perfil</th><th class="n">Barras</th><th class="n">m</th><th class="n">kg</th></tr></thead><tbody>
+    ${rows.map(r => { const d = SECDEF[r.s] || { c: '#999', n: '', dim: '' }; return `<tr class="${state.secIso === r.s ? 'on' : ''}" data-act="sec-iso" data-sec="${esc(r.s)}" tabindex="0">
+      <td><span class="sw" style="background:${d.c}"></span></td>
+      <td><div class="sec-row"><div class="sec-pic">${sectionSVG(r.s, 46)}</div><div><div class="mono">${esc(r.s)}${r.type === 'T' ? ' · tipo T' : ''}</div><div class="small">${esc(d.n)}</div><div class="small muted">${esc(d.dim)} mm</div></div></div></td>
+      <td class="n">${r.n}</td><td class="n">${nf(r.m, 1)}</td><td class="n">${r.kg != null ? nf(r.kg, 1) : '—'}</td></tr>`; }).join('')}
+    </tbody><tfoot><tr><td></td><td>Total</td><td class="n">${tot.n}</td><td class="n">${nf(tot.m, 1)}</td><td class="n">${D.takeoffTotal != null ? nf(D.takeoffTotal, 1) : '—'}</td></tr></tfoot></table></div>`;
+  $('#p-cap').innerHTML = `<div><h2>Capas</h2><p class="small muted">Barras en ${state.barMode === 'sec' ? '<b>Perfiles 3D</b>: cada barra extruida con la forma de su perfil' : '<b>Líneas</b>: modelo analítico, una línea por barra con el color de su perfil'}. Se cambia arriba, en «Barras».</p></div>
     <div class="layers">${LAYERS.map(([k, n, c]) => `<label><input type="checkbox" data-layer="${k}" ${state.layers[k] ? 'checked' : ''}><span class="sw" style="background:${c}"></span>${n}</label>`).join('')}
-    <label><input type="checkbox" id="align" ${state.align ? 'checked' : ''}><span class="sw" style="background:var(--accent)"></span>Alinear vigas con placas<small>apagado = nudos STAAD</small></label></div>`;
+    <label><input type="checkbox" id="align" ${state.align ? 'checked' : ''}><span class="sw" style="background:var(--accent)"></span>Alinear niveles con los planos<small>perfiles 3D · apagado = nudos STAAD</small></label></div>${secTable}`;
 }
 function renderLegend() {
   const items = [['P038SVH002', 'Patín mezz. 225×175'], ['P038MVV-004', 'Cortante mezz. 125×110'], ['P038ESM-006', 'Patín cubierta 167×130'], ['P038ESM-005', 'Cortante cubierta 67×110'], ['P038SVH001', 'Fachada L 168×148'], ['P038SVH007', 'Fachada U 296×168'], ['P038MVV-001', 'Placa base 300×300'], ['P038SVH005', 'Placas a 412.7 (SYR-04)']];
-  $('#legend-list').innerHTML = items.map(([k, n]) => `<li><span class="sw" style="background:${PART[k].col}"></span>${n}</li>`).join('') +
-    `<li><span class="sw" style="background:#7f97ab;opacity:.7"></span>Viga STAAD (sólido)</li><li><span class="sw" style="background:#d2453a;opacity:.6"></span>Columna STAAD sin plano</li>`;
+  const secs = Object.keys(SECDEF).filter(s => SEC.includes(s));
+  $('#legend-list').innerHTML = `<li class="lg-h">Perfiles STAAD${state.barMode === 'lin' ? ' (color de línea)' : ''}</li>` +
+    secs.map(s => `<li><span class="sw" style="background:${SECDEF[s].c}"></span>${esc(s)}</li>`).join('') +
+    `<li class="lg-h">Placas de los planos</li>` + items.map(([k, n]) => `<li><span class="sw" style="background:${PART[k].col}"></span>${n}</li>`).join('') +
+    `<li><span class="sw" style="background:#d2453a;opacity:.6"></span>Columna STAAD sin plano</li>`;
 }
 function renderPanels() { renderColumnTab(); renderPartsTab(); renderReviewTab(); renderLayersTab(); }
 
@@ -1399,6 +1508,15 @@ function setTab(t) {
 $('.tabs').addEventListener('click', ev => { const b = ev.target.closest('[role=tab]'); if (b) setTab(b.id.slice(2)); });
 $('#views').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) setView(b.dataset.view); });
 $('#levels').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) setLevel(b.dataset.level); });
+function setBarMode(m) {
+  state.barMode = m;
+  try { localStorage.setItem('conexiones-villahermosa-barras', m); } catch (e) { /* sin almacenamiento */ }
+  $$('#barmode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bm === m)));
+  if (focus.mesh) { const fm = focus.mesh; exitFocus(); updateBeams(); applyLayerVisibility(); focusPlate(fm, { fly: false }); }
+  else { updateBeams(); applyLayerVisibility(); }
+  renderLayersTab(); renderLegend();
+}
+$('#barmode').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b && b.dataset.bm !== state.barMode) setBarMode(b.dataset.bm); });
 document.querySelector('.panel').addEventListener('click', ev => {
   const t = ev.target.closest('[data-act]'); if (!t) return;
   const act = t.dataset.act;
@@ -1416,6 +1534,14 @@ document.querySelector('.panel').addEventListener('click', ev => {
   }
   else if (act === 'part-clear') { state.part = null; updateHighlight(); renderPartsTab(); }
   else if (act === 'sheet') openSheet(+t.dataset.sheet);
+  else if (act === 'sec-iso' || act === 'sec-clear') {
+    const sec = act === 'sec-clear' ? null : (state.secIso === t.dataset.sec ? null : t.dataset.sec);
+    if (sec && focus.mesh) exitFocus();
+    state.secIso = sec;
+    applySectionLook();
+    renderLayersTab();
+    if (sec && camera.position.distanceTo(controls.target) < 9) setView('iso');
+  }
   else if (act === 'member') {
     const mid = +t.dataset.mid; const [a, b] = MEM[mid]; const A = S(...J[a]), B = S(...J[b]);
     const mid3 = A.clone().add(B).multiplyScalar(0.5); const dir = camera.position.clone().sub(controls.target).normalize();
@@ -1428,7 +1554,7 @@ document.querySelector('.panel').addEventListener('click', ev => {
 });
 document.querySelector('.panel').addEventListener('keydown', ev => {
   if (ev.key !== 'Enter' && ev.key !== ' ') return;
-  const t = ev.target.closest('[data-act="pos"],[data-act="part-focus"],[data-act="plate-part"]'); if (!t) return;
+  const t = ev.target.closest('[data-act="pos"],[data-act="part-focus"],[data-act="plate-part"],[data-act="sec-iso"]'); if (!t) return;
   ev.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 });
 document.querySelector('.panel').addEventListener('change', ev => {
@@ -1600,14 +1726,17 @@ function instOf(mid) { if (!memberInst) { memberInst = new Map(); for (const m o
 function relatedMembers(mesh) {
   const u = mesh.userData, p = POSBY[u.pos], g = globalDir(mesh), out = [];
   const nodes = u.lvl === 'mez' ? [p.nMez] : u.lvl === 'cub' ? [p.nCub] : u.lvl === 'col' ? [p.nFac, p.nMez, p.nCub] : [];
-  for (const n of nodes.filter(Boolean)) for (const d of around(n)) if (SOLID_GROUPS.has(grpName(d.mid))) out.push({ mid: d.mid, rel: !!g && d.dir === g });
+  for (const n of nodes.filter(Boolean)) for (const d of around(n)) {
+    if (grpName(d.mid) === '_COLUMNAS') continue;
+    out.push({ mid: d.mid, rel: !!g && d.dir === g });
+  }
   if (u.lvl === 'fac' || u.lvl === 'col') for (const l of p.facLinks) for (const d of around(l.other)) if (grpName(d.mid) === '_VIGA_APOY_INF') out.push({ mid: d.mid, rel: u.lvl === 'fac' });
   return out;
 }
 const beamRelMat = new THREE.MeshStandardMaterial({ color: 0x2f7fd0, roughness: 0.5, metalness: 0.1, transparent: true, opacity: 0.55, depthWrite: false });
-const beamNbMat = new THREE.MeshStandardMaterial({ color: 0x8aa0b2, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 0.32, depthWrite: false });
+const nbSecMats = new Map();
+function nbSecMat(sec) { if (!nbSecMats.has(sec)) nbSecMats.set(sec, new THREE.MeshStandardMaterial({ color: SECDEF[sec]?.c || 0x8aa0b2, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 0.42, depthWrite: false })); return nbSecMats.get(sec); }
 const focusRoot = new THREE.Group(); scene.add(focusRoot);
-function setLinesDim(on) { for (const ln of lineObjs) { if (ln.userData.op0 === undefined) ln.userData.op0 = ln.material.opacity; ln.material.opacity = on ? Math.min(ln.userData.op0, 0.1) : ln.userData.op0; } }
 function clearFocusDecor() {
   for (const b of focus.beams) focusRoot.remove(b); focus.beams = [];
   for (const t of focus.tags) { if (t.parent) t.parent.remove(t); t.element.remove(); } focus.tags = [];
@@ -1646,12 +1775,25 @@ function focusPlate(mesh, { fly = true } = {}) {
   clearFocusDecor();
   state.part = null;
   focus.mesh = mesh; focus.nb = neighborsOf(mesh); focus.pulseUntil = performance.now() + 1800;
-  beamMat.opacity = 0.06; setLinesDim(true);
-  for (const r of relatedMembers(mesh)) {
+  applySectionLook();
+  const rel = relatedMembers(mesh);
+  if (state.barMode === 'lin' && rel.length) {
+    const pos = [], col = [];
+    for (const r of rel) {
+      const [a, b] = MEM[r.mid]; const A = S(...J[a]), B = S(...J[b]);
+      const c = new THREE.Color(r.rel ? 0x1f7ae0 : (SECDEF[secName(r.mid)]?.c || '#8aa0b2'));
+      pos.push(A.x, A.y, A.z, B.x, B.y, B.z); col.push(c.r, c.g, c.b, c.r, c.g, c.b);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    const hl = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ vertexColors: true })); hl.raycast = () => {};
+    focusRoot.add(hl); focus.beams.push(hl);
+  }
+  for (const r of rel) {
+    if (state.barMode === 'lin') break;
     const it = instOf(r.mid); if (!it) continue;
     const m4 = new THREE.Matrix4(); it[0].getMatrixAt(it[1], m4);
     if (m4.elements[0] === 0 && m4.elements[5] === 0) continue;
-    const b = new THREE.Mesh(it[0].geometry, r.rel ? beamRelMat : beamNbMat);
+    const b = new THREE.Mesh(it[0].geometry, r.rel ? beamRelMat : nbSecMat(it[0].userData.sec));
     b.matrixAutoUpdate = false; b.matrix.copy(m4); b.raycast = () => {};
     focusRoot.add(b); focus.beams.push(b);
   }
@@ -1666,7 +1808,7 @@ function focusPlate(mesh, { fly = true } = {}) {
 function exitFocus() {
   if (!focus.mesh) return;
   focus.mesh = null; focus.nb = new Set(); clearFocusDecor();
-  beamMat.opacity = 0.55; setLinesDim(false);
+  applySectionLook();
   stage.classList.remove('focusing');
   insp.hidden = true;
   updateHighlight(); renderPartsTab(); markDirty();

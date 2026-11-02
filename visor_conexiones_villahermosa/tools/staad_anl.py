@@ -70,7 +70,7 @@ def parse_input(path):
         "run_date": (re.search(r"Date=\s+(.+?)\s+\*", head) or [None, ""])[1],
         "input_file": (re.search(r"INPUT FILE:\s*(.+)", head) or [None, ""])[1].strip(),
     }
-    joints, members, shells, groups, props = {}, {}, {}, {}, {}
+    joints, members, shells, groups, props, ptypes = {}, {}, {}, {}, {}, {}
     beta, supports, releases, truss, load_titles = {}, {}, {}, set(), {}
     section, kind, group = None, None, None
     starts = {
@@ -129,6 +129,10 @@ def parse_input(path):
         elif section == "PROP":
             ids, rest = _split_list(tok)
             name = rest[2] if rest and rest[0] in ("TABLE", "UPTABLE") else " ".join(rest)
+            if rest and rest[0] == "TABLE":
+                ptypes[name] = rest[1]          # ST = sencillo, T = te cortada del perfil, ...
+            elif rest and rest[0] == "UPTABLE":
+                ptypes[name] = "UPT"
             for i in ids:
                 props[i] = name
         elif section == "CONST" and tok[0] == "BETA":
@@ -148,6 +152,7 @@ def parse_input(path):
         "meta": meta, "joints": joints, "members": members, "shells": shells,
         "groups": groups, "props": props, "beta": beta, "supports": supports,
         "releases": releases, "truss": truss, "load_titles": load_titles,
+        "ptypes": ptypes,
     }
 
 
@@ -175,3 +180,29 @@ def parse_code_check(path):
             "My": float(g[12]), "Mx": float(g[13]),
         }
     return res
+
+
+TAKEOFF = re.compile(r"^\s+([A-Z]{1,3})\s+(\S+)\s+([\d.]+)\s+([\d.]+)\s*$")
+
+
+def parse_takeoff(path):
+    """STEEL TAKE OFF: [{'type', 'profile', 'length_cm', 'weight_kg'}] y total."""
+    with open(path, encoding="latin-1") as fh:
+        lines = fh.readlines()
+    out, total, inside = [], None, False
+    for ln in lines:
+        if "STEEL TAKE-OFF" in ln:
+            inside, out = True, []
+            continue
+        if not inside:
+            continue
+        m = re.search(r"TOTAL =\s+([\d.]+)", ln)
+        if m:
+            total = float(m.group(1))
+            inside = False
+            continue
+        m = TAKEOFF.match(ln.rstrip("\n"))
+        if m:
+            out.append({"type": m.group(1), "profile": m.group(2),
+                        "length_cm": float(m.group(3)), "weight_kg": float(m.group(4))})
+    return out, total

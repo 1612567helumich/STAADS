@@ -12,11 +12,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from staad_anl import parse_input, parse_code_check  # noqa: E402
+from staad_anl import parse_input, parse_code_check, parse_takeoff  # noqa: E402
 
 src, out = sys.argv[1], sys.argv[2]
 model = parse_input(src)
 check = parse_code_check(src)
+takeoff, takeoff_total = parse_takeoff(src)
 
 J = model["joints"]
 M = model["members"]
@@ -94,9 +95,14 @@ data = {
     "supports": {str(k): v for k, v in model["supports"].items()},
     "check": chk,
     "loads": model["load_titles"],
+    "secType": model["ptypes"],
+    "takeoff": takeoff,
+    "takeoffTotal": takeoff_total,
 }
 with open(out, "w") as fh:
     json.dump(data, fh, separators=(",", ":"))
 print(f"joints {len(joints)}  members {len(members)}  shells {len(shells)}  check {len(chk)}")
 print("sections", sections)
 print("groups", groups)
+print("tipos", model["ptypes"])
+print("takeoff", len(takeoff), "perfiles, total", takeoff_total, "kg")
