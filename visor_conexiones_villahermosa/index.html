@@ -295,7 +295,7 @@ tr[data-act]:hover td{background:var(--surface)}
         <summary>Simbología</summary>
         <ul id="legend-list"></ul>
       </details>
-      <div class="hint" id="hint">Arrastra: girar · Clic der.: mover · Rueda: zoom · Clic: seleccionar</div>
+      <div class="hint" id="hint">Arrastra: girar · Rueda presionada o clic der.: mover · Rueda: zoom al cursor · Clic: seleccionar</div>
     </section>
     <aside class="panel" aria-label="Revisión">
       <div class="tabs" role="tablist">
@@ -638,6 +638,13 @@ const camera = new THREE.PerspectiveCamera(38, 1, 0.02, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.09; controls.screenSpacePanning = true;
 controls.minDistance = 0.12; controls.maxDistance = 160;
+// Navegación tipo CAD: rueda presionada (o clic derecho) mueve el modelo, la rueda acerca hacia el cursor,
+// Shift + rueda presionada gira (OrbitControls invierte PAN/ROTATE con Shift, Ctrl o Cmd).
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
+controls.zoomToCursor = true;
+// Evita el autodesplazamiento de Windows al presionar la rueda sobre el modelo
+renderer.domElement.addEventListener('mousedown', ev => { if (ev.button === 1) ev.preventDefault(); });
+renderer.domElement.addEventListener('auxclick', ev => { if (ev.button === 1) ev.preventDefault(); });
 scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8b95, 1.15));
 const sun = new THREE.DirectionalLight(0xffffff, 1.7); sun.position.set(9, 15, 7); scene.add(sun);
 const fill = new THREE.DirectionalLight(0xffffff, 0.55); fill.position.set(-11, 7, -9); scene.add(fill);
@@ -1120,7 +1127,7 @@ function processMove() {
   showTip(hitInfo(h), ev.clientX, ev.clientY);
 }
 renderer.domElement.addEventListener('pointerleave', () => { if (!pinned) { tip.hidden = true; setHover(null); } });
-renderer.domElement.addEventListener('pointerdown', ev => { downAt = [ev.clientX, ev.clientY]; });
+renderer.domElement.addEventListener('pointerdown', ev => { downAt = ev.button === 0 ? [ev.clientX, ev.clientY] : null; });
 renderer.domElement.addEventListener('pointerup', ev => {
   if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 5) { downAt = null; return; }
   downAt = null;

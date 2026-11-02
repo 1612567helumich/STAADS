@@ -13,6 +13,11 @@ llegan a ese nudo.
 Abre `index.html` en un navegador con internet (three.js se carga de jsDelivr).
 Las hojas del PDF están en `planos/` y se abren desde el panel.
 
+Navegación tipo CAD: arrastrar con el botón izquierdo gira; con la rueda presionada (o
+el botón derecho) mueve el modelo; girar la rueda acerca o aleja hacia el cursor;
+Shift + rueda presionada gira. En pantallas táctiles: un dedo gira y dos dedos mueven y
+hacen zoom.
+
 - **Columnas**: planta con ejes, marca asignada a cada columna, conexiones por nivel
   (cubierta, mezzanine, fachada, base), barras STAAD con relación de diseño y fuerzas,
   lista de partes y miniaturas del plano.
