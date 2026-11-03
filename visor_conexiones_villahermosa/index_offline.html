@@ -97,6 +97,8 @@ button,select,input{font:inherit;color:inherit}
 .tooltip b{font:600 .95rem/1.1 var(--f-display);letter-spacing:.02em}
 .tooltip .mono{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
 .tooltip.pinned{pointer-events:auto}
+/* Número de conexión (hoja de pieza del PDF) en la esquina del recuadro, como el sello azul del plano */
+.tooltip .tip-cn{float:right;margin:-2px -3px 4px 10px;min-width:26px;height:26px;padding:0 6px;border-radius:5px;display:grid;place-items:center;border:2px solid var(--conn);background:var(--conn-bg);color:var(--conn);font:700 1rem/1 var(--f-display)}
 .legend{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(360px,calc(100% - 20px));background:color-mix(in srgb,var(--surface-2) 92%,transparent);border:1px solid var(--line);border-radius:5px;padding:6px 8px;font-size:.7rem;line-height:1.2}
 .legend summary{cursor:pointer;font:600 .74rem/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);list-style:none}
 .legend summary::-webkit-details-marker{display:none}
@@ -1243,7 +1245,7 @@ function hitInfo(h) {
     const P = PART[u.part]; const p = POSBY[u.pos]; const A = ANA[u.pos];
     const g = u.face ? L2G[A.k][u.face] : '';
     const n = connNum(u.part);
-    return `<b>${n ? `Conexión ${n} · ` : ''}${esc(u.part)}</b><div>${esc(P.d)}</div><div class="mono">${esc(u.mark)} · eje ${u.pos} · ${LEVEL_NAME[u.lvl] || ''}${u.face ? ` · cara ${u.face} (${g})` : ''}</div><div class="mono">${esc(u.label)}${P.holes ? ' · ' + esc(P.holes) : ''}</div>`;
+    return `${n ? `<span class="tip-cn">${n}</span>` : ''}<b>${esc(u.part)}</b><div>${esc(P.d)}</div><div class="mono">${esc(u.mark)} · eje ${u.pos} · ${LEVEL_NAME[u.lvl] || ''}${u.face ? ` · cara ${u.face} (${g})` : ''}</div><div class="mono">${esc(u.label)}${P.holes ? ' · ' + esc(P.holes) : ''}</div>`;
   }
   if (u.kind === 'ghost') {
     const p = POSBY[u.pos];
