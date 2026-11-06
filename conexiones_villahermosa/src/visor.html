@@ -1,0 +1,2063 @@
+<title>Conexiones Villahermosa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen workspace. 3D stage on the left, review panel on the right; stacks on phones. */
+:root{
+  --bg:#e5e9ec;
+  --surface:#f3f5f6;
+  --surface-2:#ffffff;
+  --ink:#19222a;
+  --muted:#53626d;
+  --line:#c6cfd5;
+  --line-strong:#97a5ae;
+  --accent:#c4561a;
+  --accent-soft:#f5e1d3;
+  --accent-ink:#ffffff;
+  --ok:#2a7f51;
+  --ok-soft:#dbeee2;
+  --warn:#9b6b06;
+  --warn-soft:#f5ead0;
+  --crit:#b8342a;
+  --crit-soft:#f6dbd7;
+  --info:#2f6696;
+  --info-soft:#dce7f2;
+  --scene:#e1e6e9;
+  --edge:#1b2329;
+  --conn:#0052cc;
+  --conn-bg:#ffffff;
+  --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1417; --surface:#151c21; --surface-2:#1b242a; --ink:#e1e7eb; --muted:#93a1ab;
+    --line:#29343c; --line-strong:#44525c; --accent:#ec8a46; --accent-soft:#3a2618; --accent-ink:#1b0f06;
+    --ok:#5ab985; --ok-soft:#163223; --warn:#e0ab45; --warn-soft:#352a10; --crit:#ef6f61; --crit-soft:#3c1b17;
+    --info:#7cafe0; --info-soft:#15293b; --scene:#11181d; --edge:#06090b; --conn:#7fb2ff; --conn-bg:#0d1a2c; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1417; --surface:#151c21; --surface-2:#1b242a; --ink:#e1e7eb; --muted:#93a1ab;
+  --line:#29343c; --line-strong:#44525c; --accent:#ec8a46; --accent-soft:#3a2618; --accent-ink:#1b0f06;
+  --ok:#5ab985; --ok-soft:#163223; --warn:#e0ab45; --warn-soft:#352a10; --crit:#ef6f61; --crit-soft:#3c1b17;
+  --info:#7cafe0; --info-soft:#15293b; --scene:#11181d; --edge:#06090b; --conn:#7fb2ff; --conn-bg:#0d1a2c; color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 14px/1.45 var(--f-body);-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 12px}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.brand{display:flex;flex-direction:column;flex:1 1 300px;min-width:0}
+.ctls{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 16px}
+.brand h1{margin:0;font:700 1.55rem/1 var(--f-display);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+.brand p{margin:3px 0 0;color:var(--muted);font:400 .78rem/1.3 var(--f-mono)}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--surface-2)}
+.seg button{border:0;background:transparent;padding:6px 11px;font:600 .82rem/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface-2)}
+.seg button:hover:not([aria-pressed="true"]){color:var(--ink);background:var(--surface)}
+.seg-label{font:600 .72rem/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.ctl{display:flex;align-items:center}
+
+/* ---------- work area ---------- */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:12px;min-height:0}
+.stage{position:relative;min-height:0;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--scene);touch-action:none}
+.stage canvas{display:block;width:100%;height:100%}
+.labels{position:absolute;inset:0;pointer-events:none;z-index:1}
+.labels > div{pointer-events:none}
+.tag{pointer-events:auto;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 6px 2px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line-strong);border-left:4px solid var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12);white-space:nowrap;transform:translateY(-6px)}
+.tag b{font:700 .86rem/1 var(--f-display);letter-spacing:.04em}
+.tag small{font:500 .64rem/1 var(--f-mono);color:var(--muted)}
+.tag.warn{border-left-color:var(--warn)} .tag.crit{border-left-color:var(--crit)} .tag.none{border-left-color:var(--line-strong);opacity:.85}
+.tag.sel{outline:2px solid var(--accent);outline-offset:1px}
+.bubble{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--ink);background:var(--surface-2);font:700 .9rem/1 var(--f-display)}
+.axis-tag{font:600 .74rem/1 var(--f-mono);color:var(--muted);background:var(--surface-2);padding:2px 4px;border-radius:3px;border:1px solid var(--line)}
+.mk{pointer-events:auto;cursor:pointer;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 .8rem/1 var(--f-display);color:#fff;background:var(--crit);border:2px solid var(--surface-2);box-shadow:0 1px 3px rgb(0 0 0 / .3)}
+.mk.warn{background:var(--warn)} .mk.info{background:var(--info)}
+.mk:hover{transform:scale(1.15)}
+.tooltip{position:absolute;z-index:5;pointer-events:none;max-width:290px;padding:7px 9px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line-strong);box-shadow:0 4px 14px rgb(0 0 0 / .18);font-size:.8rem;line-height:1.35}
+.tooltip b{font:600 .95rem/1.1 var(--f-display);letter-spacing:.02em}
+.tooltip .mono{font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.tooltip.pinned{pointer-events:auto}
+.legend{position:absolute;left:10px;bottom:10px;z-index:4;max-width:min(360px,calc(100% - 20px));background:color-mix(in srgb,var(--surface-2) 92%,transparent);border:1px solid var(--line);border-radius:5px;padding:6px 8px;font-size:.7rem;line-height:1.2}
+.legend summary{cursor:pointer;font:600 .74rem/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);list-style:none}
+.legend summary::-webkit-details-marker{display:none}
+.legend ul{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:3px 10px}
+.legend li{display:flex;align-items:center;gap:6px;min-width:0}
+.legend li.lg-h{grid-column:1 / -1;margin-top:4px;font:600 .64rem/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.legend li.lg-h:first-child{margin-top:0}
+.sec-row{display:flex;gap:8px;align-items:center;min-width:0}
+.sec-pic{flex:none;width:58px;display:grid;place-items:center;color:var(--ink)}
+.sec-pic svg{max-width:58px;height:auto}
+.secs tfoot td{font-weight:600;border-bottom:0}
+.tip-sec{display:flex;gap:10px;align-items:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);color:var(--ink)}
+.tip-sec svg{flex:none;max-width:140px;height:auto}
+.sw{display:inline-block;vertical-align:middle;width:11px;height:11px;border-radius:2px;flex:none;border:1px solid rgb(0 0 0 / .25)}
+@media (max-width: 600px){ .tag{padding:2px 4px 1px} .tag b{font-size:.74rem} .tag small{display:none} .bubble{width:20px;height:20px;font-size:.75rem} .hint{display:none} }
+.hint{position:absolute;right:10px;top:10px;z-index:4;font:400 .72rem/1.3 var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--surface-2) 85%,transparent);padding:4px 7px;border-radius:4px}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font:600 1rem/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- panel ---------- */
+.panel{min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line-strong);background:var(--surface-2)}
+.tabs button{flex:1;border:0;background:transparent;padding:10px 4px 8px;cursor:pointer;font:600 .86rem/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:3px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs .count{display:inline-block;min-width:1.4em;margin-left:4px;padding:1px 4px;border-radius:9px;background:var(--crit);color:#fff;font:600 .7rem/1.2 var(--f-mono)}
+.tabpanel{flex:1;min-height:0;overflow:auto;padding:12px 12px 18px;display:flex;flex-direction:column;gap:12px}
+h2{margin:0;font:700 1.15rem/1.1 var(--f-display);letter-spacing:.02em;text-wrap:balance}
+h3{margin:0;font:600 .78rem/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+p{margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.small{font-size:.8rem}
+.note{font-size:.8rem;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line-strong);border-radius:5px;padding:8px 10px;display:flex;gap:10px;align-items:flex-start}
+.note p{flex:1;min-width:0}
+.btn{border:1px solid var(--line-strong);background:var(--surface-2);border-radius:5px;padding:5px 9px;cursor:pointer;font:600 .78rem/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:3px 7px;font-size:.72rem}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.plan{background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:4px}
+.plan svg{display:block;width:100%;height:auto}
+.plan .gl{stroke:var(--line-strong);stroke-width:2;stroke-dasharray:14 8}
+.plan .bm{stroke:var(--info);stroke-width:5;opacity:.45}
+.plan .bmc{stroke:var(--muted);stroke-width:3;opacity:.35}
+.plan .fac{stroke:var(--muted);stroke-width:3;stroke-dasharray:6 6;opacity:.6;fill:none}
+.plan text{fill:var(--ink);font-family:var(--f-display);paint-order:stroke;stroke:var(--surface-2);stroke-width:9px;stroke-linejoin:round}
+.plan .bub circle{fill:var(--surface-2);stroke:var(--ink);stroke-width:3}
+.plan .bub text{font-weight:700;font-size:40px;text-anchor:middle;dominant-baseline:central}
+.plan .dim{fill:var(--muted);font-family:var(--f-mono);font-size:30px;text-anchor:middle}
+.plan .col{cursor:pointer}
+.plan .col rect{stroke:var(--ink);stroke-width:3}
+.plan .col.asig rect{fill:var(--ink)} .plan .col.ok rect{fill:var(--ok)} .plan .col.warn rect{fill:var(--warn)} .plan .col.crit rect{fill:var(--crit)} .plan .col.none rect{fill:var(--surface-2);stroke-dasharray:6 4}
+.plan .col.sel .ring{stroke:var(--accent);stroke-width:8;fill:none}
+.plan .col text{font-size:34px;font-weight:700;text-anchor:middle}
+.plan .col .pid{font-family:var(--f-mono);font-size:24px;font-weight:400;fill:var(--muted)}
+.card{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.card-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.card-head h2{margin-right:auto}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font:600 .72rem/1.3 var(--f-display);letter-spacing:.06em;text-transform:uppercase;border:1px solid transparent}
+.chip.ok{background:var(--ok-soft);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.chip.crit{background:var(--crit-soft);color:var(--crit);border-color:color-mix(in srgb,var(--crit) 35%,transparent)}
+.chip.info{background:var(--info-soft);color:var(--info);border-color:color-mix(in srgb,var(--info) 35%,transparent)}
+.chip.neutral{background:var(--surface);color:var(--muted);border-color:var(--line)}
+label.sel-mark{display:flex;align-items:center;gap:6px;font:600 .74rem/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+select{border:1px solid var(--line-strong);border-radius:5px;background:var(--surface-2);padding:4px 6px;font:600 .9rem/1.1 var(--f-display);letter-spacing:.03em}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;font-size:.8rem}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:.76rem;min-width:0;overflow-wrap:anywhere}
+.lvl{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:7px}
+.lvl-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.lvl-head h3{color:var(--ink);font-size:.86rem;margin-right:auto}
+.lvl-head .mono{font-size:.7rem;color:var(--muted)}
+.conn{display:flex;flex-direction:column;gap:6px}
+.cr{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 8px;align-items:start;padding:7px 8px;border-radius:5px;background:var(--surface);border-left:4px solid var(--line-strong)}
+.cr.warn{border-left-color:var(--warn)} .cr.crit{border-left-color:var(--crit)} .cr.info{border-left-color:var(--info)}
+.dirb{display:flex;flex-direction:column;align-items:center;gap:1px}
+.dirb b{font:700 1rem/1 var(--f-display)}
+.dirb span{font:500 .66rem/1 var(--f-mono);color:var(--muted)}
+.cr .main{min-width:0;display:flex;flex-direction:column;gap:3px;font-size:.8rem}
+.cr .main .mono{font-size:.72rem;color:var(--muted)}
+.cr .plates{font-size:.76rem}
+.cr .why{font-size:.76rem;color:var(--ink)}
+.bar{position:relative;height:6px;background:var(--line);border-radius:3px;overflow:hidden;max-width:180px}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--ok)}
+.bar.hi i{background:var(--warn)} .bar.over i{background:var(--crit)}
+.memb{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
+.item{display:inline-grid;place-items:center;min-width:1.55em;height:1.55em;padding:0 2px;border:1px solid currentColor;border-radius:50%;font:500 .7rem/1 var(--f-mono)}
+table{border-collapse:collapse;width:100%;font-size:.78rem}
+th{font:600 .7rem/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 5px;border-bottom:1px solid var(--line-strong)}
+td{padding:4px 5px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.thumbs button{border:1px solid var(--line);border-radius:4px;background:#fff;padding:0;cursor:zoom-in;overflow:hidden;aspect-ratio:11/17;max-width:100%}
+.thumbs img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.thumbs figcaption{font:500 .66rem/1.2 var(--f-mono);color:var(--muted);text-align:center;margin-top:2px}
+.parts tr{cursor:pointer}
+.parts tr:hover td{background:var(--surface)}
+.parts tr.on td{background:var(--accent-soft)}
+.find{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);border-left:5px solid var(--info)}
+.find.crit{border-left-color:var(--crit)} .find.warn{border-left-color:var(--warn)}
+.find.hl{box-shadow:0 0 0 2px var(--accent)}
+.find h4{margin:0;font:600 1rem/1.15 var(--f-display);letter-spacing:.01em;text-wrap:balance}
+.find p,.find li{font-size:.8rem}
+.find ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+pre.code{margin:0;padding:8px 10px;border-radius:5px;background:var(--surface);border:1px solid var(--line);font:400 .72rem/1.45 var(--f-mono);white-space:pre;overflow-x:auto;max-height:220px}
+.layers{display:flex;flex-direction:column;gap:2px}
+.layers label{display:flex;align-items:center;gap:9px;padding:6px 4px;border-bottom:1px solid var(--line);font-size:.86rem;cursor:pointer}
+.layers label .sw{width:14px;height:4px;border:0;border-radius:2px}
+.layers small{margin-left:auto;font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.layers input{accent-color:var(--accent);width:16px;height:16px}
+
+/* ---------- lightbox ---------- */
+.lightbox{position:fixed;inset:0;z-index:50;background:rgb(10 14 17 / .82);display:flex;flex-direction:column;
+  padding:max(10px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lb-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-bottom:8px;color:#e8edf0}
+.lb-bar strong{font:700 1.05rem/1.1 var(--f-display);letter-spacing:.03em;margin-right:auto;min-width:0}
+.lb-bar .btn{background:#1d262c;color:#e8edf0;border-color:#4a5862}
+.lb-view{flex:1;min-height:0;overflow:auto;background:#f4f4f2;border-radius:4px;cursor:grab;touch-action:pan-x pan-y}
+.lb-view.drag{cursor:grabbing}
+.lb-view img{display:block;max-width:none;user-select:none;-webkit-user-drag:none}
+
+/* ---------- inspector de pieza ---------- */
+.insp{position:absolute;left:10px;top:10px;z-index:6;width:min(360px,calc(100% - 20px));max-height:calc(100% - 20px);display:flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:6px;box-shadow:0 10px 30px rgb(0 0 0 / .22);overflow:hidden}
+.insp-head{display:flex;align-items:flex-start;gap:9px;padding:10px 10px 8px;border-bottom:1px solid var(--line)}
+.insp-head .sw{width:16px;height:16px;margin-top:3px}
+.insp-head .ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.insp-head b{font:700 1.12rem/1.05 var(--f-display);letter-spacing:.02em}
+.insp-head small{font-size:.76rem;color:var(--muted);line-height:1.3}
+.insp-x{border:0;background:transparent;font-size:1.35rem;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px}
+.insp-x:hover{color:var(--ink)}
+.insp-nav{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--surface);border-bottom:1px solid var(--line);font:500 .74rem/1.3 var(--f-mono)}
+.insp-nav .grow{flex:1;min-width:0}
+.insp-body{overflow:auto;padding:9px 10px 12px;display:flex;flex-direction:column;gap:11px}
+.insp.collapsed .insp-body{display:none}
+.insp-sec{display:flex;flex-direction:column;gap:4px}
+.insp-sec h5{margin:0;font:600 .7rem/1.2 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.insp .kv{font-size:.76rem}
+.insp .kv dd{font-size:.72rem}
+.qc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 8px;font-size:.76rem;align-items:baseline}
+.qc .lbl{min-width:0}
+.qc .val{font:500 .7rem/1.2 var(--f-mono);text-align:right;white-space:nowrap}
+.qc .bar{grid-column:1 / -1;max-width:none;height:5px;margin:1px 0 5px}
+.gov{font-size:.78rem;padding:6px 8px;border-radius:5px;font-weight:600}
+.gov.ok{background:var(--ok-soft);color:var(--ok)} .gov.warn{background:var(--warn-soft);color:var(--warn)} .gov.crit{background:var(--crit-soft);color:var(--crit)} .gov.info{background:var(--info-soft);color:var(--info)}
+.part-thumb{display:flex;gap:8px;align-items:flex-start}
+.part-thumb button.th{flex:none;width:104px;aspect-ratio:11/8.5;border:1px solid var(--line);border-radius:4px;background:#fff;padding:0;cursor:zoom-in;overflow:hidden}
+.part-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.nbl{display:flex;flex-direction:column;gap:3px}
+.nbb{display:flex;align-items:center;gap:7px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 6px;cursor:pointer;font-size:.76rem}
+.nbb:hover{border-color:var(--ink)}
+.nbb.on{border-color:var(--accent);background:var(--accent-soft)}
+.nbb .sw{width:10px;height:10px}
+.dimtag{font:600 .68rem/1 var(--f-mono);color:var(--ink);background:color-mix(in srgb,var(--surface-2) 90%,transparent);border:1px solid var(--line-strong);border-radius:3px;padding:2px 4px;white-space:nowrap}
+.ib{pointer-events:auto;cursor:pointer;min-width:22px;height:22px;padding:0 5px;border-radius:11px;display:grid;place-items:center;border:1.5px solid var(--ink);background:var(--surface-2);font:600 .74rem/1 var(--f-mono);color:var(--ink);box-shadow:0 1px 3px rgb(0 0 0 / .25)}
+.ib:hover{transform:scale(1.12)}
+.ib.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* Número de conexión = hoja de pieza del PDF (mismo número azul sellado en el plano) */
+.cn{pointer-events:auto;cursor:pointer;min-width:21px;height:21px;padding:0 5px;border-radius:5px;display:grid;place-items:center;border:2px solid var(--conn);background:var(--conn-bg);color:var(--conn);font:700 .86rem/1 var(--f-display);letter-spacing:.02em;box-shadow:0 1px 3px rgb(0 0 0 / .28);white-space:nowrap}
+.labels > div.cn{pointer-events:auto}
+.cn:hover{box-shadow:0 0 0 2px var(--conn),0 1px 3px rgb(0 0 0 / .28)}
+/* CSS2DRenderer escribe el transform en línea: el desplazamiento al lado de la columna va con margin */
+.cn.grp{height:19px;font-size:.76rem;padding:0 6px;border-width:1.5px;margin-left:38px}
+.cnb{display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;padding:0 4px;border-radius:4px;border:1.5px solid var(--conn);background:var(--conn-bg);color:var(--conn);font:700 .76rem/1 var(--f-display);vertical-align:middle}
+.stage.focusing .tag:not(.sel){opacity:.25}
+.stage.focusing .bubble,.stage.focusing .mk{opacity:.2}
+.stage.focusing .axis-tag{display:none}
+.stage.focusing .hint{display:none}
+.cr .act{grid-column:2 / 4}
+tr[data-act]{cursor:pointer}
+tr[data-act]:hover td{background:var(--surface)}
+@media (max-width: 600px){ .insp{left:6px;right:6px;top:auto;bottom:6px;width:auto;max-height:58%} .stage.focusing .legend{display:none} }
+@media (max-width: 860px){
+  html,body{height:auto}
+  .app{height:auto}
+  .work{grid-template-columns:1fr}
+  .stage{height:58vh;min-height:340px}
+  .ctls{justify-content:flex-start}
+  .panel{max-height:none}
+  .tabpanel{overflow:visible}
+  .legend ul{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Conexiones Villahermosa</h1>
+      <p>Planos GMI S07713000573–579 (SYR-01…07) · STAAD 001_VILLAHERMOSA_SAYER R1.3 · <span style="color:var(--conn)">conexiones 1–15 = hojas 22–36 del PDF · 16 = esquema CAJON-HSS</span></p>
+    </div>
+    <div class="ctls">
+    <div class="ctl"><span class="seg-label">Vista</span>
+      <div class="seg" id="views">
+        <button type="button" data-view="iso" aria-pressed="true">Iso</button>
+        <button type="button" data-view="plan" aria-pressed="false">Planta</button>
+        <button type="button" data-view="front" aria-pressed="false">Elev. X</button>
+        <button type="button" data-view="side" aria-pressed="false">Elev. Z</button>
+      </div>
+    </div>
+    <div class="ctl"><span class="seg-label">Barras</span>
+      <div class="seg" id="barmode">
+        <button type="button" data-bm="sec" aria-pressed="true" title="Cada barra extruida con la forma de su perfil">Perfiles 3D</button>
+        <button type="button" data-bm="lin" aria-pressed="false" title="Modelo analítico: una línea por barra, del color de su perfil">Líneas</button>
+      </div>
+    </div>
+    <div class="ctl"><span class="seg-label">Nivel</span>
+      <div class="seg" id="levels">
+        <button type="button" data-level="all" aria-pressed="true">Todo</button>
+        <button type="button" data-level="cub" aria-pressed="false">Cubierta</button>
+        <button type="button" data-level="mez" aria-pressed="false">Mezz.</button>
+        <button type="button" data-level="inf" aria-pressed="false">Base</button>
+      </div>
+    </div>
+    </div>
+  </header>
+  <div class="work">
+    <section class="stage" id="stage" aria-label="Modelo 3D de columnas y conexiones">
+      <div class="loading" id="loading">Cargando modelo 3D…</div>
+      <div class="tooltip" id="tooltip" hidden></div>
+      <section class="insp" id="insp" hidden aria-label="Propiedades de la pieza seleccionada"></section>
+      <details class="legend" id="legend" open>
+        <summary>Simbología</summary>
+        <ul id="legend-list"></ul>
+      </details>
+      <div class="hint" id="hint">Arrastra: girar · Rueda presionada o clic der.: mover · Rueda: zoom al cursor · Clic: seleccionar</div>
+    </section>
+    <aside class="panel" aria-label="Panel">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="t-col" aria-controls="p-col" aria-selected="true">Columnas</button>
+        <button type="button" role="tab" id="t-pie" aria-controls="p-pie" aria-selected="false">Piezas</button>
+        <button type="button" role="tab" id="t-cap" aria-controls="p-cap" aria-selected="false">Capas</button>
+      </div>
+      <div class="tabpanel" role="tabpanel" id="p-col" aria-labelledby="t-col"></div>
+      <div class="tabpanel" role="tabpanel" id="p-pie" aria-labelledby="t-pie" hidden></div>
+      <div class="tabpanel" role="tabpanel" id="p-cap" aria-labelledby="t-cap" hidden></div>
+    </aside>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-labelledby="lb-title">
+  <div class="lb-bar">
+    <strong id="lb-title">Plano</strong>
+    <button type="button" class="btn sm" id="lb-prev" aria-label="Hoja anterior">‹</button>
+    <button type="button" class="btn sm" id="lb-next" aria-label="Hoja siguiente">›</button>
+    <button type="button" class="btn sm" id="lb-out" aria-label="Alejar">−</button>
+    <button type="button" class="btn sm" id="lb-fit">Ajustar</button>
+    <button type="button" class="btn sm" id="lb-in" aria-label="Acercar">+</button>
+    <button type="button" class="btn sm acc" id="lb-close">Cerrar</button>
+  </div>
+  <div class="lb-view" id="lb-view"><img id="lb-img" alt=""></div>
+</div>
+
+<script type="application/json" id="staad-data">__STAAD_DATA__</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* =====================================================================
+   1. Datos STAAD (extraídos del .ANL por tools/prep_data.py)
+   ===================================================================== */
+const D = JSON.parse(document.getElementById('staad-data').textContent);
+const J = D.joints, MEM = D.members, SEC = D.sections, GRP = D.groups, CHK = D.check;
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nf = (v, d = 2) => Number(v).toLocaleString('es-MX', { minimumFractionDigits: d, maximumFractionDigits: d });
+const secName = mid => SEC[MEM[mid][2]];
+const grpName = mid => GRP[MEM[mid][3]];
+
+const CX = -301, CZ = -1106;            // centro del edificio (cm), origen de la escena
+const S = (x, y, z) => new THREE.Vector3((x - CX) / 100, y / 100, (z - CZ) / 100);
+
+const adj = new Map();
+for (const [id, m] of Object.entries(MEM)) for (const n of [m[0], m[1]]) {
+  if (!adj.has(n)) adj.set(n, []);
+  adj.get(n).push(+id);
+}
+const nodeKey = (x, y, z) => `${Math.round(x)}|${Math.round(y)}|${Math.round(z)}`;
+const nodeIndex = new Map();
+for (const [id, p] of Object.entries(J)) nodeIndex.set(nodeKey(p[0], p[1], p[2]), +id);
+
+function memberDir(mid, n) {
+  const m = MEM[mid]; const other = m[0] === n ? m[1] : m[0];
+  const a = J[n], b = J[other];
+  const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+  const L = Math.hypot(dx, dy, dz), h = Math.hypot(dx, dz);
+  let dir = 'diag';
+  if (Math.abs(dy) > 0.95 * L) dir = dy > 0 ? '+Y' : '-Y';
+  else if (Math.abs(dy) < 0.02 * L && Math.abs(dx) > 0.995 * h) dir = dx > 0 ? '+X' : '-X';
+  else if (Math.abs(dy) < 0.02 * L && Math.abs(dz) > 0.995 * h) dir = dz > 0 ? '+Z' : '-Z';
+  return { mid, other, dir, L, atStart: m[0] === n, vec: [dx / L, dy / L, dz / L] };
+}
+const around = n => (n ? (adj.get(n) || []).map(mid => memberDir(mid, n)) : []);
+const relAt = d => (MEM[d.mid][d.atStart ? 6 : 7] || '');
+
+/* =====================================================================
+   2. Ejes y columnas del modelo (nombres de eje asignados en este visor)
+   ===================================================================== */
+const GX = [['1', -851], ['2', -451], ['3', -51], ['4', 249]];
+const GZ = [['A', -1556], ['B', -1056], ['C', -656]];
+const POS = [];
+for (const [zl, z] of GZ) for (const [xl, x] of GX) {
+  const p = { id: `${xl}-${zl}`, xl, zl, x, z };
+  p.nBase = nodeIndex.get(nodeKey(x, 0, z));
+  p.nFac = nodeIndex.get(nodeKey(x, 20, z)) ?? null;
+  p.nMez = nodeIndex.get(nodeKey(x, 327, z));
+  p.nCub = nodeIndex.get(nodeKey(x, 604, z));
+  const horiz = d => /^[+-][XZ]$/.test(d.dir) && grpName(d.mid) !== '_COLUMNAS';
+  p.beams = { mez: around(p.nMez).filter(horiz), cub: around(p.nCub).filter(horiz) };
+  p.truss = around(p.nCub).filter(d => grpName(d.mid) === '_ARMADURAS');
+  p.fij = [...around(p.nMez), ...around(p.nCub)].filter(d => d.dir === 'diag' && /D-14/.test(secName(d.mid)));
+  p.facLinks = around(p.nFac).filter(d => secName(d.mid) === 'W16X36');
+  p.faces = [];
+  for (const d of p.facLinks) {
+    if (Math.abs(d.vec[0]) > 0.3) p.faces.push(d.vec[0] > 0 ? '+X' : '-X');
+    if (Math.abs(d.vec[2]) > 0.3) p.faces.push(d.vec[2] > 0 ? '+Z' : '-Z');
+  }
+  p.colBase = around(p.nBase).find(d => grpName(d.mid) === '_COLUMNAS');
+  p.colAbove = around(p.nMez).find(d => grpName(d.mid) === '_COLUMNAS' && d.dir === '+Y');
+  p.colSegs = Object.keys(MEM).map(Number).filter(mid => grpName(mid) === '_COLUMNAS' && J[MEM[mid][0]][0] === x && J[MEM[mid][0]][2] === z);
+  p.tipo = p.faces.length >= 2 ? 'esquina' : p.faces.length === 1 ? 'borde' : 'interior';
+  POS.push(p);
+}
+const POSBY = Object.fromEntries(POS.map(p => [p.id, p]));
+const COLNODES = new Set(POS.flatMap(p => [p.nFac, p.nMez, p.nCub].filter(Boolean)));
+
+/* =====================================================================
+   3. Planos de taller (PDF) — piezas y marcas
+   ===================================================================== */
+const PART = {
+  'P038SVH002': { d: 'PLC MOMENTO 225×175 mm E=1/4″', t: 6.4, kg: 1.819, col: '#d9622b', hoja: 31, rol: 'Patín · mezzanine', holes: '8 barrenos Ø14.3' },
+  'P038MVV-004': { d: 'PL MOMENTO 125×110 mm ESP 3/16″', t: 4.8, kg: 0.490, col: '#e9a43a', hoja: 28, rol: 'Cortante · mezzanine', holes: '4 barrenos Ø14.29' },
+  'P038ESM-006': { d: 'PL MOMENTO 167×130 mm ESP 1/4″', t: 6.4, kg: 1.009, col: '#2f78b7', hoja: 25, rol: 'Patín · cubierta', holes: '6 barrenos Ø14.29' },
+  'P022MVV-001': { d: 'ANG 167×40 mm E=1/4″ (placa doblada)', t: 6.4, kg: 1.226, col: '#1c4f86', hoja: 23, rol: 'Patín sup. cubierta (SYR-03)', holes: '6 barrenos Ø14.29' },
+  'P038ESM-005': { d: 'PL MOMENTO 67×110 mm ESP 3/16″', t: 4.8, kg: 0.264, col: '#62b2e2', hoja: 24, rol: 'Cortante · cubierta', holes: '2 barrenos Ø14.29' },
+  'P038MVV-005': { d: 'PL MOMENTO 67×110 mm ESP 3/16″ T5', t: 4.8, kg: 0.256, col: '#3f93c6', hoja: 29, rol: 'Cortante · cubierta (SYR-03)', holes: '2 barrenos Ø14.29' },
+  'P038SVH001': { d: 'PLC MOMENTO 168×148.2 mm E=1/4″ (en L)', t: 6.4, kg: 0.922, col: '#3b9a62', hoja: 30, rol: 'Fachada · esquina', holes: '2 oblongos 9/16″×1″' },
+  'P038SVH007': { d: 'PLC MOMENTO 296.4×168 mm E=1/4″ (en U)', t: 6.4, kg: 1.843, col: '#26877f', hoja: 36, rol: 'Fachada · borde', holes: '4 oblongos 9/16″×1″' },
+  'PL-U-ESQ': { d: 'PLACA EN U - ESQUINA 316.2×316.2 mm E=3/8″', t: 9.5, kg: 4.396, col: '#4f9d69', hoja: null, n: 16, rol: 'Fachada · esquina', holes: '6 oblongos 9/16″×1″' },
+  'CART-ASIENTO': { d: 'CARTABÓN DE ASIENTO 90×100 mm E=1/4″', t: 6.4, kg: 0.264, col: '#8f9aa2', hoja: null, rol: 'Fachada · bajo placa inferior', holes: '' },
+  'P038SVH004': { d: 'PLC CONEXIÓN 139.5×51.3 mm E=3/16″', t: 4.8, kg: 0.210, col: '#8e5cc2', hoja: 33, rol: 'Nivel 412.7 (SYR-04)', holes: '1 barreno Ø14.3' },
+  'P038SVH005': { d: 'PLC CONEXIÓN 140.7×60 mm E=3/16″', t: 4.8, kg: 0.308, col: '#b083dc', hoja: 34, rol: 'Nivel 412.7 (SYR-04)', holes: '1 barreno Ø14.3' },
+  'P038SVH006': { d: 'PLC CONEXIÓN 157.1×140.3 mm E=3/16″', t: 4.8, kg: 0.717, col: '#6c3ea3', hoja: 35, rol: 'Nivel 412.7 (SYR-04)', holes: '2 barrenos Ø14.3' },
+  'S07605000096': { d: 'ANG 39×62 mm CAL 12 (clip)', t: 2.7, kg: 0.049, col: '#c2448a', hoja: null, rol: 'Sobre tapa (SYR-03)', holes: '' },
+  'P038SVH003': { d: 'PLC TAPA 152.4×152.4 mm E=1/4″', t: 6.4, kg: 1.141, col: '#8b959d', hoja: 32, rol: 'Tapa', holes: '' },
+  'P038MVV-001': { d: 'PL BASE 300×300 mm ESP 5/8″', t: 15.9, kg: 10.829, col: '#5d6871', hoja: 26, rol: 'Base (8 anclas)', holes: '8 barrenos Ø22.23' },
+  'P038MVV-002': { d: 'PL BASE 300×300 mm ESP 5/8″ T-02', t: 15.9, kg: 11.022, col: '#4b555e', hoja: 27, rol: 'Base (4 anclas)', holes: '4 barrenos Ø22.23' },
+  'P008SVH001': { d: 'CARTABÓN 74×100 mm E=5/16″', t: 7.9, kg: 0.411, col: '#a3acb3', hoja: 22, rol: 'Base', holes: '' },
+  'P025SVH001': { d: 'HSS 6″×6″×1/4″', t: 6.35, kg: null, col: '#eceee9', hoja: null, rol: 'Columna', holes: '' },
+};
+const PART_ORDER = ['P038SVH002', 'P038MVV-004', 'P038ESM-006', 'P022MVV-001', 'P038ESM-005', 'P038MVV-005', 'P038SVH001', 'P038SVH007', 'PL-U-ESQ', 'CART-ASIENTO', 'P038SVH005', 'P038SVH004', 'P038SVH006', 'S07605000096', 'P038SVH003', 'P038MVV-001', 'P038MVV-002', 'P008SVH001'];
+
+// Número de conexión: orden de la hoja de pieza dentro del PDF (hojas 22–36 → conexiones 1–15).
+// Es el mismo número azul sellado arriba a la derecha de cada plano de pieza (tools/numerar_conexiones.py).
+const CONN_FIRST_SHEET = 22;
+const connNum = part => { if (PART[part]?.n) return PART[part].n; const h = PART[part]?.hoja; return h >= CONN_FIRST_SHEET ? h - CONN_FIRST_SHEET + 1 : null; };
+const cnBadge = part => { const n = connNum(part); return n ? `<span class="cnb" title="Conexión ${n} · ${PART[part].hoja ? `hoja ${PART[part].hoja} del PDF` : 'esquema CAJON-HSS'}">${n}</span>` : ''; };
+const CONN_ORDER = [...PART_ORDER].sort((a, b) => (connNum(a) ?? 99) - (connNum(b) ?? 99));
+
+// Elevaciones (mm, desde el lecho inferior de la placa base). Cara superior de cada placa.
+const MEZ = { flange: 'P038SVH002', tab: 'P038MVV-004', botTop: 3126.1, topTop: 3389.7, tabBot: 3199.7, clear: 257.2 };
+const CUB = { flange: 'P038ESM-006', tab: 'P038ESM-005', botTop: 6031.9, topTop: 6193.9, tabBot: 6054.7, clear: 155.6 };
+const FAC = { botTop: 205.9, topTop: 418.6, clear: 206.4 };
+const AXIS_MM = { cub: 6109.7, mez: 3254.7, fac: 309.1 };     // eje de la viga según planos
+const STAAD_MM = { cub: 6040, mez: 3270, fac: 200 };          // nudo STAAD
+
+const L_HSS6178 = [1, 'P025SVH001-05', 'HSS 6″x6″x1/4″ L=6178 mm', 1, 174.054];
+const MARKS = {
+  'SYR-01': { plano: 'S07713000573', hojas: [1, 2, 3], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 211.979,
+    cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
+    lista: [L_HSS6178, [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [4, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 4, 1.819], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 2, 0.490], [6, 'PL-U-ESQ', 'PLACA EN U - ESQUINA 316.2x316.2 mm E=3/8″', 2, 4.396], [7, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [8, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 4, 0.264]] },
+  'SYR-02': { plano: 'S07713000574', hojas: [4, 5, 6], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476,
+    cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
+    lista: [L_HSS6178, [2, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [3, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [4, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 3, 0.490], [6, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 6, 1.819], [7, 'P038SVH007', 'PLC MOMENTO 296.4x168 mm E=1/4″', 2, 1.843], [8, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 2, 0.264]] },
+  'SYR-03': { plano: 'S07713000575', hojas: [7, 8, 9], tipo: 'borde', L: 6170, base: 'P038MVV-001', peso: 210.717,
+    cub: { ...CUB, tab: 'P038MVV-005', topAngle: 'P022MVV-001', clip: 'S07605000096', dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
+    lista: [[1, 'P025SVH001-06', 'HSS 6″x6″x1/4″ L=6170 mm', 1, 173.828], [2, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [3, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 2, 1.009], [4, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [5, 'P038MVV-005', 'PL MOMENTO 67X110MM ESP 3/16″ T5', 2, 0.256], [6, 'P038SVH007', 'PLC MOMENTO 296.4x168 mm E=1/4″', 2, 1.843], [7, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 6, 1.819], [8, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 3, 0.490], [9, 'P022MVV-001', 'ANG 167X40MM E=1/4″', 2, 1.226], [10, 'S07605000096', 'ANG 39X62MM CAL 12', 1, 0.049], [11, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [12, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 2, 0.264]] },
+  'SYR-04': { plano: 'S07713000576', hojas: [10, 11, 12], tipo: 'interior', L: 3374, base: 'P038MVV-002', peso: 128.256,
+    cub: null, mez: { ...MEZ, dirs: ['N', 'E', 'S', 'W'] }, fac: null, n412: true,
+    lista: [[1, 'P025SVH001-02', 'HSS 6″x6″x1/4″ L=3374 mm', 1, 95.056], [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-002', 'PL BASE 300X300MM ESP 5/8″ T-02', 1, 11.022], [4, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 4, 0.490], [5, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 8, 1.819], [6, 'P038SVH005', 'PLC CONEXIÓN 140.7x60 mm E=3/16″', 1, 0.308], [7, 'P038SVH004', 'PLC CONEXIÓN 139.5x51.3 mm E=3/16″', 1, 0.210], [8, 'P038SVH006', 'PLC CONEXIÓN 157.1x140.3 mm E=3/16″', 1, 0.717], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411]] },
+  'SYR-05': { plano: 'S07713000577', hojas: [13, 14, 15], tipo: 'interior', L: 3374, base: 'P038MVV-002', peso: 127.022,
+    cub: null, mez: { ...MEZ, dirs: ['N', 'E', 'S', 'W'] }, fac: null,
+    lista: [[1, 'P025SVH001-02', 'HSS 6″x6″x1/4″ L=3374 mm', 1, 95.056], [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-002', 'PL BASE 300X300MM ESP 5/8″ T-02', 1, 11.022], [4, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 4, 0.490], [5, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 8, 1.819], [6, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411]] },
+  'SYR-06': { plano: 'S07713000578', hojas: [16, 17, 18], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476, tabFlip: ['E'],
+    cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
+    lista: null },
+  'SYR-07': { plano: 'S07713000579', hojas: [19, 20, 21], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 211.979,
+    cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
+    lista: null },
+};
+MARKS['SYR-06'].lista = MARKS['SYR-02'].lista;
+MARKS['SYR-07'].lista = MARKS['SYR-01'].lista;
+const MARK_IDS = Object.keys(MARKS);
+
+// Asignación propuesta. El PDF no trae plano de montaje: se dedujo por tipo de conexión.
+const DEFAULT_ASSIGN = {
+  '1-A': 'SYR-01', '2-A': 'SYR-02', '3-A': 'SYR-02', '4-A': 'SYR-07',
+  '1-B': 'SYR-03', '2-B': 'SYR-05', '3-B': 'SYR-04', '4-B': 'SYR-03',
+  '1-C': 'SYR-07', '2-C': 'SYR-06', '3-C': 'SYR-06', '4-C': 'SYR-01',
+};
+const STORE_KEY = 'conexiones-villahermosa-asignacion-v1';
+function loadAssign() {
+  try { const s = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (s && typeof s === 'object') return { ...DEFAULT_ASSIGN, ...s }; } catch (e) { /* sin almacenamiento */ }
+  return { ...DEFAULT_ASSIGN };
+}
+function loadBarMode() { try { const v = localStorage.getItem('conexiones-villahermosa-barras'); if (v === 'lin' || v === 'sec') return v; } catch (e) { /* sin almacenamiento */ } return 'sec'; }
+function saveAssign() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state.assign)); } catch (e) { /* sin almacenamiento */ } }
+
+/* Dirección local del plano (N = arriba en las vistas en planta, E = derecha) -> eje global STAAD, por giro k·90° */
+const L2G = [
+  { E: '+X', N: '-Z', W: '-X', S: '+Z' },
+  { E: '-Z', N: '-X', W: '+Z', S: '+X' },
+  { E: '-X', N: '+Z', W: '+X', S: '-Z' },
+  { E: '+Z', N: '+X', W: '-Z', S: '-X' },
+];
+const DEPTH_MM = { 'MCE10-14': 254, 'MCE10-12': 254, 'MC10-14': 254, 'W8X10': 200.4, 'MCE6-14': 152.4, 'MCC8-14': 203.2 };
+const LEVEL_NAME = { cub: 'Cubierta', mez: 'Mezzanine', fac: 'Fachada (inferior)', base: 'Base', col: 'Columna' };
+
+/* =====================================================================
+   4. Cruce plano ↔ STAAD por columna
+   ===================================================================== */
+function facFacesLocal(mk) { return mk.fac ? (mk.fac.kind === 'L' || mk.fac.kind === 'UE' ? ['W', 'S'] : ['W']) : []; }
+function bestK(p, mk) {
+  let best = 0, bestScore = -Infinity;
+  for (let k = 0; k < 4; k++) {
+    const m = L2G[k]; let s = 0;
+    for (const [lvl, w] of [['mez', 3], ['cub', 1]]) {
+      const c = mk[lvl]; if (!c) continue;
+      const pd = c.dirs.map(d => m[d]); const sd = new Set(p.beams[lvl].map(d => d.dir));
+      for (const d of pd) s += sd.has(d) ? 2 * w : -w;
+      for (const d of sd) if (!pd.includes(d)) s -= w;
+    }
+    const mf = facFacesLocal(mk).map(d => m[d]);
+    for (const f of mf) s += p.faces.includes(f) ? 2 : -1;
+    for (const f of p.faces) if (!mf.includes(f)) s -= 1;
+    if (s > bestScore) { bestScore = s; best = k; }
+  }
+  return best;
+}
+
+function analyze(p, markId) {
+  const mk = markId ? MARKS[markId] : null;
+  const A = { k: 0, rows: { cub: [], mez: [] }, fac: [], issues: [], status: 'ok' };
+  const issue = (sev, code, t, extra = {}) => A.issues.push({ sev, code, t, pos: p.id, ...extra });
+  if (!mk) {
+    issue('warn', 'sinplano', 'Sin marca asignada: no hay plano de taller para esta columna.');
+  } else {
+    A.k = bestK(p, mk);
+  }
+  const m = L2G[A.k];
+  for (const lvl of ['cub', 'mez']) {
+    const c = mk ? mk[lvl] : null;
+    const plateDirs = c ? c.dirs.map(d => m[d]) : [];
+    for (const g of ['+X', '+Z', '-X', '-Z']) {
+      const sm = p.beams[lvl].filter(d => d.dir === g);
+      const has = plateDirs.includes(g);
+      if (!sm.length && !has) continue;
+      const local = Object.keys(m).find(kk => m[kk] === g);
+      let st = 'ok', why = '';
+      if (sm.length && !has) {
+        const rigid = sm.some(d => !/MZ/.test(relAt(d)));
+        if (!mk) { st = 'warn'; why = 'Sin plano para esta columna.'; }
+        else if (lvl === 'cub' && !c) { st = 'crit'; why = `La columna ${markId} termina en el mezzanine; en STAAD esta viga llega a la columna a ${nf(STAAD_MM.cub / 1000)} m.`; }
+        else { st = rigid ? 'crit' : 'warn'; why = rigid ? 'Viga empotrada en STAAD (sin liberaciones) y el plano no tiene placas en esta cara.' : 'Viga articulada en STAAD; el plano no tiene conexión en esta cara.'; }
+        if (mk) issue(st, lvl === 'cub' && !c ? 'corta' : 'sinplacas', why, { lvl, dir: g, members: sm.map(d => d.mid) });
+      } else if (!sm.length && has) {
+        st = 'warn'; why = 'Hay placas en el plano pero STAAD no tiene viga en esta dirección.';
+        issue('warn', 'sinviga', why, { lvl, dir: g });
+      } else {
+        const sec = secName(sm[0].mid), dep = DEPTH_MM[sec];
+        if (dep && Math.abs(c.clear - dep) > 12) {
+          st = 'crit'; why = `Peralte ${sec} = ${nf(dep, 1)} mm, pero las placas quedan a ${nf(c.clear, 1)} mm libres (diseñadas para peralte 10″).`;
+          issue('crit', 'peralte', why, { lvl, dir: g, members: sm.map(d => d.mid) });
+        }
+        const ck0 = CHK[sm[0].mid], q0 = QSPEC[c.flange];
+        if (st === 'ok' && q0 && atNodeOf(sm[0], ck0)) {
+          const Ff = flangeForce(sm[0], ck0, q0.tp), phi = hssK17(q0.Wf, q0.tp);
+          if (Ff > phi) { st = 'crit'; why = `Pared del HSS (K1-7): fuerza de patín ${nf(Ff / 1000, 2)} t > φRn ${nf(phi / 1000, 2)} t (relación ${nf(Ff / phi, 2)}).`; issue('crit', 'hss', why, { lvl, dir: g, members: sm.map(d => d.mid) }); }
+        }
+        const r = Math.max(...sm.map(d => (CHK[d.mid] || [0, 0])[1]));
+        if (st === 'ok' && r >= 0.8) { st = 'warn'; why = `Relación de diseño alta en la viga (${nf(r)}): revisar la conexión con prioridad.`; issue('warn', 'demanda', why, { lvl, dir: g, members: sm.map(d => d.mid) }); }
+      }
+      A.rows[lvl].push({ g, local, sm, has, st, why });
+    }
+  }
+  // Fachada (enlace W16X36 a nivel 20 cm en STAAD)
+  if (mk || p.faces.length) {
+    const mf = mk ? facFacesLocal(mk).map(d => m[d]) : [];
+    for (const f of new Set([...mf, ...p.faces])) {
+      const s = p.faces.includes(f), pl = mf.includes(f);
+      let st = 'ok', why = '';
+      if (s && !pl) { st = 'warn'; why = 'STAAD tiene viga de apoyo de fachada (MCC8-14) en esta cara y el plano no tiene placas.'; if (mk) issue('warn', 'fachada', why, { lvl: 'fac', dir: f }); }
+      if (!s && pl) { st = 'warn'; why = 'Placas de fachada sin viga de apoyo en STAAD en esta cara.'; issue('warn', 'fachada', why, { lvl: 'fac', dir: f }); }
+      A.fac.push({ f, s, pl, st, why, link: p.facLinks.find(d => (Math.abs(d.vec[0]) > .3 && (d.vec[0] > 0 ? '+X' : '-X') === f) || (Math.abs(d.vec[2]) > .3 && (d.vec[2] > 0 ? '+Z' : '-Z') === f)) });
+    }
+  }
+  if (mk && mk.L < 5000 && p.colAbove) {
+    issue('crit', 'corta', `${markId} mide ${nf(mk.L + 15.9 + 6.4, 1)} mm y lleva tapa ciega; en STAAD la columna sigue hasta cubierta (barra ${p.colAbove.mid}, ${secName(p.colAbove.mid)}).`, { lvl: 'cub', members: [p.colAbove.mid] });
+  }
+  if (mk && mk.n412) issue('info', 'n412', 'Placas a 412.7 mm (piezas 6, 7 y 8) sin elemento correspondiente en STAAD; orientación en planta no definida en el plano.', { lvl: 'fac' });
+  A.status = A.issues.some(i => i.sev === 'crit') ? 'crit' : A.issues.some(i => i.sev === 'warn') ? 'warn' : 'ok';
+  if (!mk) A.status = 'none';
+  return A;
+}
+
+/* =====================================================================
+   5. Geometría de placas (mm) — formas tomadas de los planos de pieza
+   ===================================================================== */
+const V2 = (x, y) => new THREE.Vector2(x, y);
+function ring(pts, cw) { const v = pts.map(p => V2(p[0], p[1])); if (THREE.ShapeUtils.isClockWise(v) !== cw) v.reverse(); return v; }
+function makeShape(outer, holes = []) { const s = new THREE.Shape(ring(outer, false)); for (const h of holes) s.holes.push(new THREE.Path(ring(h, true))); return s; }
+function arc(cx, cy, r, a0, a1, n = 8) { const o = []; for (let i = 0; i <= n; i++) { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; }
+function circ(cx, cy, d, n = 16) { return arc(cx, cy, d / 2, 0, 360 * (n - 1) / n, n - 1); }
+function slot(cx, cy, w, h, axis = 'y') {
+  const r = w / 2, k = h / 2 - r;
+  return axis === 'y' ? [...arc(cx, cy + k, r, 0, 180, 6), ...arc(cx, cy - k, r, 180, 360, 6)]
+                      : [...arc(cx + k, cy, r, -90, 90, 6), ...arc(cx - k, cy, r, 90, 270, 6)];
+}
+function rrect(x0, y0, x1, y1, r) { return [...arc(x1 - r, y0 + r, r, -90, 0, 4), ...arc(x1 - r, y1 - r, r, 0, 90, 4), ...arc(x0 + r, y1 - r, r, 90, 180, 4), ...arc(x0 + r, y0 + r, r, 180, 270, 4)]; }
+const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+const H14 = 14.29;
+const SHAPES = {
+  'P038SVH002': () => makeShape([[0, -47.5], [40, -87.5], [225, -87.5], [225, 87.5], [40, 87.5], [0, 47.5]], [50, 100, 150, 200].flatMap(a => [-44.45, 44.45].map(b => circ(a, b, 14.3)))),
+  'P038ESM-006': () => makeShape([[0, -45], [25, -65], [167, -65], [167, 65], [25, 65], [0, 45]], [42, 92, 142].flatMap(a => [-31.75, 31.75].map(b => circ(a, b, H14)))),
+  'P022MVV-001': () => makeShape(rect(0, -65, 167, 65), [42, 92, 142].flatMap(a => [-31.75, 31.75].map(b => circ(a, b, H14)))),
+  'P022MVV-001-leg': () => makeShape(rect(0, -65, 6.4, 65)),
+  'P038ESM-005': () => makeShape(rect(0, 0, 67, 110), [25, 85].map(b => circ(42, b, H14))),
+  'P038MVV-005': () => makeShape([[0, 0], [67, 0], [67, 110], [20, 110], [0, 90]], [25, 85].map(b => circ(42, b, H14))),
+  'P038MVV-004': () => makeShape(rect(0, 0, 125, 110), [50, 100].flatMap(a => [25, 85].map(b => circ(a, b, H14)))),
+  'P038SVH001': () => makeShape([[0, 0], [168, 0], [168, 72], ...arc(104.5, 84.7, 12.7, -90, -180), [91.8, 148.2], [0, 148.2]], [slot(31.8, 31, 14.3, 25.4, 'y'), slot(95.3, 31, 14.3, 25.4, 'y')]),
+  'P038SVH007': () => makeShape([[0, 0], [296.4, 0], [296.4, 168], [224.4, 168], ...arc(211.7, 104.5, 12.7, 0, -90), ...arc(84.7, 104.5, 12.7, -90, -180), [72, 168], [0, 168]], [[31, 31.8], [265.4, 31.8], [31, 95.3], [265.4, 95.3]].map(([x, y]) => slot(x, y, 14.3, 25.4, 'x'))),
+  'PL-U-ESQ': () => makeShape([[148.2, 0], [76.2, 0], ...arc(63.5, -63.5, 12.7, 0, -90), ...arc(-63.5, -63.5, 12.7, -90, -180), ...arc(-63.5, 63.5, 12.7, 180, 90), [0, 76.2], [0, 148.2], [-168, 148.2], [-168, -168], [148.2, -168]],
+    [[117.2, -136.2, 'x'], [117.2, -72.7, 'x'], [0, -136.2, 'x'], [-72.7, 117.2, 'y'], [-136.2, 117.2, 'y'], [-136.2, 0, 'y']].map(([x, y, a]) => slot(x, y, 14.3, 25.4, a))),
+  'CART-ASIENTO': () => makeShape([[0, 0], [90, 80], [90, 100], [15, 100], [0, 85]]),
+  'P038SVH005': () => makeShape([[6, 0], [134.7, 0], [140.7, 6], [140.7, 54], [134.7, 60], [6, 60], [0, 54], [0, 6]], [circ(40, 25.6, 14.3)]),
+  'P038SVH004': () => makeShape([[6, 0], [139.5, 0], [139.5, 24.4], ...arc(95.9, 30.8, 6.4, -90, -180, 5), [89.5, 51.3], [6, 51.3], [0, 45.3], [0, 6]], [circ(40, 25.7, 14.3)]),
+  'P038SVH006': () => makeShape([[6, 0], [107.1, 0], ...arc(113.5, 43.6, 6.4, 180, 90, 5), [157.1, 50], [157.1, 134.3], [151.1, 140.3], [6, 140.3], [0, 134.3], [0, 6]], [circ(40, 84.4, 14.3), circ(108.3, 100.3, 14.3)]),
+  'S07605000096': () => makeShape(rect(0, 0, 39, 62), [circ(19.5, 44, 8)]),
+  'P038SVH003': () => makeShape(rrect(-76.2, -76.2, 76.2, 76.2, 9.3)),
+  'P038MVV-001': () => makeShape(rect(-150, -150, 150, 150), [[-110, -110], [0, -110], [110, -110], [-110, 0], [110, 0], [-110, 110], [0, 110], [110, 110]].map(([x, y]) => circ(x, y, 22.23))),
+  'P038MVV-002': () => makeShape(rect(-150, -150, 150, 150), [[-110, -110], [110, -110], [-110, 110], [110, 110]].map(([x, y]) => circ(x, y, 22.23))),
+  'P008SVH001': () => makeShape([[0, 0], [74, 0], [74, 60], [34, 100], [0, 100]]),
+  'HSS': () => makeShape(rrect(-76.2, -76.2, 76.2, 76.2, 12.7), [rrect(-69.85, -69.85, 69.85, 69.85, 6.35)]),
+};
+const HALF = 76.2;
+const FN = { E: [1, 0], N: [0, 1], W: [-1, 0], S: [0, -1] };
+const tanOf = f => { const [u, v] = FN[f]; return [-v, u]; };
+function basis(ax, ay, az, t) { const m = new THREE.Matrix4(); m.set(ax[0], ay[0], az[0], t[0], ax[1], ay[1], az[1], t[1], ax[2], ay[2], az[2], t[2], 0, 0, 0, 1); return m; }
+// Planta (u = E, v = N)  ->  local 3D (X = u, Y = elevación, Z = -v)
+const mFlange = (f, yTop, t) => { const [nu, nv] = FN[f], [tu, tv] = tanOf(f); return basis([nu, 0, -nv], [tu, 0, -tv], [0, 1, 0], [HALF * nu, yTop - t, -HALF * nv]); };
+const mTab = (f, yBot, off, t) => { const [nu, nv] = FN[f], [tu, tv] = tanOf(f); const o = off + t / 2; return basis([nu, 0, -nv], [0, 1, 0], [-tu, 0, tv], [HALF * nu + tu * o, yBot, -(HALF * nv + tv * o)]); };
+const mPlan = (A, c, yTop, t) => basis([A[0], 0, -A[2]], [A[1], 0, -A[3]], [0, 1, 0], [c[0], yTop - t, -c[1]]);
+const mHSS = () => basis([1, 0, 0], [0, 0, -1], [0, 1, 0], [0, 15.9, 0]);
+const mClip = y => basis([1, 0, 0], [0, 1, 0], [0, 0, 1], [-20.8, y, -1.35]);
+
+/* =====================================================================
+   6. Escena
+   ===================================================================== */
+const stage = $('#stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.localClippingEnabled = false;
+stage.prepend(renderer.domElement);
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.domElement.className = 'labels';
+stage.appendChild(labelRenderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.02, 300);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.09; controls.screenSpacePanning = true;
+controls.minDistance = 0.12; controls.maxDistance = 160;
+// Navegación tipo CAD: rueda presionada (o clic derecho) mueve el modelo, la rueda acerca hacia el cursor,
+// Shift + rueda presionada gira (OrbitControls invierte PAN/ROTATE con Shift, Ctrl o Cmd).
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
+controls.zoomToCursor = true;
+// Evita el autodesplazamiento de Windows al presionar la rueda sobre el modelo
+renderer.domElement.addEventListener('mousedown', ev => { if (ev.button === 1) ev.preventDefault(); });
+renderer.domElement.addEventListener('auxclick', ev => { if (ev.button === 1) ev.preventDefault(); });
+scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8b95, 1.15));
+const sun = new THREE.DirectionalLight(0xffffff, 1.7); sun.position.set(9, 15, 7); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 0.55); fill.position.set(-11, 7, -9); scene.add(fill);
+
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let dirty = true; const markDirty = () => { dirty = true; };
+
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x1b2329, transparent: true, opacity: 0.6 });
+const partMats = new Map(), hoverMats = new Map();
+const dimMat = new THREE.MeshStandardMaterial({ color: 0x9aa6ae, transparent: true, opacity: 0.12, depthWrite: false });
+const ghostMat = new THREE.MeshStandardMaterial({ color: 0xb4bec5, transparent: true, opacity: 0.09, depthWrite: false });
+const accentEdgeMat = new THREE.LineBasicMaterial({ color: 0xff5a00 });
+const selMats = new Map();
+function selMat(part) {
+  if (!selMats.has(part)) selMats.set(part, new THREE.MeshStandardMaterial({ color: new THREE.Color(PART[part].col).lerp(new THREE.Color(0xffffff), 0.12), roughness: 0.35, metalness: 0.05, emissive: 0xff6a00, emissiveIntensity: 0.5 }));
+  return selMats.get(part);
+}
+const focus = { mesh: null, nb: new Set(), beams: [], tags: [], pulseUntil: 0 };
+function partMat(part) {
+  if (!partMats.has(part)) {
+    partMats.set(part, new THREE.MeshStandardMaterial({ color: PART[part].col, roughness: 0.55, metalness: 0.08 }));
+    hoverMats.set(part, new THREE.MeshStandardMaterial({ color: PART[part].col, roughness: 0.4, metalness: 0.08, emissive: 0xff7a1a, emissiveIntensity: 0.55 }));
+  }
+  return partMats.get(part);
+}
+const geoCache = new Map();
+function partGeo(shapeKey, depth) {
+  const ck = shapeKey + '|' + depth;
+  if (!geoCache.has(ck)) {
+    const g = new THREE.ExtrudeGeometry(SHAPES[shapeKey](), { depth, bevelEnabled: false, curveSegments: 6 });
+    geoCache.set(ck, { g, e: new THREE.EdgesGeometry(g, 28) });
+  }
+  return geoCache.get(ck);
+}
+
+/* ---------- 6a. Ensamble de una columna según su marca ---------- */
+const assemblies = new Map();    // pos -> { group, meshes }
+const plateRoot = new THREE.Group(); scene.add(plateRoot);
+function buildAssembly(p, markId, k) {
+  const mk = MARKS[markId];
+  const g = new THREE.Group(); const meshes = [];
+  const base = { pos: p.id, mark: markId };
+  const add = (part, shapeKey, depth, m, info) => {
+    const { g: geo, e } = partGeo(shapeKey, depth);
+    const mesh = new THREE.Mesh(geo, partMat(part));
+    mesh.matrixAutoUpdate = false; mesh.matrix.copy(m);
+    const lines = new THREE.LineSegments(e, edgeMat); lines.matrixAutoUpdate = false; lines.matrix.copy(m); lines.raycast = () => {};
+    mesh.userData = { kind: 'plate', part, edges: lines, ...base, ...info };
+    g.add(mesh, lines); meshes.push(mesh);
+    return mesh;
+  };
+  const hssTop = 15.9 + mk.L;
+  add(mk.base, mk.base, 15.9, mPlan([1, 0, 0, 1], [0, 0], 15.9, 15.9), { lvl: 'base', role: 'base', y: 15.9, label: 'Placa base' });
+  for (const f of ['E', 'N', 'W', 'S']) for (const off of [-72.25, 72.25]) add('P008SVH001', 'P008SVH001', 7.9, mTab(f, 15.9, off, 7.9), { lvl: 'base', face: f, role: 'cartabon', y: 115.9, label: 'Cartabón' });
+  add('P025SVH001', 'HSS', mk.L, mHSS(), { lvl: 'col', role: 'hss', y: hssTop, label: `HSS 6″×6″×1/4″ L=${mk.L} mm` });
+  add('P038SVH003', 'P038SVH003', 6.4, mPlan([1, 0, 0, 1], [0, 0], hssTop + 6.4, 6.4), { lvl: mk.L > 5000 ? 'cub' : 'mez', role: 'tapa', y: hssTop + 6.4, label: 'Tapa' });
+  for (const lvl of ['mez', 'cub']) {
+    const c = mk[lvl]; if (!c) continue;
+    for (const f of c.dirs) {
+      add(c.flange, c.flange, 6.4, mFlange(f, c.botTop, 6.4), { lvl, face: f, role: 'patin-inf', y: c.botTop, label: 'Placa de patín inferior' });
+      if (c.topAngle) {
+        const h = add(c.topAngle, c.topAngle, 6.4, mFlange(f, c.topTop, 6.4), { lvl, face: f, role: 'patin-sup', y: c.topTop, label: 'Ángulo de patín superior' });
+        const leg = add(c.topAngle, 'P022MVV-001-leg', 33.6, mFlange(f, c.topTop - 6.4, 33.6), { lvl, face: f, role: 'patin-sup', y: c.topTop - 6.4, label: 'Ángulo (pierna de 40 mm)', sub: true });
+        h.userData.twin = leg; leg.userData.twin = h;
+      } else add(c.flange, c.flange, 6.4, mFlange(f, c.topTop, 6.4), { lvl, face: f, role: 'patin-sup', y: c.topTop, label: 'Placa de patín superior' });
+      const off = (mk.tabFlip || []).includes(f) ? -4.3 : 4.3;
+      add(c.tab, c.tab, 4.8, mTab(f, c.tabBot, off, 4.8), { lvl, face: f, role: 'cortante', y: c.tabBot + 110, label: 'Placa de cortante' });
+    }
+    if (c.clip) add(c.clip, 'S07605000096', 2.7, mClip(hssTop + 6.4), { lvl, role: 'clip', y: hssTop + 6.4 + 62, label: 'Clip sobre tapa' });
+  }
+  if (mk.fac) for (const yTop of [mk.fac.botTop, mk.fac.topTop]) {
+    if (mk.fac.kind === 'UE') {
+      add('PL-U-ESQ', 'PL-U-ESQ', 9.5, mPlan([1, 0, 0, 1], [0, 0], yTop, 9.5), { lvl: 'fac', face: 'W', role: 'fachada', y: yTop, label: 'Placa en U de esquina (fachada)' });
+    } else if (mk.fac.kind === 'L') {
+      add('P038SVH001', 'P038SVH001', 6.4, mPlan([1, 0, 0, -1], [-168, 148.2], yTop, 6.4), { lvl: 'fac', face: 'W', role: 'fachada', y: yTop, label: 'Placa en L (fachada)' });
+      add('P038SVH001', 'P038SVH001', 6.4, mPlan([0, -1, 1, 0], [148.2, -168], yTop, 6.4), { lvl: 'fac', face: 'S', role: 'fachada', y: yTop, label: 'Placa en L (fachada)' });
+    } else add('P038SVH007', 'P038SVH007', 6.4, mPlan([0, 1, -1, 0], [-168, 148.2], yTop, 6.4), { lvl: 'fac', face: 'W', role: 'fachada', y: yTop, label: 'Placa en U (fachada)' });
+  }
+  // cartabones de asiento bajo la placa inferior, en las orillas del HSS (2 por cara de fachada)
+  if (mk.fac) {
+    const yC = mk.fac.botTop - (mk.fac.kind === 'UE' ? 9.5 : 6.4);
+    for (const f of facFacesLocal(mk)) for (const off of [-73.025, 73.025]) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
+  }
+  if (mk.n412) {
+    add('P038SVH005', 'P038SVH005', 4.8, mPlan([1, 0, 0, -1], [-162, -76.2], 412.7, 4.8), { lvl: 'fac', role: 'n412', y: 412.7, label: 'Placa a 412.7 mm' });
+    add('P038SVH004', 'P038SVH004', 4.8, mPlan([0, -1, -1, 0], [100.6, 165.7], 412.7, 4.8), { lvl: 'fac', role: 'n412', y: 412.7, label: 'Placa a 412.7 mm' });
+    add('P038SVH006', 'P038SVH006', 4.8, mPlan([-1, 0, 0, -1], [183.3, -26.2], 412.7, 4.8), { lvl: 'fac', role: 'n412', y: 412.7, label: 'Placa a 412.7 mm' });
+  }
+  // Números de conexión (hoja del PDF): uno sobre cada placa —un solo cartabón por base— y, para la vista
+  // lejana, uno por nivel de la columna con los números que hay en ese nivel. updateConnLabels() decide cuál se ve.
+  const cnGroups = new Map();
+  let cart = false;
+  for (const mesh of meshes) {
+    const u = mesh.userData, n = connNum(u.part);
+    if (!n || u.sub) continue;
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    const bb = mesh.geometry.boundingBox, c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
+    const dz = mesh.geometry.parameters?.options?.depth || 0;
+    const key = u.lvl === 'base' || u.lvl === 'fac' ? 'inf' : u.lvl;
+    const at = new THREE.Vector3(c.x, c.y, dz / 2).applyMatrix4(mesh.matrix);
+    if (!cnGroups.has(key)) cnGroups.set(key, { ys: 0, n: 0, nums: new Set(), parts: new Set(), plates: [], o: null });
+    const G = cnGroups.get(key);
+    G.ys += at.y; G.n++; G.nums.add(n); G.parts.add(u.part);
+    if (u.role === 'cartabon') { if (cart) continue; cart = true; }
+    const el = document.createElement('div');
+    el.className = 'cn'; el.textContent = n;
+    el.title = `Conexión ${n} · ${u.part} · ${PART[u.part].d} · ${PART[u.part].hoja ? `hoja ${PART[u.part].hoja} del PDF` : 'esquema CAJON-HSS'}`;
+    el.addEventListener('click', ev => { ev.stopPropagation(); focusPlate(mesh); });
+    // hacia una esquina de la placa, para no tapar el globo de ítem que va al centro
+    const o = new CSS2DObject(el); o.position.set(c.x + 0.3 * sz.x, c.y + 0.3 * sz.y, dz + 10); o.visible = false;
+    mesh.add(o); G.plates.push({ o, mesh });
+  }
+  for (const [key, G] of cnGroups) {
+    const nums = [...G.nums].sort((a, b) => a - b);
+    const el = document.createElement('div');
+    el.className = 'cn grp'; el.textContent = nums.join(' · ');
+    el.title = `${markId} · ${key === 'inf' ? 'base y fachada' : LEVEL_NAME[key].toLowerCase()}: conexiones ${nums.join(', ')}. Acércate para ver el número en cada placa.`;
+    el.addEventListener('click', ev => { ev.stopPropagation(); selectPos(p.id, { focus: true, lvl: key === 'inf' ? 'base' : key }); });
+    // a la altura media de las placas del nivel (abajo del rótulo de marca) y, con margin, a un lado de la columna
+    G.o = new CSS2DObject(el); G.o.position.set(0, G.ys / G.n, 0); G.o.visible = false;
+    g.add(G.o);
+  }
+  g.position.copy(S(p.x, 0, p.z)); g.rotation.y = k * Math.PI / 2; g.scale.setScalar(0.001);
+  return { group: g, meshes, cnGroups };
+}
+// Más cerca que CN_NEAR (m) de un nivel de columna se ve el número en cada placa; más lejos, uno por nivel.
+const CN_NEAR = 4.6;
+const _cnw = new THREE.Vector3();
+function updateConnLabels() {
+  const on = state.layers.conn && state.layers.plates;
+  scene.updateMatrixWorld();
+  for (const a of assemblies.values()) for (const G of a.cnGroups.values()) {
+    G.o.getWorldPosition(_cnw);
+    const near = camera.position.distanceTo(_cnw) < CN_NEAR, clipOk = passesClip(_cnw);
+    G.o.visible = on && clipOk && !near && !focus.mesh && (!state.part || G.parts.has(state.part));
+    for (const c of G.plates) {
+      let v = on && (near || !!focus.mesh);
+      if (v && focus.mesh) v = focus.nb.has(c.mesh) || c.mesh === focus.mesh;
+      if (v && state.part) v = c.mesh.userData.part === state.part;
+      if (v) { c.o.getWorldPosition(_cnw); v = passesClip(_cnw); }
+      c.o.visible = v;
+    }
+  }
+}
+function removeConnLabels(a) {
+  for (const G of a.cnGroups.values()) { G.o.element.remove(); for (const c of G.plates) c.o.element.remove(); }
+}
+
+/* ---------- 6b. Columnas STAAD sin plano / tramos que el plano no cubre ---------- */
+const ghostRoot = new THREE.Group(); scene.add(ghostRoot);
+const ghostMats = {
+  none: new THREE.MeshStandardMaterial({ color: 0x8e99a1, transparent: true, opacity: 0.35, depthWrite: false }),
+  crit: new THREE.MeshStandardMaterial({ color: 0xd2453a, transparent: true, opacity: 0.38, depthWrite: false }),
+};
+function ghostColumn(p, y0, y1, kind) {
+  const geo = new THREE.BoxGeometry(0.1524, (y1 - y0) / 1000, 0.1524);
+  const mesh = new THREE.Mesh(geo, ghostMats[kind]);
+  mesh.position.copy(S(p.x, 0, p.z)); mesh.position.y = (y0 + y1) / 2000;
+  mesh.userData = { kind: 'ghost', pos: p.id, y0, y1, ghost: kind };
+  return mesh;
+}
+
+/* ---------- 6c. Barras STAAD: líneas por grupo + vigas principales en sólido ---------- */
+const GROUP_STYLE = {
+  '_COLUMNAS': { c: '#6f7d87', o: 0.8, n: 'Columnas (eje STAAD)', layer: 'colstaad' },
+  '_VIG_PRINC_MEZZ': { c: '#2f6aa0', o: 0.9, n: 'Vigas principales mezzanine', layer: 'mez' },
+  '_VIG_SEC_MEZ': { c: '#6e95bb', o: 0.8, n: 'Vigas secundarias mezzanine', layer: 'mez' },
+  '_CONTRAFLAMB': { c: '#9a8cc0', o: 0.8, n: 'Contraflambeo (PIPS5)', layer: 'mez' },
+  '_VIG_PRINC_CUB': { c: '#2f6aa0', o: 0.9, n: 'Vigas principales cubierta', layer: 'cub' },
+  '_ARMADURAS': { c: '#8d9aa4', o: 0.75, n: 'Armaduras NNZ cal 20', layer: 'arm' },
+  '_LARG_CUB': { c: '#aab4bb', o: 0.7, n: 'Largueros TOPHAT', layer: 'larg' },
+  '_POSTES:_FACH': { c: '#8f9ca6', o: 0.7, n: 'Postes de fachada', layer: 'fach' },
+  '_VIGA_APOY_INF': { c: '#3d8a68', o: 0.9, n: 'Viga de apoyo inferior (fachada)', layer: 'fach' },
+  '_FIJ_COL': { c: '#b0874f', o: 0.9, n: 'Fijaciones a columna (D-14)', layer: 'fach' },
+  '_SIN_PROP': { c: '#b0874f', o: 0.8, n: 'Fijaciones / postes (sin prop.)', layer: 'fach' },
+  '(sin grupo)': { c: '#c0703c', o: 0.95, n: 'Enlaces rígidos W16X36', layer: 'fach' },
+};
+const lineObjs = [];
+function buildLines() {
+  const per = {};
+  for (const [id, m] of Object.entries(MEM)) {
+    const sec = SEC[m[2]], layer = (GROUP_STYLE[GRP[m[3]]] || {}).layer || 'otros';
+    (per[`${sec}|${layer}`] ||= { sec, layer, ids: [] }).ids.push(+id);
+  }
+  for (const { sec, layer, ids } of Object.values(per)) {
+    const arr = new Float32Array(ids.length * 6);
+    ids.forEach((id, i) => { const [a, b] = MEM[id]; const A = S(...J[a]), B = S(...J[b]); arr.set([A.x, A.y, A.z, B.x, B.y, B.z], i * 6); });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+    const ln = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: SECDEF[sec]?.c || '#999999', transparent: true, opacity: 0.95 }));
+    ln.userData = { kind: 'lines', sec, ids, layer, op0: 0.95 };
+    scene.add(ln); lineObjs.push(ln);
+  }
+}
+
+/* ---------- 6c-bis. Sección real de cada perfil del STAAD (m) ----------
+   Coordenadas de la sección: u = ancho (−z local de STAAD), v = peralte (y local).
+   Los perfiles laminados en frío se generan desde su línea media con el espesor del calibre. */
+const T12 = .00266, T14 = .0019, T16 = .00152, T20 = .00091, T24 = .00061;
+function thick(pts, t) {
+  const h = t / 2, L = [], R = [], n = pts.length;
+  const unit = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; };
+  for (let i = 0; i < n; i++) {
+    const a = i > 0 ? unit(pts[i - 1], pts[i]) : null, b = i < n - 1 ? unit(pts[i], pts[i + 1]) : null;
+    let nx, ny;
+    if (a && b) { const ax = -a[1], ay = a[0], bx = -b[1], by = b[0]; let mx = ax + bx, my = ay + by; const ml = Math.hypot(mx, my) || 1; mx /= ml; my /= ml; const c = mx * ax + my * ay || 1; nx = mx / c; ny = my / c; }
+    else { const d = a || b; nx = -d[1]; ny = d[0]; }
+    L.push([pts[i][0] + nx * h, pts[i][1] + ny * h]); R.push([pts[i][0] - nx * h, pts[i][1] - ny * h]);
+  }
+  return [...L, ...R.reverse()];
+}
+const thin = (path, t) => ({ o: thick(path, t), h: [] });
+const solidSec = pts => ({ o: pts, h: [] });
+function cPath(d, b, lip, t, s, u0) {
+  const top = d / 2 - t / 2, w = u0 + s * t / 2, tip = u0 + s * (b - t / 2), p = [];
+  if (lip) p.push([tip, top - lip]);
+  p.push([tip, top], [w, top], [w, -top], [tip, -top]);
+  if (lip) p.push([tip, -top + lip]);
+  return p;
+}
+const backToBack = (d, b, lip, t) => [thin(cPath(d, b, lip, t, 1, 0), t), thin(cPath(d, b, lip, t, -1, 0), t)];
+const boxed = (d, b, lip, t) => [thin(cPath(d, b, lip, t, -1, b), t), thin(cPath(d, b, lip, t, 1, -b), t)];
+const singleC = (d, b, lip, t) => [thin(cPath(d, b, lip, t, 1, -b / 2), t)];
+function zPath(d, b, lip, t) { const top = d / 2 - t / 2, e = b - t / 2; return [[e, top - lip], [e, top], [0, top], [0, -top], [-e, -top], [-e, -top + lip]]; }
+const iSec = (d, b, tw, tf) => solidSec([[-b / 2, -d / 2], [b / 2, -d / 2], [b / 2, -d / 2 + tf], [tw / 2, -d / 2 + tf], [tw / 2, d / 2 - tf], [b / 2, d / 2 - tf], [b / 2, d / 2], [-b / 2, d / 2], [-b / 2, d / 2 - tf], [-tw / 2, d / 2 - tf], [-tw / 2, -d / 2 + tf], [-b / 2, -d / 2 + tf]]);
+const teeSec = (d, b, tw, tf) => solidSec([[-b / 2, d / 2], [-b / 2, d / 2 - tf], [-tw / 2, d / 2 - tf], [-tw / 2, -d / 2], [tw / 2, -d / 2], [tw / 2, d / 2 - tf], [b / 2, d / 2 - tf], [b / 2, d / 2]]);
+const pipeSec = (r, t) => ({ o: circ(0, 0, 2 * r, 28), h: [circ(0, 0, 2 * (r - t), 28)] });
+const HAT = [[-.046, -.02], [-.026, -.02], [-.015, .02], [.015, .02], [.026, -.02], [.046, -.02]];
+const SECDEF = {
+  'TUB60604': { c: '#9aa3ab', n: 'HSS 6″×6″×1/4″ · tubo cuadrado', dim: '152.4 × 152.4 × 6.35', sh: () => [{ o: rrect(-.0762, -.0762, .0762, .0762, .0127), h: [rrect(-.0703, -.0703, .0703, .0703, .0064)] }] },
+  'MCE10-14': { c: '#3f7cc0', n: '2 Monten 10″ cal 14 espalda con espalda', dim: '254 × 177.8 · e 1.9', sh: () => backToBack(.254, .0889, .025, T14) },
+  'MCE10-12': { c: '#24589a', n: '2 Monten 10″ cal 12 espalda con espalda', dim: '254 × 177.8 · e 2.7', sh: () => backToBack(.254, .0889, .025, T12) },
+  'MC10-14': { c: '#79b0e0', n: 'Monten 10″ cal 14 sencillo', dim: '254 × 88.9 · e 1.9', sh: () => singleC(.254, .0889, .025, T14) },
+  'MCE6-14': { c: '#2f9e8f', n: '2 Monten 6″ cal 14 espalda con espalda', dim: '152.4 × 127 · e 1.9', sh: () => backToBack(.1524, .0635, .02, T14) },
+  'MCC8-14': { c: '#5c9e48', n: '2 Monten 8″ cal 14 en cajón', dim: '203.2 × 127 · e 1.9', sh: () => boxed(.2032, .0635, .02, T14) },
+  'W8X10': { c: '#c0504d', n: 'IR 8″ × 14.9 kg/m (W8X10)', dim: '200.4 × 100.1 · alma 4.3 · patín 5.2', sh: () => [iSec(.2004, .1001, .0043, .0052)] },
+  'W16X36': { c: '#e07b39', n: 'T cortada de W16X36 (WT8X18) · enlace rígido', dim: '203 × 177.4 · alma 7.5 · patín 10.9', sh: () => [teeSec(.203, .1774, .0075, .0109)] },
+  'NNZ_S_CAL20': { c: '#b09f6c', n: 'Z 89 cal 20 · armadura Intra', dim: '89 × 41 · e 0.9', sh: () => [thin(zPath(.089, .041, .008, T20), T20)] },
+  'TOPHAT40CAL24': { c: '#cf9f3c', n: 'Larguero top hat 40 cal 24', dim: '40 × 92 · e 0.6', sh: () => [thin(HAT, T24)] },
+  'POSTE-C16': { c: '#8e6fc1', n: 'Poste C 60 cal 16 · fachada Intra', dim: '60 × 60 · e 1.5', sh: () => singleC(.06, .06, .015, T16) },
+  'PIPS5': { c: '#d16ba5', n: 'Tubo 1/2″ estándar (PIPS5)', dim: 'Ø 21.3 × 2.8', sh: () => [pipeSec(.01065, .00277)] },
+  'D-14': { c: '#8a7560', n: 'C 1½″ × 1″ cal 14 · diagonal D-14', dim: '38.1 × 25.4 · e 1.9', sh: () => singleC(.0381, .0254, .006, T14) },
+};
+function sectionSVG(sec, px = 92) {
+  const def = SECDEF[sec]; if (!def) return '';
+  const shapes = def.sh(); const xs = [], ys = [];
+  for (const s of shapes) for (const p of s.o) { xs.push(p[0]); ys.push(p[1]); }
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = px / Math.max(x1 - x0, y1 - y0), pad = 6, W = (x1 - x0) * k + 2 * pad, H = (y1 - y0) * k + 2 * pad;
+  const P = pts => pts.map((p, i) => `${i ? 'L' : 'M'}${((p[0] - x0) * k + pad).toFixed(1)} ${((y1 - p[1]) * k + pad).toFixed(1)}`).join('') + 'Z';
+  const d = shapes.map(s => P(s.o) + s.h.map(P).join('')).join('');
+  return `<svg class="secsvg" viewBox="0 0 ${W.toFixed(1)} ${H.toFixed(1)}" width="${W.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="Sección ${esc(sec)}"><path d="${d}" fill="${def.c}" fill-rule="evenodd" stroke="currentColor" stroke-width=".7" stroke-linejoin="round"/></svg>`;
+}
+const beamMeshes = [];
+const BEAM_HOVER = new THREE.Color('#ff8a3d');
+(function buildSections() {
+  const bySec = {};
+  for (const [id, m] of Object.entries(MEM)) (bySec[SEC[m[2]]] ||= []).push(+id);
+  for (const [sec, ids] of Object.entries(bySec)) {
+    const def = SECDEF[sec]; if (!def) continue;
+    const geo = new THREE.ExtrudeGeometry(def.sh().map(s => makeShape(s.o, s.h)), { depth: 1, bevelEnabled: false, curveSegments: 6 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.15 });
+    const mesh = new THREE.InstancedMesh(geo, mat, ids.length);
+    const col = new THREE.Color(def.c);
+    mesh.userData = { kind: 'beam', sec, ids, color: col, layerOf: ids.map(id => (GROUP_STYLE[grpName(id)] || {}).layer || 'otros') };
+    for (let i = 0; i < ids.length; i++) mesh.setColorAt(i, col);
+    scene.add(mesh); beamMeshes.push(mesh);
+  }
+})();
+buildLines();
+const levelShift = y => (Math.abs(y - 604) < 1 ? (AXIS_MM.cub - STAAD_MM.cub) : Math.abs(y - 327) < 1 ? (AXIS_MM.mez - STAAD_MM.mez) : Math.abs(y - 20) < 1 ? (AXIS_MM.fac - STAAD_MM.fac) : 0) / 1000;
+const HIDE = new THREE.Matrix4().makeScale(0, 0, 0);
+const UPV = new THREE.Vector3(0, 1, 0);
+// Ejes locales STAAD: x del nudo inicial al final; z = x × Y global (en barras verticales z = Z global); y = z × x; BETA gira y, z alrededor de x
+function memberFrame(id) {
+  const [a, b] = MEM[id]; const A = S(...J[a]), B = S(...J[b]);
+  const x = B.clone().sub(A).normalize();
+  const z = Math.abs(x.y) > 0.9999 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3().crossVectors(x, UPV).normalize();
+  let y = new THREE.Vector3().crossVectors(z, x).normalize(), zz = z;
+  const beta = (MEM[id][4] || 0) * Math.PI / 180;
+  if (beta) { const c = Math.cos(beta), s = Math.sin(beta); const y2 = y.clone().multiplyScalar(c).addScaledVector(z, s); zz = z.clone().multiplyScalar(c).addScaledVector(y, -s); y = y2; }
+  return { A, B, x, y, z: zz };
+}
+function updateBeams() {
+  const secMode = state.barMode === 'sec';
+  for (const mesh of beamMeshes) {
+    const { ids, layerOf, sec } = mesh.userData;
+    const shrink = sec === 'TUB60604' ? 0.985 : 1;   // queda dentro del HSS del plano, sin parpadeo
+    ids.forEach((id, i) => {
+      if (!state.layers[layerOf[i]] || !secMode) { mesh.setMatrixAt(i, HIDE); return; }
+      const f = memberFrame(id); const [a, b] = MEM[id];
+      const A = f.A, B = f.B;
+      if (state.align) { A.y += levelShift(J[a][1]); B.y += levelShift(J[b][1]); }
+      const dir = B.clone().sub(A); const L = dir.length(); dir.normalize();
+      const horiz = Math.abs(dir.y) < 0.05 && grpName(id) !== '_COLUMNAS';
+      const t0 = horiz && COLNODES.has(a) ? 0.088 : 0, t1 = horiz && COLNODES.has(b) ? 0.088 : 0;
+      A.addScaledVector(dir, t0);
+      const len = Math.max(0.005, L - t0 - t1);
+      const m = new THREE.Matrix4().makeBasis(f.z.clone().multiplyScalar(-shrink), f.y.clone().multiplyScalar(shrink), dir.multiplyScalar(len)); m.setPosition(A);
+      mesh.setMatrixAt(i, m);
+    });
+    mesh.instanceMatrix.needsUpdate = true; mesh.computeBoundingSphere(); mesh.computeBoundingBox?.();
+  }
+  applySectionLook();
+}
+// Opacidad de las barras según modo (secciones opacas / líneas con vigas translúcidas), pieza enfocada o perfil aislado
+function applySectionLook() {
+  for (const mesh of beamMeshes) {
+    const mat = mesh.material; let op = 1;
+    if (focus.mesh) op = 0.06; else if (state.secIso && state.secIso !== mesh.userData.sec) op = 0.06;
+    const tr = op < 1;
+    if (mat.transparent !== tr) { mat.transparent = tr; mat.needsUpdate = true; }
+    mat.opacity = op; mat.depthWrite = !tr;
+  }
+  for (const ln of lineObjs) ln.material.opacity = focus.mesh ? 0.1 : state.secIso && state.secIso !== ln.userData.sec ? 0.06 : ln.userData.op0;
+  markDirty();
+}
+
+/* ---------- 6d. Losa y muros (elementos placa STAAD) ---------- */
+const shellObjs = {};
+(function buildShells() {
+  const per = {};
+  for (const sh of D.shells) (per[GRP[sh[sh.length - 1]]] ||= []).push(sh);
+  const colors = { '_STRUCTUCRETE': '#9aa9b4', '_MUROS_MW': '#c7b79a' };
+  for (const [g, list] of Object.entries(per)) {
+    const pos = [];
+    for (const sh of list) {
+      const n = sh.slice(1, sh.length - 1).map(id => S(...J[id]));
+      if (g === '_STRUCTUCRETE') n.forEach(v => { v.y += 0.12; });
+      const tri = n.length === 4 ? [0, 1, 2, 0, 2, 3] : [0, 1, 2];
+      for (const t of tri) pos.push(n[t].x, n[t].y, n[t].z);
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: colors[g] || '#aaaaaa', transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false }));
+    mesh.userData = { kind: 'shell', group: g };
+    mesh.raycast = () => {};
+    scene.add(mesh); shellObjs[g] = mesh;
+  }
+})();
+
+/* ---------- 6e. Ejes, piso y rótulos ---------- */
+const gridRoot = new THREE.Group(); scene.add(gridRoot);
+const gridBubbles = []; let gridNear = false;
+const gridMat = new THREE.LineDashedMaterial({ color: 0x8c99a3, dashSize: 0.25, gapSize: 0.15, transparent: true, opacity: 0.8 });
+function cssLabel(html, cls, pos) { const el = document.createElement('div'); el.className = cls; el.innerHTML = html; const o = new CSS2DObject(el); o.position.copy(pos); return o; }
+(function buildGrid() {
+  const pts = [];
+  for (const [, x] of GX) { pts.push(S(x, 0, -1556 - 170), S(x, 0, -656 + 120)); }
+  for (const [, z] of GZ) { pts.push(S(-851 - 170, 0, z), S(249 + 120, 0, z)); }
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const ls = new THREE.LineSegments(geo, gridMat); ls.computeLineDistances(); gridRoot.add(ls);
+  for (const [l, x] of GX) gridBubbles.push(gridRoot.add(cssLabel(l, 'bubble', S(x, 0, -1556 - 215))).children.at(-1));
+  for (const [l, z] of GZ) gridBubbles.push(gridRoot.add(cssLabel(l, 'bubble', S(-851 - 215, 0, z))).children.at(-1));
+  const o = S(-851 - 140, 0, -656 + 170);
+  const ax = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), o, 1.2, 0xc4561a, 0.18, 0.1);
+  const az = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), o, 1.2, 0x2f6696, 0.18, 0.1);
+  gridRoot.add(ax, az, cssLabel('+X STAAD', 'axis-tag', o.clone().add(new THREE.Vector3(1.45, 0, 0))), cssLabel('+Z STAAD', 'axis-tag', o.clone().add(new THREE.Vector3(0, 0, 1.4))));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(16, 14), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.035, depthWrite: false }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.002; ground.raycast = () => {}; gridRoot.add(ground);
+})();
+
+/* =====================================================================
+   7. Estado y reconstrucción
+   ===================================================================== */
+const state = {
+  assign: loadAssign(), sel: '1-A', part: null, level: 'all', tab: 'col', align: true, finding: null, hss: 'staad', barMode: loadBarMode(), secIso: null,
+  layers: { plates: true, solids: true, conn: true, mez: true, cub: true, arm: true, larg: true, fach: true, colstaad: true, losa: false, muros: false, labels: true, grid: true, marks: true },
+};
+let ANA = {};
+const labelObjs = new Map();
+const markerObjs = [];
+const markerRoot = new THREE.Group(); scene.add(markerRoot);
+const labelRoot = new THREE.Group(); scene.add(labelRoot);
+const selRing = new THREE.Mesh(new THREE.RingGeometry(0.3, 0.312, 64), new THREE.MeshBasicMaterial({ color: 0xc4561a, side: THREE.DoubleSide, transparent: true, opacity: 0.6 }));
+selRing.rotation.x = -Math.PI / 2; selRing.raycast = () => {}; scene.add(selRing);
+
+function rebuildAll() {
+  exitFocus();
+  for (const p of POS) rebuildPos(p.id, false);
+  refreshMarkers(); updateHighlight(); renderPanels(); markDirty();
+}
+function rebuildPos(id, refresh = true) {
+  if (focus.mesh && focus.mesh.userData.pos === id) exitFocus();
+  const p = POSBY[id];
+  const old = assemblies.get(id);
+  if (old) { plateRoot.remove(old.group); removeConnLabels(old); }
+  for (const gm of ghostRoot.children.filter(c => c.userData.pos === id)) { ghostRoot.remove(gm); gm.geometry.dispose(); }
+  const mark = state.assign[id] || null;
+  ANA[id] = analyze(p, mark);
+  if (mark) {
+    const a = buildAssembly(p, mark, ANA[id].k);
+    assemblies.set(id, a); plateRoot.add(a.group);
+    const mk = MARKS[mark];
+    if (mk.L < 5000 && p.colAbove) ghostRoot.add(ghostColumn(p, 15.9 + mk.L + 6.4, STAAD_MM.cub, 'none'));
+  } else {
+    assemblies.delete(id);
+    ghostRoot.add(ghostColumn(p, 0, STAAD_MM.cub, 'none'));
+  }
+  // rótulo
+  let lab = labelObjs.get(id);
+  if (!lab) {
+    const el = document.createElement('div');
+    el.addEventListener('click', ev => { ev.stopPropagation(); selectPos(id, { focus: true }); });
+    lab = new CSS2DObject(el); labelObjs.set(id, lab); labelRoot.add(lab);
+  }
+  const mk = mark ? MARKS[mark] : null;
+  const topMm = mk ? 15.9 + mk.L + 6.4 : STAAD_MM.cub;
+  lab.position.copy(S(p.x, 0, p.z)); lab.position.y = topMm / 1000 + 0.42;
+  lab.element.className = `tag${mark ? '' : ' none'}${state.sel === id ? ' sel' : ''}`;
+  lab.element.innerHTML = `<b>${mark || 'Sin plano'}</b><small>${p.id}</small>`;
+  lab.element.title = `${mark || 'Sin marca'} · eje ${p.id} · ${p.tipo}`;
+  if (refresh) { refreshMarkers(); updateHighlight(); renderPanels(); markDirty(); }
+}
+
+/* ---------- marcadores de observaciones en 3D ---------- */
+const DIRV = { '+X': [1, 0], '-X': [-1, 0], '+Z': [0, 1], '-Z': [0, -1] };
+function refreshMarkers() {
+  for (const o of markerObjs) { markerRoot.remove(o); o.element.remove(); }
+  markerObjs.length = 0;
+  applyLayerVisibility();
+}
+
+/* ---------- resaltado de pieza / selección ---------- */
+function allPlateMeshes() { return [...assemblies.values()].flatMap(a => a.meshes); }
+let hovered = null;
+function focusRank(mesh) {
+  if (!focus.mesh) return state.part && mesh.userData.part !== state.part ? 0 : 1;
+  if (mesh === focus.mesh || mesh === focus.mesh.userData.twin) return 2;
+  return focus.nb.has(mesh) ? 1 : 0;
+}
+function baseMatFor(mesh) {
+  const r = focusRank(mesh), part = mesh.userData.part;
+  if (r === 2) return selMat(part);
+  if (r === 1) return partMat(part);
+  return focus.mesh ? ghostMat : dimMat;
+}
+function updateHighlight() {
+  for (const mesh of allPlateMeshes()) {
+    const r = focusRank(mesh);
+    mesh.material = baseMatFor(mesh);
+    mesh.userData.edges.visible = r > 0;
+    mesh.userData.edges.material = r === 2 ? accentEdgeMat : edgeMat;
+  }
+  const p = POSBY[state.sel];
+  selRing.visible = !!p;
+  if (p) { selRing.position.copy(S(p.x, 0, p.z)); selRing.position.y = 0.02; }
+  for (const [id, lab] of labelObjs) lab.element.classList.toggle('sel', id === state.sel);
+  markDirty();
+}
+
+/* =====================================================================
+   8. Cámara, vistas y niveles
+   ===================================================================== */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let tween = null;
+const FOV_PERSP = 38, FOV_ORTHO = 9;
+function flyTo(pos, target, ms = 650, fov = FOV_PERSP) {
+  if (reduceMotion) { camera.position.copy(pos); controls.target.copy(target); camera.fov = fov; camera.updateProjectionMatrix(); controls.update(); markDirty(); return; }
+  tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos.clone(), t1: target.clone(), f0: camera.fov, f1: fov, start: performance.now(), ms };
+}
+// Vistas "planta" y "elevación": cámara lejana con ángulo estrecho para que se lean casi sin perspectiva
+const far = (dir, tgt, dist) => tgt.clone().add(dir.clone().normalize().multiplyScalar(dist));
+const VIEWS = {
+  iso: () => { const a = camera.aspect || 1.5; const k = a < 1 ? 1.55 : a < 1.3 ? 1.25 : 1.0; return [new THREE.Vector3(13.8 * k, 10.6 * k, 15.6 * k), new THREE.Vector3(0, 2.7, 0)]; },
+  plan: () => { const t = new THREE.Vector3(0, 0, 0); const a = camera.aspect || 1.5; return [far(new THREE.Vector3(0, 1, 0.0004), t, a < 1.25 ? 118 / Math.max(a, 0.5) : 100), t, FOV_ORTHO]; },
+  front: () => { const t = new THREE.Vector3(0, 3.1, 0); const a = camera.aspect || 1.5; return [far(new THREE.Vector3(0, 0.02, 1), t, a < 1.25 ? 110 / Math.max(a, 0.5) : 92), t, FOV_ORTHO]; },
+  side: () => { const t = new THREE.Vector3(0, 3.1, 0); const a = camera.aspect || 1.5; return [far(new THREE.Vector3(1, 0.02, 0), t, a < 1.25 ? 100 / Math.max(a, 0.5) : 84), t, FOV_ORTHO]; },
+};
+function setView(v) {
+  const [pos, tgt, fov] = VIEWS[v](); flyTo(pos, tgt, 650, fov || FOV_PERSP);
+  $$('#views button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+}
+function revealStage() { if (window.innerWidth <= 860) { const r = stage.getBoundingClientRect(); if (r.top < 0 || r.bottom > window.innerHeight) stage.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); } }
+function focusPos(id, lvl) {
+  revealStage();
+  const p = POSBY[id]; const mk = state.assign[id] ? MARKS[state.assign[id]] : null;
+  const yMm = lvl === 'cub' ? AXIS_MM.cub : lvl === 'mez' ? AXIS_MM.mez : lvl === 'fac' || lvl === 'base' ? 250 : (mk && mk.L < 5000 ? AXIS_MM.mez : AXIS_MM.mez);
+  const t = S(p.x, yMm / 10, p.z);
+  const dir = camera.position.clone().sub(controls.target); dir.y = Math.max(dir.y, 0.2 * dir.length()); dir.normalize();
+  if (Math.max(Math.abs(dir.x), Math.abs(dir.y), Math.abs(dir.z)) > 0.93) dir.set(0.62, 0.42, 0.66).normalize();
+  if (!lvl) { flyTo(t.clone().add(dir.multiplyScalar(4.2)), t); return; }
+  flyTo(t.clone().add(dir.multiplyScalar(1.45)), t);
+}
+const LEVEL_RANGE = { cub: [5.55, 7.0], mez: [2.85, 3.8], inf: [-0.05, 0.75] };
+function setLevel(l) {
+  state.level = l;
+  const R = LEVEL_RANGE[l];
+  renderer.clippingPlanes = R ? [new THREE.Plane(new THREE.Vector3(0, 1, 0), -R[0]), new THREE.Plane(new THREE.Vector3(0, -1, 0), R[1])] : [];
+  $$('#levels button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.level === l)));
+  if (R) { const y = (R[0] + R[1]) / 2; const off = camera.position.clone().sub(controls.target); const t = controls.target.clone(); t.y = y; flyTo(t.clone().add(off), t); }
+  applyLayerVisibility(); markDirty();
+}
+const passesClip = pt => { const R = LEVEL_RANGE[state.level]; return !R || (pt.y >= R[0] - 1e-6 && pt.y <= R[1] + 1e-6); };
+
+/* =====================================================================
+   9. Capas
+   ===================================================================== */
+const LAYERS = [
+  ['plates', 'Placas y columnas de los planos', '#d9622b'],
+  ['conn', 'Números de conexión (hoja del PDF)', '#0052cc'],
+  ['mez', 'Vigas de mezzanine', '#2f6aa0'],
+  ['cub', 'Vigas de cubierta', '#2f6aa0'],
+  ['arm', 'Armaduras (NNZ cal 20)', '#8d9aa4'],
+  ['larg', 'Largueros (TOPHAT)', '#aab4bb'],
+  ['fach', 'Fachada: postes, apoyo inferior, fijaciones', '#3d8a68'],
+  ['colstaad', 'Columnas STAAD (TUB60604)', '#9aa3ab'],
+  ['losa', 'Losa de mezzanine (Structucrete)', '#9aa9b4'],
+  ['muros', 'Muros Megawall', '#c7b79a'],
+  ['labels', 'Rótulos de marca', '#19222a'],
+  ['grid', 'Ejes y piso', '#8c99a3'],
+];
+function applyLayerVisibility() {
+  const L = state.layers;
+  plateRoot.visible = L.plates; ghostRoot.visible = L.plates;
+  for (const ln of lineObjs) ln.visible = !!L[ln.userData.layer] && state.barMode === 'lin';
+  if (shellObjs._STRUCTUCRETE) shellObjs._STRUCTUCRETE.visible = L.losa;
+  if (shellObjs._MUROS_MW) shellObjs._MUROS_MW.visible = L.muros;
+  labelRoot.visible = L.labels; gridRoot.visible = L.grid;
+  for (const o of labelObjs.values()) o.visible = L.labels;
+  const R = LEVEL_RANGE[state.level];
+  for (const o of markerObjs) o.visible = L.marks && (!R || (o.userData.y >= R[0] && o.userData.y <= R[1] + 0.3));
+  markDirty();
+}
+
+/* =====================================================================
+   10. Selección, tooltip y picking
+   ===================================================================== */
+const tip = $('#tooltip');
+const ray = new THREE.Raycaster(); ray.params.Line.threshold = 0.035;
+const ndc = new THREE.Vector2();
+function visibleChain(o) { for (let x = o; x; x = x.parent) if (!x.visible) return false; return true; }
+function pick(clientX, clientY) {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const solids = [...allPlateMeshes(), ...ghostRoot.children, ...beamMeshes];
+  let hit = ray.intersectObjects(solids, false).find(h => visibleChain(h.object) && passesClip(h.point) && !(h.object.isInstancedMesh && isHiddenInstance(h)));
+  if (hit) return hit;
+  return ray.intersectObjects(lineObjs.filter(l => l.visible), false).find(h => passesClip(h.point)) || null;
+}
+function isHiddenInstance(h) { const m = new THREE.Matrix4(); h.object.getMatrixAt(h.instanceId, m); return m.elements[0] === 0 && m.elements[5] === 0; }
+function memberInfo(mid) {
+  const c = CHK[mid]; const [a, b] = MEM[mid];
+  const L = Math.hypot(...[0, 1, 2].map(i => J[b][i] - J[a][i]));
+  const lc = c ? `${c[2]} · ${esc(D.loads[c[2]] || '')}` : '';
+  const sd = SECDEF[secName(mid)], beta = MEM[mid][4];
+  return `<b>Barra ${mid} · ${esc(secName(mid))}${D.secType?.[secName(mid)] === 'T' ? ' (T)' : ''}</b>${sd ? `<div>${esc(sd.n)} · ${esc(sd.dim)} mm${beta ? ` · β = ${beta}°` : ''}</div>` : ''}<div class="mono">${esc(GROUP_STYLE[grpName(mid)]?.n || grpName(mid))} · L = ${nf(L, 1)} cm · nudos ${a}→${b}</div>${c ? `<div>Relación ${nf(c[1], 3)} (${c[0] === 'P' ? 'pasa' : 'no pasa'}) · LC ${lc}</div>` : ''}`;
+}
+function hitInfo(h) {
+  const o = h.object, u = o.userData;
+  if (u.kind === 'plate') {
+    const P = PART[u.part]; const p = POSBY[u.pos]; const A = ANA[u.pos];
+    const g = u.face ? L2G[A.k][u.face] : '';
+    return `<b>${esc(u.part)}</b><div>${esc(P.d)}</div><div class="mono">${esc(u.mark)} · eje ${u.pos} · ${LEVEL_NAME[u.lvl] || ''}${u.face ? ` · cara ${u.face} (${g})` : ''}</div><div class="mono">${esc(u.label)}${P.holes ? ' · ' + esc(P.holes) : ''}</div>`;
+  }
+  if (u.kind === 'ghost') {
+    const p = POSBY[u.pos];
+    return u.ghost === 'crit' ? `<b>Tramo de columna STAAD sin plano</b><div>Barra ${p.colAbove?.mid} (${esc(secName(p.colAbove?.mid))}) de ${nf(u.y0 / 1000)} m a ${nf(u.y1 / 1000)} m. La marca asignada termina en el mezzanine.</div>` : `<b>Columna STAAD sin marca</b><div class="mono">Eje ${u.pos} · TUB60604</div>`;
+  }
+  if (u.kind === 'beam') return memberInfo(u.ids[h.instanceId]);
+  if (u.kind === 'lines') return memberInfo(u.ids[Math.floor(h.index / 2)]);
+  return '';
+}
+function showTip(html, x, y, pinned = false) {
+  const r = stage.getBoundingClientRect();
+  tip.innerHTML = html; tip.hidden = false; tip.classList.toggle('pinned', pinned);
+  const w = tip.offsetWidth, hgt = tip.offsetHeight;
+  let lx = x - r.left + 14, ly = y - r.top + 14;
+  if (lx + w > r.width - 6) lx = x - r.left - w - 12;
+  if (ly + hgt > r.height - 6) ly = y - r.top - hgt - 12;
+  tip.style.left = Math.max(6, lx) + 'px'; tip.style.top = Math.max(6, ly) + 'px';
+}
+function setHover(h) {
+  if (hovered && hovered.obj) {
+    if (hovered.obj.isInstancedMesh) { hovered.obj.setColorAt(hovered.i, hovered.obj.userData.color); hovered.obj.instanceColor.needsUpdate = true; }
+    else if (hovered.obj.userData.kind === 'plate') hovered.obj.material = baseMatFor(hovered.obj);
+  }
+  hovered = null;
+  if (h) {
+    const o = h.object;
+    if (o.isInstancedMesh) { o.setColorAt(h.instanceId, BEAM_HOVER); o.instanceColor.needsUpdate = true; hovered = { obj: o, i: h.instanceId }; }
+    else if (o.userData.kind === 'plate' && !(state.part && o.userData.part !== state.part)) { o.material = hoverMats.get(o.userData.part) || o.material; hovered = { obj: o }; }
+  }
+  markDirty();
+}
+let pinned = false, downAt = null, moveQueued = null;
+renderer.domElement.addEventListener('pointermove', ev => {
+  if (ev.pointerType === 'touch') return;
+  moveQueued = ev;
+});
+function processMove() {
+  if (!moveQueued || pinned) { moveQueued = null; return; }
+  const ev = moveQueued; moveQueued = null;
+  if (ev.buttons) { tip.hidden = true; setHover(null); return; }
+  const h = pick(ev.clientX, ev.clientY);
+  if (!h) { tip.hidden = true; setHover(null); renderer.domElement.style.cursor = ''; return; }
+  setHover(h); renderer.domElement.style.cursor = 'pointer';
+  showTip(hitInfo(h), ev.clientX, ev.clientY);
+}
+renderer.domElement.addEventListener('pointerleave', () => { if (!pinned) { tip.hidden = true; setHover(null); } });
+renderer.domElement.addEventListener('pointerdown', ev => { downAt = ev.button === 0 ? [ev.clientX, ev.clientY] : null; });
+renderer.domElement.addEventListener('pointerup', ev => {
+  if (!downAt || Math.hypot(ev.clientX - downAt[0], ev.clientY - downAt[1]) > 5) { downAt = null; return; }
+  downAt = null;
+  const h = pick(ev.clientX, ev.clientY);
+  pinned = false; tip.classList.remove('pinned');
+  if (!h) { tip.hidden = true; setHover(null); exitFocus(); return; }
+  const u = h.object.userData;
+  if (u.kind === 'plate') { focusPlate(h.object); return; }
+  if (u.pos) { selectPos(u.pos, { focus: false }); showTip(hitInfo(h), ev.clientX, ev.clientY); return; }
+  const mid = u.kind === 'beam' ? u.ids[h.instanceId] : u.kind === 'lines' ? u.ids[Math.floor(h.index / 2)] : null;
+  if (mid) {
+    const [a, b] = MEM[mid];
+    const p = POS.find(q => [q.nFac, q.nMez, q.nCub].some(n => n === a || n === b));
+    if (p) selectPos(p.id, { focus: false });
+    pinned = true; showTip(`${hitInfo(h)}<div class="tip-sec">${sectionSVG(secName(mid), 120)}<span class="small muted">Sección vista desde el nudo inicial (${MEM[mid][0]}).<br>Clic en otro lado para cerrar.</span></div>`, ev.clientX, ev.clientY, true); setHover(h);
+  }
+});
+
+function selectPos(id, { focus: fly = false, lvl = null } = {}) {
+  if (focus.mesh && focus.mesh.userData.pos !== id) exitFocus();
+  state.sel = id;
+  updateHighlight();
+  if (fly) focusPos(id, lvl);
+  renderColumnTab();
+  renderPlan();
+}
+
+/* =====================================================================
+   11. Panel: Columnas
+   ===================================================================== */
+const SEVTXT = { crit: 'Crítica', warn: 'Revisar', info: 'Info', ok: 'OK', none: 'Sin plano' };
+const TIPOTXT = { esquina: 'Esquina', borde: 'Borde', interior: 'Interior' };
+const tm = v => nf(v / 1e5, 2), tt = v => nf(v / 1000, 2);
+function ratioBar(r) { const cls = r >= 1 ? 'over' : r >= 0.8 ? 'hi' : ''; return `<div class="bar ${cls}" title="Relación ${nf(r, 3)}"><i style="width:${Math.min(100, r * 100).toFixed(0)}%"></i></div>`; }
+function memberLine(d) {
+  const c = CHK[d.mid]; const sec = secName(d.mid);
+  const rel = relAt(d);
+  let force = '';
+  if (c) {
+    const atEnd = d.atStart ? c[3] < 0.5 : Math.abs(c[3] - d.L) < 0.5;
+    const dep = DEPTH_MM[sec];
+    const ff = atEnd && dep ? ` · F patín ≈ ${nf(flangeForce(d, c, 0.635) / 1000, 2)} t` : '';
+    force = `<span class="mono">Mx ${tm(c[10])} · My ${tm(c[9])} t·m · Vy ${tt(c[6])} t · P ${tt(c[5])} t · LC ${c[2]} · x=${nf(c[3], 0)} cm${atEnd ? ' <b>(en este nudo)</b>' : ''}${ff}</span>`;
+  }
+  return `<div><span class="memb" data-act="member" data-mid="${d.mid}">${d.mid}</span> ${esc(sec)}${rel ? ` <span class="chip neutral" title="Liberaciones en este extremo">lib. ${esc(rel)}</span>` : ''} · ${c ? nf(c[1], 2) : '–'}</div>${c ? ratioBar(c[1]) : ''}${force}`;
+}
+function connRows(rows, c, lvl) {
+  if (!rows.length) return '<p class="small muted">Sin vigas ni placas en este nivel.</p>';
+  return rows.map(r => {
+    const plates = r.has ? (lvl === 'cub' && c.topAngle ? `2× ${c.topAngle === 'P022MVV-001' ? 'PL 167×130 / ANG 167×40' : ''} + ${esc(c.tab)}` : `2× ${esc(c.flange)} + ${esc(c.tab)}`) : '';
+    return `<div class="cr">
+      <div class="dirb"><b>${r.local}</b><span>${r.g}</span></div>
+      <div class="main">${r.sm.length ? r.sm.map(memberLine).join('') : '<div class="muted">Sin viga en STAAD</div>'}
+        <div class="plates">${r.has ? `Plano: ${plates} <button type="button" class="btn sm" data-act="plate" data-lvl="${lvl}" data-g="${r.g}">Ver placa</button>` : '<span class="muted">Plano: sin placas en esta cara</span>'}</div>
+</div></div>`;
+  }).join('');
+}
+function renderColumnTab() {
+  const el = $('#p-col'); const p = POSBY[state.sel]; const A = ANA[p.id];
+  const mark = state.assign[p.id] || null; const mk = mark ? MARKS[mark] : null;
+  const counts = { crit: A.issues.filter(i => i.sev === 'crit').length, warn: A.issues.filter(i => i.sev === 'warn').length };
+  const opts = ['', ...MARK_IDS].map(m => `<option value="${m}" ${m === (mark || '') ? 'selected' : ''}>${m ? `${m} · ${TIPOTXT[MARKS[m].tipo]}` : '(sin plano)'}</option>`).join('');
+  const lvlHead = (key, title, extra) => `<div class="lvl-head"><h3>${title}</h3><span class="mono">${extra}</span><button type="button" class="btn sm" data-act="focus" data-lvl="${key}">Ver en 3D</button></div>`;
+  const truss = p.truss.map(d => `<div class="cr"><div class="dirb"><b>${d.dir === '+Y' ? '↑' : '↗'}</b><span>arm.</span></div><div class="main">${memberLine(d)}${mk && mk.cub && mk.cub.clip ? '<div class="why">Plano: clip ANG 39×62 cal 12 sobre la tapa.</div>' : ''}</div></div>`).join('');
+  const fac = A.fac.map(r => `<div class="cr"><div class="dirb"><b>${r.f}</b><span>cara</span></div><div class="main">${r.link ? `<div>Enlace <span class="memb" data-act="member" data-mid="${r.link.mid}">${r.link.mid}</span> W16X36 → viga MCC8-14 a 20 cm</div>` : '<div class="muted">Sin viga de fachada en STAAD</div>'}<div class="plates">${r.pl ? `Plano: 2× ${mk.fac.kind === 'UE' ? 'PL-U-ESQ (U de esquina)' : mk.fac.kind === 'L' ? 'P038SVH001 (L)' : 'P038SVH007 (U)'} a 205.9 y 418.6 mm + cartabones de asiento <button type="button" class="btn sm" data-act="plate" data-lvl="fac" data-g="${r.f}">Ver placa</button>` : '<span class="muted">Plano: sin placas en esta cara</span>'}</div></div></div>`).join('');
+  const baseC = p.colBase ? CHK[p.colBase.mid] : null;
+  const colMax = p.colSegs.map(m => [m, CHK[m]]).filter(x => x[1]).sort((a, b) => b[1][1] - a[1][1])[0];
+  const lista = mk ? `<div class="tbl"><table><thead><tr><th>Item</th><th title="Número de conexión: hoja de pieza del PDF">Con.</th><th>Pieza</th><th>Descripción</th><th class="n">Cant.</th><th class="n">kg/u</th></tr></thead><tbody>${mk.lista.map(r => `<tr data-act="plate-part" data-part="${r[1].startsWith('P025SVH001') ? 'P025SVH001' : esc(r[1])}" tabindex="0" title="Ver esta pieza en el 3D"><td><span class="item">${r[0]}</span></td><td>${cnBadge(r[1])}</td><td class="mono">${esc(r[1])}</td><td>${esc(r[2])}</td><td class="n">${r[3]}</td><td class="n">${nf(r[4], 3)}</td></tr>`).join('')}</tbody></table></div><p class="small muted">Peso aprox. del ensamble según plano: <span class="mono">${nf(mk.peso, 3)} kg</span></p>` : '';
+  const thumbs = mk ? `<div class="thumbs">${mk.hojas.map((h, i) => `<figure style="margin:0"><button type="button" data-act="sheet" data-sheet="${h}" aria-label="Abrir hoja ${i + 1} de ${mark}"><img src="planos/hoja-${String(h).padStart(2, '0')}.png" alt="Hoja ${i + 1} de 3 del plano ${mk.plano}" loading="lazy"></button><figcaption>Hoja ${i + 1}/3 · PDF p.${h}</figcaption></figure>`).join('')}</div>` : '';
+  el.innerHTML = `
+    <div class="plan" id="plan"></div>
+    <div class="note"><p><b>Asignación propuesta.</b> El PDF no trae plano de montaje ni cantidades por marca. Ubiqué cada marca según el patrón de vigas que le llega en STAAD (esquina, borde o interior); cámbiala aquí si tu plano de montaje dice otra cosa.</p><button type="button" class="btn sm" data-act="reset">Restablecer</button></div>
+    <article class="card">
+      <div class="card-head">
+        <h2>Eje ${p.id}</h2>
+        <span class="chip neutral">${TIPOTXT[p.tipo]}</span>
+        ${A.status === 'none' ? '<span class="chip neutral">Sin plano</span>' : ''}
+      </div>
+      <div class="row"><label class="sel-mark" for="mark-select">Marca</label><select id="mark-select">${opts}</select>
+        ${mk ? `<span class="small muted mono">${mk.plano} · giro ${A.k * 90}°</span>` : ''}</div>
+      <dl class="kv">
+        <dt>Coordenadas STAAD</dt><dd>X ${p.x} · Z ${p.z} cm</dd>
+        <dt>Nudos</dt><dd>base ${p.nBase}${p.nFac ? ` · fachada ${p.nFac}` : ''} · mezz ${p.nMez} · cubierta ${p.nCub}</dd>
+        <dt>Columna</dt><dd>${mk ? `HSS 6″×6″×1/4″ L=${mk.L} mm (altura ${nf(15.9 + mk.L + 6.4, 1)} mm)` : 'sin plano'} · STAAD TUB60604${colMax ? ` · máx. ${nf(colMax[1][1], 2)} (barra ${colMax[0]})` : ''}</dd>
+      </dl>
+      ${thumbs}
+      <section class="lvl">${lvlHead('cub', 'Cubierta', `STAAD ${nf(STAAD_MM.cub, 0)} · plano: placas ${mk && mk.cub ? '6,025.5–6,193.9' : '—'} mm`)}
+        <div class="conn">${connRows(A.rows.cub, mk ? mk.cub : null, 'cub')}${truss}</div></section>
+      <section class="lvl">${lvlHead('mez', 'Mezzanine', `STAAD ${nf(STAAD_MM.mez, 0)} · plano: placas 3,119.7–3,389.7 mm`)}
+        <div class="conn">${connRows(A.rows.mez, mk ? mk.mez : null, 'mez')}</div></section>
+      <section class="lvl">${lvlHead('fac', 'Fachada (inferior)', `STAAD 200 · plano: 199.5–418.6 mm`)}
+        <div class="conn">${fac || '<p class="small muted">Columna interior: sin fachada en STAAD.</p>'}
+        ${mk && mk.n412 ? '<div class="cr"><div class="dirb"><b>412.7</b><span>mm</span></div><div class="main"><div>Piezas 6, 7 y 8 (P038SVH005/004/006) a 412.7 mm</div></div></div>' : ''}</div></section>
+      <section class="lvl">${lvlHead('base', 'Base', `apoyo STAAD ${esc(D.supports[p.nBase] || '')}`)}
+        <div class="small">${mk ? `${esc(PART[mk.base].d)} · ${esc(PART[mk.base].holes)} + 8 cartabones 74×100×5/16″` : 'Sin plano'}</div>
+        ${baseC ? `<div class="small mono">Barra ${p.colBase.mid} en la base (x=${nf(baseC[3], 0)} cm): P ${tt(baseC[5])} t · Mx ${tm(baseC[10])} t·m · My ${tm(baseC[9])} t·m · Vy ${tt(baseC[6])} t · Vx ${tt(baseC[7])} t · LC ${baseC[2]} · relación ${nf(baseC[1], 3)}</div>` : ''}
+      </section>
+      ${mk ? `<section class="lvl"><div class="lvl-head"><h3>Lista de partes del plano</h3><span class="mono">toca una fila para verla en 3D</span></div>${lista}</section>` : ''}
+    </article>`;
+  renderPlan();
+}
+
+/* ---------- planta (mini mapa) ---------- */
+function renderPlan() {
+  const host = $('#plan'); if (!host) return;
+  let s = `<svg viewBox="-1020 -1735 1410 1250" role="img" aria-label="Planta de columnas: clic para seleccionar">`;
+  for (const [, x] of GX) s += `<line class="gl" x1="${x}" y1="-1650" x2="${x}" y2="-600"/>`;
+  for (const [, z] of GZ) s += `<line class="gl" x1="-940" y1="${z}" x2="330" y2="${z}"/>`;
+  s += `<rect class="fac" x="-864" y="-1569" width="1126" height="926"/>`;
+  for (const [id, m] of Object.entries(MEM)) {
+    const g = GRP[m[3]]; if (g !== '_VIG_PRINC_MEZZ' && g !== '_VIG_SEC_MEZ') continue;
+    const a = J[m[0]], b = J[m[1]];
+    s += `<line class="${g === '_VIG_PRINC_MEZZ' ? 'bm' : 'bmc'}" x1="${a[0]}" y1="${a[2]}" x2="${b[0]}" y2="${b[2]}"/>`;
+  }
+  for (const [l, x] of GX) s += `<g class="bub"><circle cx="${x}" cy="-1690" r="34"/><text x="${x}" y="-1690">${l}</text></g>`;
+  for (const [l, z] of GZ) s += `<g class="bub"><circle cx="-985" cy="${z}" r="34"/><text x="-985" y="${z}">${l}</text></g>`;
+  for (let i = 0; i < GX.length - 1; i++) s += `<text class="dim" x="${(GX[i][1] + GX[i + 1][1]) / 2}" y="-1612">${GX[i + 1][1] - GX[i][1]}</text>`;
+  for (let i = 0; i < GZ.length - 1; i++) s += `<text class="dim" x="345" y="${(GZ[i][1] + GZ[i + 1][1]) / 2}" transform="rotate(90 345 ${(GZ[i][1] + GZ[i + 1][1]) / 2})">${GZ[i + 1][1] - GZ[i][1]}</text>`;
+  for (const p of POS) {
+    const A = ANA[p.id]; const mark = state.assign[p.id];
+    s += `<g class="col ${mark ? 'asig' : 'none'}${state.sel === p.id ? ' sel' : ''}" data-act="pos" data-pos="${p.id}" tabindex="0" role="button" aria-label="Eje ${p.id} ${mark || 'sin plano'}">
+      ${state.sel === p.id ? `<circle class="ring" cx="${p.x}" cy="${p.z}" r="58"/>` : ''}
+      <rect x="${p.x - 24}" y="${p.z - 24}" width="48" height="48"/>
+      <text x="${p.x}" y="${p.z + 78}">${mark || '—'}</text><text class="pid" x="${p.x}" y="${p.z - 44}">${p.id}</text></g>`;
+  }
+  s += `<text class="dim" x="-940" y="-512" style="text-anchor:start">Cotas en cm · STAAD +X →  +Z ↓ · ejes nombrados en este visor</text></svg>`;
+  host.innerHTML = s;
+}
+
+/* =====================================================================
+   12. Panel: Piezas
+   ===================================================================== */
+function partCounts() {
+  const cnt = {}; const where = {};
+  for (const p of POS) {
+    const m = state.assign[p.id]; if (!m) continue;
+    for (const r of MARKS[m].lista) {
+      const key = r[1].startsWith('P025SVH001') ? 'P025SVH001' : r[1];
+      cnt[key] = (cnt[key] || 0) + r[3];
+      (where[key] ||= new Set()).add(m);
+    }
+  }
+  return { cnt, where };
+}
+function renderPartsTab() {
+  const { cnt, where } = partCounts();
+  const rows = CONN_ORDER.map(k => {
+    const P = PART[k];
+    return `<tr class="${state.part === k || (focus.mesh && focus.mesh.userData.part === k) ? 'on' : ''}" data-act="part-focus" data-part="${k}" tabindex="0">
+      <td><span class="sw" style="background:${P.col}"></span></td>
+      <td><div class="mono">${cnBadge(k)} ${k}</div><div class="small">${esc(P.d)}</div><div class="small muted">${esc(P.rol)}${P.holes ? ' · ' + esc(P.holes) : ''}</div></td>
+      <td class="n">${cnt[k] || 0}</td>
+      <td class="small mono">${[...(where[k] || [])].sort().map(m => m.replace('SYR-', '')).join(' ') || '—'}</td>
+      <td><div class="row" style="flex-direction:column;align-items:stretch;gap:4px">${cnt[k] ? `<button type="button" class="btn sm" data-act="part" data-part="${k}" title="Resaltar todas en el edificio">Todas</button>` : ''}${P.hoja ? `<button type="button" class="btn sm" data-act="sheet" data-sheet="${P.hoja}" title="Hoja de pieza: conexión ${connNum(k)}">p.${P.hoja}</button>` : ''}</div></td></tr>`;
+  }).join('');
+  const totKg = POS.reduce((s, p) => s + (state.assign[p.id] ? MARKS[state.assign[p.id]].peso : 0), 0);
+  const n = POS.filter(p => state.assign[p.id]).length;
+  $('#p-pie').innerHTML = `
+    <div><h2>¿Dónde va cada placa?</h2><p class="small muted">El número azul es la conexión: el mismo que lleva arriba a la derecha su hoja de pieza en el PDF (hojas 22–36 → 1–15; la 16 sale del esquema CAJON-HSS). Toca una pieza: la cámara va a la primera, la pinta con sus piezas aledañas y abre sus propiedades; recórrelas con ‹ › o con las flechas del teclado. «Todas» las muestra juntas en el edificio. Cantidades según la lista de partes de cada marca y la asignación actual (${n} columnas, ${nf(totKg, 1)} kg según planos).</p></div>
+    ${state.part ? `<div class="row"><span class="chip info">Resaltando ${esc(state.part)}</span><button type="button" class="btn sm" data-act="part-clear">Mostrar todas</button></div>` : ''}
+    <div class="tbl"><table class="parts"><thead><tr><th></th><th>Pieza</th><th class="n">Cant.</th><th>SYR-</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* =====================================================================
+   13. Panel: Revisión
+   ===================================================================== */
+function compact(ids) {
+  const s = [...new Set(ids)].sort((a, b) => a - b); const out = [];
+  for (let i = 0; i < s.length;) { let j = i; while (j + 1 < s.length && s[j + 1] === s[j] + 1) j++; out.push(j - i >= 2 ? `${s[i]} TO ${s[j]}` : s.slice(i, j + 1).join(' ')); i = j + 1; }
+  return out.join(' ');
+}
+function wrapStaad(prefix, body) {
+  const words = (prefix + ' ' + body).split(' '); const lines = []; let cur = '';
+  for (const w of words) { if ((cur + ' ' + w).trim().length > 72) { lines.push(cur.trim() + ' -'); cur = w; } else cur += ' ' + w; }
+  lines.push(cur.trim()); return lines.join('\n');
+}
+function findings() {
+  const F = [];
+  const all = POS.flatMap(p => ANA[p.id].issues.map(i => ({ ...i, mark: state.assign[p.id] })));
+  const by = code => all.filter(i => i.code === code);
+  const posBtns = list => [...new Set(list.map(i => i.pos))].map(id => `<button type="button" class="btn sm" data-act="goto" data-pos="${id}" data-lvl="${list.find(i => i.pos === id).lvl || ''}">${id}</button>`).join(' ');
+  const corta = by('corta').filter(i => i.members && i.members.length === 1 && grpName(i.members[0]) === '_COLUMNAS');
+  if (corta.length) F.push({ sev: 'crit', code: 'corta', t: 'Columnas interiores cortadas en el mezzanine',
+    b: `<p>${[...new Set(corta.map(i => i.mark))].join(' y ')} miden 3,395.9 mm (HSS L=3,374 mm) y rematan con tapa ciega (PLC TAPA, sin barrenos para empalme). En STAAD esas columnas continúan hasta cubierta y reciben 4 vigas MCE6-14 más montantes de armadura a 6.04 m.</p><ul>${corta.map(i => `<li>Eje ${i.pos} (${i.mark}): barra ${i.members[0]} TUB60604 de 3.27 a 6.04 m sin plano.</li>`).join('')}</ul><p>O faltan las columnas superiores en el paquete, o la estructura de cubierta perdió su apoyo intermedio y el STAAD ya no la representa.</p>`, pos: posBtns(corta) });
+  const sp = by('sinplacas');
+  if (sp.length) F.push({ sev: 'crit', code: 'sinplacas', t: 'Vigas de STAAD que llegan a la columna sin placas en el plano',
+    b: `<p>En columnas de borde el plano solo trae placas de cubierta en dos direcciones opuestas; STAAD tiene una tercera viga MCE6-14 empotrada (sin liberaciones) en la dirección perpendicular.</p><ul>${sp.map(i => `<li>Eje ${i.pos} (${i.mark}) · ${LEVEL_NAME[i.lvl]} · ${i.dir}: barra ${i.members.join(', ')} ${esc(secName(i.members[0]))}</li>`).join('')}</ul>`, pos: posBtns(sp) });
+  const pr = by('peralte');
+  if (pr.length) F.push({ sev: 'crit', code: 'peralte', t: 'W8X10 en el eje 3 con placas para viga de 10″',
+    b: `<p>Las placas de mezzanine quedan a 257.2 mm libres (para MCE10, 254 mm). En STAAD la línea W8X10 del eje 3 entre B y C (barras 2316, 2463 y 4066; peralte 200.4 mm, patín 100 mm) llega a las columnas 3-B y 3-C. Ningún plano trae detalle para esa viga.</p><ul>${pr.map(i => `<li>Eje ${i.pos} (${i.mark}) · ${i.dir}: barra ${i.members.join(', ')}</li>`).join('')}</ul>`, pos: posBtns(pr) });
+  const kRows = hssWallRows();
+  if (kRows.length) {
+    const over = kRows.filter(r => r.ratio > 1);
+    F.push({ sev: over.length ? 'crit' : kRows[0].ratio > 0.8 ? 'warn' : 'info', code: 'hss', t: 'Pared del HSS bajo las placas de patín',
+      b: `<p>Las placas de patín van soldadas directo a la cara del HSS 6×6×1/4, sin diafragmas ni placa pasante. Por los chaflanes solo tocan la cara en 95 mm (mezzanine) y 90 mm (cubierta). Con AISC 360-16 K1-7 la pared limita cada placa a φRn = ${nf(hssK17(9.5, 0.635) / 1000, 2)} t en mezzanine y ${nf(hssK17(9.0, 0.635) / 1000, 2)} t en cubierta (${esc(HSS_MATS[state.hss].n)}).</p>
+      <p>Con la fuerza de patín |Mx|/(d+tp) + |P|/2 del CHECK CODE en el nudo, <b>${over.length} de ${kRows.length}</b> conexiones a momento la rebasan:</p>
+      <div class="tbl"><table><thead><tr><th>Eje</th><th>Nivel</th><th>Dir</th><th>Barra</th><th class="n">Fuerza</th><th class="n">φRn</th><th class="n">Rel.</th><th></th></tr></thead><tbody>${kRows.slice(0, 14).map(r => `<tr><td>${r.pos}</td><td>${r.lvl === 'mez' ? 'Mezz.' : 'Cub.'}</td><td>${r.g}</td><td class="mono">${r.mid}</td><td class="n">${nf(r.Ff / 1000, 2)}</td><td class="n">${nf(r.phi / 1000, 2)}</td><td class="n" style="color:var(--${r.ratio > 1 ? 'crit' : r.ratio > 0.8 ? 'warn' : 'ok'})">${nf(r.ratio, 2)}</td><td><button type="button" class="btn sm" data-act="plate-at" data-pos="${r.pos}" data-lvl="${r.lvl}" data-g="${r.g}">Ver</button></td></tr>`).join('')}</tbody></table></div>
+      <p>Fuerzas en t, de la combinación que rige cada viga (la envolvente puede ser mayor). El acero del HSS se cambia en el inspector de cualquier placa de patín.</p>` });
+  }
+  F.push({ sev: 'warn', code: 'titulo', t: 'El título dice 4″×4″×5/16″ pero la columna es HSS 6″×6″×1/4″',
+    b: `<p>Las 7 hojas 1/3 rotulan “COL. 4″x4″x5/16″”. La lista de partes, la cota de 152.4 mm y el peso (174.054 kg en 6,178 mm = 28.2 kg/m) corresponden a HSS 6×6×1/4, igual que el STAAD (TUB60604). Corregir el título para evitar que se fabrique el perfil equivocado.</p>` });
+  F.push({ sev: 'warn', code: 'marcas', t: '7 marcas para 12 columnas, sin plano de montaje',
+    b: `<p>El paquete no indica cantidad por marca ni ubicación. SYR-01 y SYR-07 tienen la misma lista de partes y su hoja 1 es igual fuera del cuadro de título. SYR-02 y SYR-06 también comparten lista de partes; solo cambian detalles menores (la vista E-E ubica distinto una placa de cortante). Pedir el plano de montaje y confirmar la asignación que muestra este visor.</p>` });
+  F.push({ sev: 'warn', code: 'elev', t: 'Elevaciones de conexión distintas al modelo',
+    b: `<div class="tbl"><table><thead><tr><th>Nivel</th><th class="n">Eje viga plano</th><th class="n">Nudo STAAD</th><th class="n">Δ</th></tr></thead><tbody>
+      <tr><td>Cubierta</td><td class="n">6,109.7</td><td class="n">6,040</td><td class="n">+69.7</td></tr>
+      <tr><td>Mezzanine</td><td class="n">3,254.7</td><td class="n">3,270</td><td class="n">−15.3</td></tr>
+      <tr><td>Fachada</td><td class="n">309.1</td><td class="n">200</td><td class="n">+109.1</td></tr></tbody></table></div><p>mm desde el lecho inferior de la placa base. Confirmar contra los niveles de proyecto (desplante, NPT, nivel de mezzanine y de cubierta). Con “Alinear vigas con placas” en Capas puedes ver las vigas STAAD en su posición analítica.</p>` });
+  F.push({ sev: 'warn', code: 'tornillos', t: 'Tornillería no especificada',
+    b: `<p>Las placas traen barrenos Ø14.29 mm (9/16″) y oblongos 9/16″×1″, pero ninguna hoja indica diámetro, grado (A307/A325) ni número de tornillos por conexión. Las soldaduras sí vienen (ER70S-6, filetes de 3 y 5 mm). Sin la tornillería no se puede revisar la capacidad de las conexiones a momento.</p>` });
+  const dm = by('demanda');
+  if (dm.length) F.push({ sev: 'warn', code: 'demanda', t: 'Conexiones con vigas muy cargadas',
+    b: `<ul>${dm.map(i => { const m = i.members[0], c = CHK[m]; return `<li>Eje ${i.pos} · ${LEVEL_NAME[i.lvl]} · ${i.dir}: barra ${m} ${esc(secName(m))}, relación ${nf(c[1], 3)} (LC ${c[2]}) · Mx ${tm(c[10])} · My ${tm(c[9])} t·m</li>`; }).join('')}</ul><p>En estas vigas pesa mucho la flexión en el eje débil (My de ${nf(Math.min(...dm.map(i => Math.abs(CHK[i.members[0]][9]))) / 1e5, 2)} a ${nf(Math.max(...dm.map(i => Math.abs(CHK[i.members[0]][9]))) / 1e5, 2)} t·m, combinaciones con sismo). STAAD supone estas uniones rígidas en ambos ejes, así que las placas de patín también tienen que transmitir My, no solo Mx.</p>`, pos: posBtns(dm) });
+  const fa = by('fachada'), sv = by('sinviga');
+  if (fa.length || sv.length) F.push({ sev: 'warn', code: 'fachada', t: 'Placas y vigas que no coinciden',
+    b: `<ul>${[...fa, ...sv].map(i => `<li>Eje ${i.pos} (${i.mark}) · ${LEVEL_NAME[i.lvl]} · ${i.dir}: ${esc(i.t)}</li>`).join('')}</ul>`, pos: posBtns([...fa, ...sv]) });
+  const baseRows = POS.map(p => { const d = p.colBase, c = d && CHK[d.mid]; return c && c[3] < 0.5 ? `<tr><td>${p.id}</td><td>${esc(state.assign[p.id] || '—')}</td><td class="n">${tt(c[5])}</td><td class="n">${tm(c[10])}</td><td class="n">${tm(c[9])}</td><td class="n">${c[2]}</td></tr>` : ''; }).join('');
+  F.push({ sev: 'info', code: 'base', t: 'Bases empotradas en STAAD',
+    b: `<p>Los 12 apoyos son FIXED, así que las placas base trabajan con momento. SYR-01, 02, 03, 06 y 07 usan placa de 300×300×5/8″ con 8 anclas; SYR-04 y SYR-05 usan la T-02 con solo 4 anclas. Fuerzas en la base de cada columna para la combinación que rige su revisión (P en t, negativo = compresión; M en t·m):</p><div class="tbl"><table><thead><tr><th>Eje</th><th>Marca</th><th class="n">P</th><th class="n">Mx</th><th class="n">My</th><th class="n">LC</th></tr></thead><tbody>${baseRows}</tbody></table></div><p>Son las fuerzas del CHECK CODE de cada columna, no la envolvente: para diseñar anclas usa las reacciones (comando abajo).</p>` });
+  F.push({ sev: 'info', code: 'armadura', t: 'Unión armadura–columna sin detalle',
+    b: `<p>En STAAD un montante NNZ cal 20 (y en ejes B una diagonal) llega al nudo superior de cada columna. Solo SYR-03 trae un clip (ANG 39×62 cal 12) sobre la tapa; el resto no detalla cómo se fija la armadura.</p>` });
+  F.push({ sev: 'info', code: 'fij', t: 'Fijaciones de fachada en esquinas (D-14)',
+    b: `<p>STAAD une las columnas de esquina con la fachada mediante barras D-14 a 3.27 y 6.04 m (grupo _FIJ_COL). No aparecen en los planos de columnas. La barra 3772 está a ${nf(CHK[3772]?.[1] ?? 0, 3)} de su capacidad.</p>` });
+  const fails = Object.entries(CHK).filter(([, c]) => c[0] !== 'P');
+  const top = id => fails.filter(([m]) => secName(m) === id).reduce((mx, [, c]) => Math.max(mx, c[1]), 0);
+  if (fails.length) F.push({ sev: 'info', code: 'ratio', t: `El .ANL tiene ${fails.length} barras que no pasan`,
+    b: `<p>${fails.filter(([m]) => secName(m) === 'TOPHAT40CAL24').length} largueros TOPHAT40CAL24 (máx. ${nf(top('TOPHAT40CAL24'), 2)}) y ${fails.filter(([m]) => secName(m) === 'POSTE-C16').length} postes POSTE-C16 (máx. ${nf(top('POSTE-C16'), 2)}). No son conexiones de columna, pero conviene saberlo antes de aceptar el modelo como base de la revisión.</p>` });
+  // fuerzas de extremo
+  const mids = new Set();
+  for (const p of POS) for (const n of [p.nFac, p.nMez, p.nCub]) if (n) for (const d of around(n)) mids.add(d.mid);
+  const sup = POS.map(p => p.nBase);
+  const cmd = `* Fuerzas en extremos de barras que llegan a columnas\nLOAD LIST 30 TO 47\n${wrapStaad('PRINT MEMBER FORCES LIST', compact([...mids]))}\n${wrapStaad('PRINT SUPPORT REACTION LIST', compact(sup))}`;
+  F.push({ sev: 'info', code: 'fuerzas', t: 'Fuerzas para diseñar las conexiones',
+    b: `<p>El CHECK CODE del .ANL solo da las fuerzas en la sección crítica de cada barra. Para revisar placas, tornillos y soldaduras necesitas fuerzas en los extremos. Agrega esto al .STD después de PERFORM ANALYSIS y vuelve a correr:</p><pre class="code" id="cmd">${esc(cmd)}</pre><div class="row"><button type="button" class="btn sm" data-act="copy">Copiar comandos</button><span class="small muted" id="copy-msg" aria-live="polite"></span></div>` });
+  return F;
+}
+function renderReviewTab() {
+  const F = findings();
+  const n = F.filter(f => f.sev === 'crit').length;
+  $('#rev-count').textContent = n || ''; $('#rev-count').hidden = !n;
+  const order = { crit: 0, warn: 1, info: 2 };
+  F.sort((a, b) => order[a.sev] - order[b.sev]);
+  $('#p-rev').innerHTML = `<div><h2>Hallazgos de la revisión</h2><p class="small muted">Comparación automática entre los planos de taller y el STAAD R1.3, con la asignación de marcas actual. Las críticas cambian si reasignas marcas.</p></div>` +
+    F.map(f => `<article class="find ${f.sev}${state.finding === f.code ? ' hl' : ''}" id="f-${f.code}"><div class="row"><span class="chip ${f.sev}">${SEVTXT[f.sev]}</span></div><h4>${esc(f.t)}</h4>${f.b}${f.pos ? `<div class="row"><span class="small muted">Ver en 3D:</span> ${f.pos}</div>` : ''}</article>`).join('');
+  if (state.finding) { const t = $(`#f-${state.finding}`); if (t) t.scrollIntoView({ block: 'nearest' }); }
+}
+
+/* =====================================================================
+   14. Panel: Capas y leyenda
+   ===================================================================== */
+function sectionRows() {
+  const cnt = {}, len = {};
+  for (const [id, m] of Object.entries(MEM)) { const s = SEC[m[2]]; cnt[s] = (cnt[s] || 0) + 1; const a = J[m[0]], b = J[m[1]]; len[s] = (len[s] || 0) + Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]); }
+  const tk = Object.fromEntries((D.takeoff || []).map(t => [t.profile, t]));
+  const order = (D.takeoff || []).map(t => t.profile).filter(s => cnt[s]);
+  for (const s of Object.keys(cnt)) if (!order.includes(s)) order.push(s);
+  return order.map(s => ({ s, n: cnt[s], m: (tk[s]?.length_cm ?? len[s]) / 100, kg: tk[s]?.weight_kg, type: D.secType?.[s] }));
+}
+function renderLayersTab() {
+  const rows = sectionRows();
+  const tot = rows.reduce((a, r) => ({ n: a.n + r.n, m: a.m + r.m }), { n: 0, m: 0 });
+  const secTable = `<div><h2>Perfiles del STAAD</h2><p class="small muted">En «Perfiles 3D» cada barra se extruye con su sección real, orientada con sus ejes locales y su BETA; en «Líneas» se ve como rayita del mismo color. Toca un perfil para aislarlo. Longitud y peso del STEEL TAKE OFF del .ANL.</p></div>
+    ${state.secIso ? `<div class="row"><span class="chip info">Aislando ${esc(state.secIso)}</span><button type="button" class="btn sm" data-act="sec-clear">Ver todos</button></div>` : ''}
+    <div class="tbl"><table class="parts secs"><thead><tr><th></th><th>Perfil</th><th class="n">Barras</th><th class="n">m</th><th class="n">kg</th></tr></thead><tbody>
+    ${rows.map(r => { const d = SECDEF[r.s] || { c: '#999', n: '', dim: '' }; return `<tr class="${state.secIso === r.s ? 'on' : ''}" data-act="sec-iso" data-sec="${esc(r.s)}" tabindex="0">
+      <td><span class="sw" style="background:${d.c}"></span></td>
+      <td><div class="sec-row"><div class="sec-pic">${sectionSVG(r.s, 46)}</div><div><div class="mono">${esc(r.s)}${r.type === 'T' ? ' · tipo T' : ''}</div><div class="small">${esc(d.n)}</div><div class="small muted">${esc(d.dim)} mm</div></div></div></td>
+      <td class="n">${r.n}</td><td class="n">${nf(r.m, 1)}</td><td class="n">${r.kg != null ? nf(r.kg, 1) : '—'}</td></tr>`; }).join('')}
+    </tbody><tfoot><tr><td></td><td>Total</td><td class="n">${tot.n}</td><td class="n">${nf(tot.m, 1)}</td><td class="n">${D.takeoffTotal != null ? nf(D.takeoffTotal, 1) : '—'}</td></tr></tfoot></table></div>`;
+  $('#p-cap').innerHTML = `<div><h2>Capas</h2><p class="small muted">Barras en ${state.barMode === 'sec' ? '<b>Perfiles 3D</b>: cada barra extruida con la forma de su perfil' : '<b>Líneas</b>: modelo analítico, una línea por barra con el color de su perfil'}. Se cambia arriba, en «Barras».</p></div>
+    <div class="layers">${LAYERS.map(([k, n, c]) => `<label><input type="checkbox" data-layer="${k}" ${state.layers[k] ? 'checked' : ''}><span class="sw" style="background:${c}"></span>${n}</label>`).join('')}
+    <label><input type="checkbox" id="align" ${state.align ? 'checked' : ''}><span class="sw" style="background:var(--accent)"></span>Alinear niveles con los planos<small>perfiles 3D · apagado = nudos STAAD</small></label></div>${secTable}`;
+}
+function renderLegend() {
+  const items = [['P038SVH002', 'Patín mezz. 225×175'], ['P038MVV-004', 'Cortante mezz. 125×110'], ['P038ESM-006', 'Patín cubierta 167×130'], ['P038ESM-005', 'Cortante cubierta 67×110'], ['PL-U-ESQ', 'Fachada esquina U 316×316'], ['P038SVH007', 'Fachada U 296×168'], ['P038MVV-001', 'Placa base 300×300'], ['P038SVH005', 'Placas a 412.7 (SYR-04)']];
+  const secs = Object.keys(SECDEF).filter(s => SEC.includes(s));
+  $('#legend-list').innerHTML = `<li class="lg-h">Perfiles STAAD${state.barMode === 'lin' ? ' (color de línea)' : ''}</li>` +
+    secs.map(s => `<li><span class="sw" style="background:${SECDEF[s].c}"></span>${esc(s)}</li>`).join('') +
+    `<li class="lg-h">Placas de los planos</li>` + items.map(([k, n]) => `<li><span class="sw" style="background:${PART[k].col}"></span>${n}</li>`).join('') +
+    `<li><span class="sw" style="background:#d2453a;opacity:.6"></span>Columna STAAD sin plano</li>` +
+    `<li class="lg-h">Números azules</li><li style="grid-column:1 / -1"><span class="cnb">10</span>Conexión = hoja de pieza del PDF (22–36 → 1–15; 16 = esquema CAJON-HSS). De lejos, uno por nivel; acércate para verlo en cada placa.</li>`;
+}
+function renderPanels() { renderColumnTab(); renderPartsTab(); renderLayersTab(); }
+
+/* =====================================================================
+   15. Eventos de UI
+   ===================================================================== */
+function setTab(t) {
+  state.tab = t;
+  for (const [id, key] of [['col', 'col'], ['pie', 'pie'], ['cap', 'cap']]) {
+    $(`#t-${id}`).setAttribute('aria-selected', String(key === t)); $(`#p-${id}`).hidden = key !== t;
+  }
+}
+$('.tabs').addEventListener('click', ev => { const b = ev.target.closest('[role=tab]'); if (b) setTab(b.id.slice(2)); });
+$('#views').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) setView(b.dataset.view); });
+$('#levels').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b) setLevel(b.dataset.level); });
+function setBarMode(m) {
+  state.barMode = m;
+  try { localStorage.setItem('conexiones-villahermosa-barras', m); } catch (e) { /* sin almacenamiento */ }
+  $$('#barmode button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bm === m)));
+  if (focus.mesh) { const fm = focus.mesh; exitFocus(); updateBeams(); applyLayerVisibility(); focusPlate(fm, { fly: false }); }
+  else { updateBeams(); applyLayerVisibility(); }
+  renderLayersTab(); renderLegend();
+}
+$('#barmode').addEventListener('click', ev => { const b = ev.target.closest('button'); if (b && b.dataset.bm !== state.barMode) setBarMode(b.dataset.bm); });
+document.querySelector('.panel').addEventListener('click', ev => {
+  const t = ev.target.closest('[data-act]'); if (!t) return;
+  const act = t.dataset.act;
+  if (act === 'pos') selectPos(t.dataset.pos, { focus: true });
+  else if (act === 'focus') focusPos(state.sel, t.dataset.lvl);
+  else if (act === 'goto') { selectPos(t.dataset.pos, { focus: true, lvl: t.dataset.lvl || null }); }
+  else if (act === 'reset') { state.assign = { ...DEFAULT_ASSIGN }; saveAssign(); rebuildAll(); }
+  else if (act === 'plate') { const m = findPlate(state.sel, t.dataset.lvl, t.dataset.g); if (m) focusPlate(m); }
+  else if (act === 'plate-at') { const m = findPlate(t.dataset.pos, t.dataset.lvl, t.dataset.g); if (m) focusPlate(m); }
+  else if (act === 'plate-part') { const a = assemblies.get(state.sel); const m = a && a.meshes.find(x => x.userData.part === t.dataset.part && !x.userData.sub); if (m) focusPlate(m); }
+  else if (act === 'part-focus') { const list = instancesOf(t.dataset.part); if (!list.length) return; focusPlate(list.find(x => x.userData.pos === state.sel) || list[0]); }
+  else if (act === 'part') {
+    exitFocus(); state.part = state.part === t.dataset.part ? null : t.dataset.part; updateHighlight(); renderPartsTab();
+    if (state.part && camera.position.distanceTo(controls.target) < 9) setView('iso');
+  }
+  else if (act === 'part-clear') { state.part = null; updateHighlight(); renderPartsTab(); }
+  else if (act === 'sheet') openSheet(+t.dataset.sheet);
+  else if (act === 'sec-iso' || act === 'sec-clear') {
+    const sec = act === 'sec-clear' ? null : (state.secIso === t.dataset.sec ? null : t.dataset.sec);
+    if (sec && focus.mesh) exitFocus();
+    state.secIso = sec;
+    applySectionLook();
+    renderLayersTab();
+    if (sec && camera.position.distanceTo(controls.target) < 9) setView('iso');
+  }
+  else if (act === 'member') {
+    const mid = +t.dataset.mid; const [a, b] = MEM[mid]; const A = S(...J[a]), B = S(...J[b]);
+    const mid3 = A.clone().add(B).multiplyScalar(0.5); const dir = camera.position.clone().sub(controls.target).normalize();
+    flyTo(mid3.clone().add(dir.multiplyScalar(2.2)), mid3);
+  } else if (act === 'copy') {
+    const txt = $('#cmd').textContent; const msg = $('#copy-msg');
+    const sel = () => { const r = document.createRange(); r.selectNodeContents($('#cmd')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); msg.textContent = 'Texto seleccionado: cópialo con Ctrl+C.'; };
+    try { navigator.clipboard.writeText(txt).then(() => { msg.textContent = 'Copiado.'; }, sel); } catch (e) { sel(); }
+  }
+});
+document.querySelector('.panel').addEventListener('keydown', ev => {
+  if (ev.key !== 'Enter' && ev.key !== ' ') return;
+  const t = ev.target.closest('[data-act="pos"],[data-act="part-focus"],[data-act="plate-part"],[data-act="sec-iso"]'); if (!t) return;
+  ev.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+});
+document.querySelector('.panel').addEventListener('change', ev => {
+  if (ev.target.id === 'mark-select') { state.assign[state.sel] = ev.target.value || null; saveAssign(); rebuildPos(state.sel); }
+  else if (ev.target.dataset.layer) { state.layers[ev.target.dataset.layer] = ev.target.checked; applyLayerVisibility(); updateBeams(); }
+  else if (ev.target.id === 'align') { state.align = ev.target.checked; updateBeams(); }
+});
+
+/* ---------- visor de planos ---------- */
+const lb = $('#lightbox'), lbImg = $('#lb-img'), lbView = $('#lb-view');
+let lbSheet = 1, lbZoom = 0;
+const SHEET_TITLE = h => {
+  for (const [m, mk] of Object.entries(MARKS)) { const i = mk.hojas.indexOf(h); if (i >= 0) return `${m} · ${mk.plano} · hoja ${i + 1}/3 (PDF p.${h})`; }
+  const part = Object.entries(PART).find(([, P]) => P.hoja === h); return part ? `Conexión ${connNum(part[0])} · ${part[0]} · ${PART[part[0]].d} (PDF p.${h})` : `PDF p.${h}`;
+};
+function lbFit() { const w = lbView.clientWidth; const nat = lbImg.naturalWidth || 1320; lbZoom = Math.min(1, (w - 4) / nat); lbApply(); }
+function lbApply() { lbImg.style.width = Math.round((lbImg.naturalWidth || 1320) * lbZoom) + 'px'; }
+function openSheet(h) {
+  lbSheet = h; lb.hidden = false; $('#lb-title').textContent = SHEET_TITLE(h);
+  lbImg.alt = SHEET_TITLE(h);
+  lbImg.onload = () => lbFit();
+  lbImg.src = `planos/hoja-${String(h).padStart(2, '0')}.png`;
+  $('#lb-close').focus();
+}
+function closeSheet() { lb.hidden = true; }
+$('#lb-close').addEventListener('click', closeSheet);
+$('#lb-in').addEventListener('click', () => { lbZoom = Math.min(3, lbZoom * 1.35); lbApply(); });
+$('#lb-out').addEventListener('click', () => { lbZoom = Math.max(0.15, lbZoom / 1.35); lbApply(); });
+$('#lb-fit').addEventListener('click', lbFit);
+$('#lb-prev').addEventListener('click', () => openSheet(Math.max(1, lbSheet - 1)));
+$('#lb-next').addEventListener('click', () => openSheet(Math.min(36, lbSheet + 1)));
+document.addEventListener('keydown', ev => {
+  if (lb.hidden) return;
+  if (ev.key === 'Escape') closeSheet();
+  if (ev.key === 'ArrowRight') openSheet(Math.min(36, lbSheet + 1));
+  if (ev.key === 'ArrowLeft') openSheet(Math.max(1, lbSheet - 1));
+});
+let drag = null;
+lbView.addEventListener('pointerdown', ev => { if (ev.pointerType === 'touch') return; drag = [ev.clientX, ev.clientY, lbView.scrollLeft, lbView.scrollTop]; lbView.classList.add('drag'); lbView.setPointerCapture(ev.pointerId); });
+lbView.addEventListener('pointermove', ev => { if (!drag) return; lbView.scrollLeft = drag[2] - (ev.clientX - drag[0]); lbView.scrollTop = drag[3] - (ev.clientY - drag[1]); });
+lbView.addEventListener('pointerup', () => { drag = null; lbView.classList.remove('drag'); });
+
+/* =====================================================================
+   15b. Pieza seleccionada: zoom, aledañas en color y propiedades
+   ===================================================================== */
+const T_NOM = { 9.5: 9.525, 6.4: 6.35, 4.8: 4.76, 7.9: 7.94, 15.9: 15.88, 2.7: 2.66, 6.35: 6.35 };
+const INCH = { 9.5: '3/8″', 6.4: '1/4″', 4.8: '3/16″', 7.9: '5/16″', 15.9: '5/8″', 2.7: 'cal 12', 6.35: '1/4″' };
+// Cotas de la pieza seleccionada, en las coordenadas de su plano de pieza (mm)
+const DIMS = {
+  'P038SVH002': [[112.5, -102, '225'], [244, 0, '175']],
+  'P038ESM-006': [[83.5, -80, '167'], [186, 0, '130']],
+  'P022MVV-001': [[83.5, -80, '167'], [186, 0, '130']],
+  'P038ESM-005': [[33.5, -14, '67'], [84, 55, '110']],
+  'P038MVV-005': [[33.5, -14, '67'], [84, 55, '110']],
+  'P038MVV-004': [[62.5, -14, '125'], [142, 55, '110']],
+  'P038SVH001': [[84, -16, '168'], [-20, 74, '148.2']],
+  'P038SVH007': [[148.2, -16, '296.4'], [-20, 84, '168']],
+  'PL-U-ESQ': [[-9.9, -186, '316.2'], [166, -9.9, '316.2']],
+  'CART-ASIENTO': [[45, -14, '90'], [-18, 50, '100']],
+  'P038SVH005': [[70, -14, '140.7'], [-20, 30, '60']],
+  'P038SVH004': [[70, -14, '139.5'], [-20, 26, '51.3']],
+  'P038SVH006': [[55, -14, '157.1'], [-20, 70, '140.3']],
+  'P038SVH003': [[0, -94, '152.4'], [94, 0, '152.4']],
+  'P038MVV-001': [[0, -170, '300'], [170, 0, '300']],
+  'P038MVV-002': [[0, -170, '300'], [170, 0, '300']],
+  'P008SVH001': [[37, -14, '74'], [-18, 50, '100']],
+  'S07605000096': [[19.5, -12, '39'], [-14, 31, '62']],
+};
+const DIM_TXT = { 'PL-U-ESQ': '316.2 × 316.2 (envuelve el HSS, R12.7)', 'CART-ASIENTO': '90 × 100 (despunte 15 × 15)', 'P038SVH002': '225 × 175', 'P038ESM-006': '167 × 130', 'P022MVV-001': '167 × 130, pierna de 40', 'P038ESM-005': '67 × 110', 'P038MVV-005': '67 × 110 (chaflán 20×20)', 'P038MVV-004': '125 × 110', 'P038SVH001': '168 × 148.2 (muesca 76.2 × 76.2, R12.7)', 'P038SVH007': '296.4 × 168 (muesca 152.4 × 76.2, R12.7)', 'P038SVH005': '140.7 × 60', 'P038SVH004': '139.5 × 51.3 (muesca 50 × 26.9)', 'P038SVH006': '157.1 × 140.3 (muesca 50 × 50)', 'P038SVH003': '152.4 × 152.4 (R9.3)', 'P038MVV-001': '300 × 300', 'P038MVV-002': '300 × 300', 'P008SVH001': '74 × 100 (chaflán a 45°)', 'S07605000096': '39 × 62' };
+const FACE_W = { 'P038SVH002': '95 mm (chaflanes 40×40 a 45°)', 'P038ESM-006': '90 mm (chaflanes 25×20)', 'P022MVV-001': '130 mm (pierna de 40 mm soldada al HSS)' };
+const WELD_TXT = {
+  'patin-mez': 'Filete de 5 mm por ambos lados al paño del HSS, ER70S-6 (DET-02 y DET-03).',
+  'patin-cub': 'Filete de 5 mm de un lado al paño del HSS, ER70S-6 (DET-01).',
+  'angulo': 'Filete de 5 mm al paño del HSS, ER70S-6 (DET-01 de SYR-03).',
+  'cortante': 'Filete de 3 mm por ambos lados al paño del HSS, ER70S-6.',
+  'fachada': 'Filete de 3 mm por ambos lados, ER70S-6 (detalle de placas inferiores).',
+  'n412': 'Filete de 3 mm por ambos lados, ER70S-6 (DET-03 de SYR-04).',
+  'base': 'Columna a placa base: símbolo 3 / 6 a 45°, todo alrededor, ER70S-6 (detalle de base).',
+  'cartabon': 'Filete de 5 mm intermitente 50-50 por ambos lados, ER70S-6.',
+  'fachada-esq': 'Filete de 5 mm a las caras del HSS, placas superior e inferior, ER70S-6.',
+  'cart-asiento': 'Filete de 6 mm por ambos lados al HSS y a la placa, ER70S-6.',
+  'tapa': 'Soldada todo alrededor con ER70S-6; el símbolo cambia entre marcas (ver DET-01).',
+  'clip': 'E6013, filete de 2 mm intermitente 5-20 (DET-01 de SYR-03).',
+  'hss': 'Recibe todas las placas; la soldadura de cada una se indica en su pieza.',
+};
+const weldKey = u => u.part === 'P022MVV-001' ? 'angulo' : u.part === 'PL-U-ESQ' ? 'fachada-esq' : (u.role === 'patin-sup' || u.role === 'patin-inf') ? (u.part === 'P038SVH002' ? 'patin-mez' : 'patin-cub') : u.role;
+
+/* ---- revisión rápida (kg, cm) ---- */
+const HSS_MATS = { staad: { n: 'Fy 2,582 kg/cm² (STAAD)', Fy: 2582, Fu: 4158 }, b: { n: 'A500 Gr. B, Fy 3,234 kg/cm²', Fy: 3234, Fu: 4080 }, c: { n: 'A500 Gr. C, Fy 3,515 kg/cm²', Fy: 3515, Fu: 4359 } };
+const A36 = { Fy: 2530, Fu: 4080 }, FEXX = 4920, HSS_B = 15.24, HSS_T = 0.93 * 0.635;
+const QSPEC = {
+  'P038SVH002': { k: 'patin', W: 17.5, Wf: 9.5, tp: 0.635, nh: 2, dh: 1.43, w: 0.5, sides: 2 },
+  'P038ESM-006': { k: 'patin', W: 13.0, Wf: 9.0, tp: 0.635, nh: 2, dh: 1.429, w: 0.5, sides: 1 },
+  'P022MVV-001': { k: 'patin', W: 13.0, Wf: 13.0, tp: 0.635, nh: 2, dh: 1.429, w: 0.5, sides: 1, approx: true },
+  'P038MVV-004': { k: 'cortante', h: 11.0, tp: 0.476, nh: 2, dh: 1.429, w: 0.3, sides: 2, Lw: 11.0 },
+  'P038ESM-005': { k: 'cortante', h: 11.0, tp: 0.476, nh: 2, dh: 1.429, w: 0.3, sides: 2, Lw: 11.0 },
+  'P038MVV-005': { k: 'cortante', h: 11.0, tp: 0.476, nh: 2, dh: 1.429, w: 0.3, sides: 2, Lw: 9.0 },
+};
+function hssK17(Bp, tp) { const M = HSS_MATS[state.hss]; return 0.95 * Math.min(10 / (HSS_B / HSS_T) * M.Fy * HSS_T * Bp, A36.Fy * tp * Bp); }
+const atNodeOf = (d, c) => !!c && (d.atStart ? c[3] < 0.5 : Math.abs(c[3] - d.L) < 0.5);
+function flangeForce(d, c, tp) { const dep = DEPTH_MM[secName(d.mid)] / 10; return Math.abs(c[10]) / (dep + tp) + Math.abs(c[5]) / 2; }
+function quickCheck(mesh) {
+  const u = mesh.userData, q = QSPEC[u.part]; if (!q) return null;
+  const row = ANA[u.pos].rows[u.lvl]?.find(r => r.g === globalDir(mesh));
+  const d = row && row.sm[0]; if (!d) return { q, none: 'STAAD no tiene viga en esta cara: no hay fuerza que revisar.' };
+  const c = CHK[d.mid]; const res = { q, d, c, rows: [] };
+  const at = atNodeOf(d, c);
+  if (q.k === 'patin') {
+    res.demand = at ? flangeForce(d, c, q.tp) : null; res.demandTxt = 'Fuerza en el patín |Mx|/(d+tp) + |P|/2';
+    res.rows.push([`Fluencia de la placa en el paño (${nf(q.Wf * 10, 0)} × ${nf(q.tp * 10, 1)})`, 0.9 * A36.Fy * q.Wf * q.tp]);
+    res.rows.push(['Ruptura en la fila de barrenos', 0.75 * A36.Fu * Math.min((q.W - q.nh * (q.dh + 0.16)) * q.tp, 0.85 * q.W * q.tp)]);
+    res.rows.push([`Soldadura al paño (filete ${nf(q.w * 10, 0)} mm, ${q.sides === 2 ? 'ambos lados' : 'un lado'})`, 0.75 * 0.6 * FEXX * 1.5 * 0.707 * q.w * q.Wf * q.sides]);
+    res.rows.push([`Pared del HSS, K1-7 (Bp = ${nf(q.Wf * 10, 0)} mm)`, hssK17(q.Wf, q.tp)]);
+  } else {
+    res.demand = at ? Math.abs(c[6]) : null; res.demandTxt = 'Cortante en el extremo |Vy|';
+    res.rows.push([`Fluencia por cortante (${nf(q.h * 10, 0)} × ${nf(q.tp * 10, 1)})`, 1.0 * 0.6 * A36.Fy * q.h * q.tp]);
+    res.rows.push(['Ruptura por cortante (2 barrenos)', 0.75 * 0.6 * A36.Fu * (q.h - q.nh * (q.dh + 0.16)) * q.tp]);
+    res.rows.push([`Soldadura (filete ${nf(q.w * 10, 0)} mm, ambos lados)`, 0.75 * 0.6 * FEXX * 0.707 * q.w * q.Lw * q.sides]);
+    res.tmax = HSS_MATS[state.hss].Fu * HSS_T / A36.Fy;
+  }
+  return res;
+}
+function hssWallRows() {
+  const out = [];
+  for (const p of POS) {
+    const mark = state.assign[p.id]; if (!mark) continue; const mk = MARKS[mark];
+    for (const lvl of ['mez', 'cub']) {
+      const c = mk[lvl]; if (!c) continue; const q = QSPEC[c.flange]; const phi = hssK17(q.Wf, q.tp);
+      for (const r of ANA[p.id].rows[lvl]) {
+        if (!r.has || !r.sm.length) continue; const d = r.sm[0], ck = CHK[d.mid];
+        if (!atNodeOf(d, ck)) continue;
+        const Ff = flangeForce(d, ck, q.tp);
+        out.push({ pos: p.id, mark, lvl, g: r.g, mid: d.mid, Ff, phi, ratio: Ff / phi, lc: ck[2] });
+      }
+    }
+  }
+  return out.sort((a, b) => b.ratio - a.ratio);
+}
+
+/* ---- instancias, aledañas y vigas relacionadas ---- */
+const areaCache = new Map();
+function shapeArea(key) {
+  if (!areaCache.has(key)) { const e = SHAPES[key]().extractPoints(24); let a = Math.abs(THREE.ShapeUtils.area(e.shape)); for (const h of e.holes) a -= Math.abs(THREE.ShapeUtils.area(h)); areaCache.set(key, a); }
+  return areaCache.get(key);
+}
+function calcKg(part) {
+  const t = T_NOM[PART[part].t] || PART[part].t;
+  if (part === 'P022MVV-001') return (shapeArea(part) * t + 130 * 33.6 * t) * 7.85e-6;
+  return SHAPES[part] ? shapeArea(part) * t * 7.85e-6 : null;
+}
+function globalDir(mesh) { const u = mesh.userData; return u.face ? L2G[ANA[u.pos].k][u.face] : null; }
+function itemOf(mark, part) { const r = MARKS[mark].lista.find(x => (x[1].startsWith('P025SVH001') ? 'P025SVH001' : x[1]) === part); return r ? r[0] : null; }
+function instancesOf(part) {
+  const lo = { cub: 0, mez: 1, fac: 2, base: 3, col: 4 }, fo = { N: 0, E: 1, S: 2, W: 3 };
+  const list = [];
+  POS.forEach((p, i) => { const a = assemblies.get(p.id); if (!a) return; for (const m of a.meshes) { const u = m.userData; if (u.part === part && !u.sub) list.push([m, i, lo[u.lvl] ?? 9, fo[u.face] ?? 9, -(u.y || 0)]); } });
+  list.sort((a, b) => a[1] - b[1] || a[2] - b[2] || a[3] - b[3] || a[4] - b[4]);
+  return list.map(x => x[0]);
+}
+function neighborsOf(mesh) {
+  const a = assemblies.get(mesh.userData.pos); const u = mesh.userData; const s = new Set();
+  for (const m of a.meshes) { const v = m.userData; if (u.lvl === 'col' || v.lvl === u.lvl || v.role === 'hss') s.add(m); }
+  return s;
+}
+function findPlate(pos, lvl, g) {
+  const a = assemblies.get(pos); if (!a) return null;
+  const ms = a.meshes.filter(m => m.userData.lvl === lvl && !m.userData.sub);
+  if (lvl === 'fac') return ms.find(m => m.userData.role === 'fachada' && globalDir(m) === g) || ms.find(m => m.userData.role === 'fachada') || ms[0] || null;
+  return ms.find(m => m.userData.role === 'patin-sup' && globalDir(m) === g) || ms.find(m => globalDir(m) === g) || null;
+}
+let memberInst = null;
+function instOf(mid) { if (!memberInst) { memberInst = new Map(); for (const m of beamMeshes) m.userData.ids.forEach((id, i) => memberInst.set(id, [m, i])); } return memberInst.get(mid); }
+function relatedMembers(mesh) {
+  const u = mesh.userData, p = POSBY[u.pos], g = globalDir(mesh), out = [];
+  const nodes = u.lvl === 'mez' ? [p.nMez] : u.lvl === 'cub' ? [p.nCub] : u.lvl === 'col' ? [p.nFac, p.nMez, p.nCub] : [];
+  for (const n of nodes.filter(Boolean)) for (const d of around(n)) {
+    if (grpName(d.mid) === '_COLUMNAS') continue;
+    out.push({ mid: d.mid, rel: !!g && d.dir === g });
+  }
+  if (u.lvl === 'fac' || u.lvl === 'col') for (const l of p.facLinks) for (const d of around(l.other)) if (grpName(d.mid) === '_VIGA_APOY_INF') out.push({ mid: d.mid, rel: u.lvl === 'fac' });
+  return out;
+}
+const beamRelMat = new THREE.MeshStandardMaterial({ color: 0x2f7fd0, roughness: 0.5, metalness: 0.1, transparent: true, opacity: 0.55, depthWrite: false });
+const nbSecMats = new Map();
+function nbSecMat(sec) { if (!nbSecMats.has(sec)) nbSecMats.set(sec, new THREE.MeshStandardMaterial({ color: SECDEF[sec]?.c || 0x8aa0b2, roughness: 0.6, metalness: 0.1, transparent: true, opacity: 0.42, depthWrite: false })); return nbSecMats.get(sec); }
+const focusRoot = new THREE.Group(); scene.add(focusRoot);
+function clearFocusDecor() {
+  for (const b of focus.beams) focusRoot.remove(b); focus.beams = [];
+  for (const t of focus.tags) { if (t.parent) t.parent.remove(t); t.element.remove(); } focus.tags = [];
+}
+function tagAt(parent, x, y, z, el) { const o = new CSS2DObject(el); o.position.set(x, y, z); parent.add(o); focus.tags.push(o); return o; }
+function addFocusTags(mesh) {
+  const u = mesh.userData; const depth = mesh.geometry.parameters?.options?.depth || 0;
+  for (const [x, y, txt] of DIMS[u.part] || []) { const el = document.createElement('div'); el.className = 'dimtag'; el.textContent = txt; tagAt(mesh, x, y, depth, el); }
+  if (u.role === 'hss') { const el = document.createElement('div'); el.className = 'dimtag'; el.textContent = `L = ${MARKS[u.mark].L}`; tagAt(mesh, 112, 0, MARKS[u.mark].L * 0.3, el); }
+  let cart = false;
+  for (const m of focus.nb) {
+    const v = m.userData; if (v.sub) continue;
+    if (v.role === 'cartabon') { if (cart && m !== mesh) continue; cart = true; }
+    const it = itemOf(v.mark, v.part); if (it == null) continue;
+    const el = document.createElement('div'); el.className = 'ib' + (m === mesh ? ' on' : ''); el.textContent = it;
+    el.title = `Ítem ${it} · ${v.part} · ${PART[v.part].d}`; el.setAttribute('role', 'button'); el.tabIndex = 0;
+    const go = ev => { ev.stopPropagation(); focusPlate(m, { fly: false }); };
+    el.addEventListener('click', go); el.addEventListener('keydown', ev => { if (ev.key === 'Enter') go(ev); });
+    if (v.role === 'hss') {
+      const lv = u.lvl === 'col' ? MARKS[v.mark].L * 0.62 : Math.min((u.y || 300) + 160, MARKS[v.mark].L - 40) - 15.9;
+      tagAt(m, 0, -118, Math.max(60, lv), el);
+    } else {
+      if (!m.geometry.boundingBox) m.geometry.computeBoundingBox();
+      const c = m.geometry.boundingBox.getCenter(new THREE.Vector3()); const dz = m.geometry.parameters?.options?.depth || 0;
+      tagAt(m, c.x, c.y, dz + 16, el);
+    }
+  }
+}
+function focusPlate(mesh, { fly = true } = {}) {
+  if (!mesh) return;
+  if (mesh.userData.sub && mesh.userData.twin) mesh = mesh.userData.twin;
+  setHover(null); tip.hidden = true; pinned = false; tip.classList.remove('pinned');
+  const center = new THREE.Box3().setFromObject(mesh).getCenter(new THREE.Vector3());
+  if (state.level !== 'all' && !passesClip(center)) setLevel('all');
+  if (!state.layers.plates) { state.layers.plates = true; applyLayerVisibility(); renderLayersTab(); }
+  clearFocusDecor();
+  state.part = null;
+  focus.mesh = mesh; focus.nb = neighborsOf(mesh); focus.pulseUntil = performance.now() + 1800;
+  applySectionLook();
+  const rel = relatedMembers(mesh);
+  if (state.barMode === 'lin' && rel.length) {
+    const pos = [], col = [];
+    for (const r of rel) {
+      const [a, b] = MEM[r.mid]; const A = S(...J[a]), B = S(...J[b]);
+      const c = new THREE.Color(r.rel ? 0x1f7ae0 : (SECDEF[secName(r.mid)]?.c || '#8aa0b2'));
+      pos.push(A.x, A.y, A.z, B.x, B.y, B.z); col.push(c.r, c.g, c.b, c.r, c.g, c.b);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    const hl = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ vertexColors: true })); hl.raycast = () => {};
+    focusRoot.add(hl); focus.beams.push(hl);
+  }
+  for (const r of rel) {
+    if (state.barMode === 'lin') break;
+    const it = instOf(r.mid); if (!it) continue;
+    const m4 = new THREE.Matrix4(); it[0].getMatrixAt(it[1], m4);
+    if (m4.elements[0] === 0 && m4.elements[5] === 0) continue;
+    const b = new THREE.Mesh(it[0].geometry, r.rel ? beamRelMat : nbSecMat(it[0].userData.sec));
+    b.matrixAutoUpdate = false; b.matrix.copy(m4); b.raycast = () => {};
+    focusRoot.add(b); focus.beams.push(b);
+  }
+  addFocusTags(mesh);
+  stage.classList.add('focusing'); $('#legend').open = false;
+  updateHighlight();
+  if (state.sel !== mesh.userData.pos) selectPos(mesh.userData.pos, { focus: false });
+  renderInspector(); renderPartsTab();
+  if (fly) flyToPlate(mesh); else revealStage();
+  markDirty();
+}
+function exitFocus() {
+  if (!focus.mesh) return;
+  focus.mesh = null; focus.nb = new Set(); clearFocusDecor();
+  applySectionLook();
+  stage.classList.remove('focusing');
+  insp.hidden = true;
+  updateHighlight(); renderPartsTab(); markDirty();
+}
+function flyToPlate(mesh) {
+  revealStage();
+  const box = new THREE.Box3().setFromObject(mesh); const c = box.getCenter(new THREE.Vector3()); const size = box.getSize(new THREE.Vector3());
+  const u = mesh.userData, up = new THREE.Vector3(0, 1, 0);
+  const cur = camera.position.clone().sub(controls.target); cur.y = 0; if (cur.lengthSq() < 1e-6) cur.set(1, 0, 1); cur.normalize();
+  if (u.role === 'hss') { const d = cur.clone().multiplyScalar(0.9).add(new THREE.Vector3(0, 0.32, 0)).normalize(); const fit = (size.y / 2) / Math.tan(THREE.MathUtils.degToRad(FOV_PERSP / 2)) * 1.12; flyTo(c.clone().addScaledVector(d, Math.max(4, fit)), c); return; }
+  const col = assemblies.get(u.pos).group.position;
+  const out = new THREE.Vector3(c.x - col.x, 0, c.z - col.z);
+  if (out.length() < 0.02) out.copy(cur); out.normalize();
+  const side = new THREE.Vector3().crossVectors(up, out).normalize();
+  if (side.dot(cur) < 0) side.negate();
+  const W = { 'patin-inf': [0.75, 0.45, -0.5], 'patin-sup': [0.7, 0.45, 0.55], 'cortante': [0.42, 0.85, 0.22], 'base': [0.55, 0.4, 0.8], 'cartabon': [0.75, 0.45, 0.5], 'cart-asiento': [0.75, 0.45, -0.4], 'tapa': [0.5, 0.4, 0.9], 'clip': [0.55, 0.55, 0.55], 'fachada': [0.75, 0.45, 0.45], 'n412': [0.7, 0.45, 0.6] }[u.role] || [0.7, 0.45, 0.55];
+  const dir = out.clone().multiplyScalar(W[0]).addScaledVector(side, W[1]).addScaledVector(up, W[2]).normalize();
+  const dist = THREE.MathUtils.clamp(Math.max(size.x, size.y, size.z) * 4.6, 0.62, 1.9);
+  const pos = c.clone().addScaledVector(dir, dist); if (pos.y < 0.06) pos.y = 0.06;
+  flyTo(pos, c);
+}
+function stepInstance(k) {
+  if (!focus.mesh) return; const list = instancesOf(focus.mesh.userData.part); if (!list.length) return;
+  const i = list.indexOf(focus.mesh); focusPlate(list[(i + k + list.length) % list.length]);
+}
+
+/* ---- inspector ---- */
+const insp = $('#insp');
+function connectsHtml(mesh) {
+  const u = mesh.userData, p = POSBY[u.pos], A = ANA[u.pos];
+  const box = h => `<div class="cr info" style="grid-template-columns:minmax(0,1fr)"><div class="main">${h}</div></div>`;
+  if (['patin-sup', 'patin-inf', 'cortante'].includes(u.role)) {
+    const row = A.rows[u.lvl].find(r => r.g === globalDir(mesh));
+    return row && row.sm.length ? row.sm.map(d => box(memberLine(d))).join('') : '<p class="small muted">STAAD no tiene viga en esta cara.</p>';
+  }
+  if (u.role === 'fachada' || u.role === 'cart-asiento') {
+    const out = [];
+    for (const l of p.facLinks) { out.push(box(`<div>Enlace rígido en STAAD a 20 cm:</div>${memberLine(l)}`)); for (const d of around(l.other)) if (grpName(d.mid) === '_VIGA_APOY_INF') out.push(box(memberLine(d))); }
+    return out.join('') || '<p class="small muted">Sin viga de fachada en STAAD.</p>';
+  }
+  if (u.role === 'tapa' || u.role === 'clip') {
+    if (u.lvl === 'mez' && p.colAbove) return `<p class="small">STAAD continúa la columna arriba de esta tapa: barra ${p.colAbove.mid} (${esc(secName(p.colAbove.mid))}).</p>`;
+    return p.truss.map(d => box(memberLine(d))).join('') || '<p class="small muted">Sin barras de armadura en este nudo.</p>';
+  }
+  if (u.role === 'base' || u.role === 'cartabon') return `<p class="small">Apoyo STAAD nudo ${p.nBase}: ${esc(D.supports[p.nBase] || '')}</p>${p.colBase ? box(memberLine(p.colBase)) : ''}`;
+  if (u.role === 'hss') return p.colSegs.map(mid => box(memberLine(memberDir(mid, MEM[mid][0])))).join('');
+  return '<p class="small muted">Ningún elemento de STAAD llega a esta altura.</p>';
+}
+function quickHtml(mesh) {
+  const r = quickCheck(mesh); if (!r) return '';
+  if (r.none) return `<section class="insp-sec"><h5>Revisión rápida</h5><p class="small muted">${esc(r.none)}</p></section>`;
+  const dem = r.demand;
+  const sel = `<label class="sel-mark" for="hss-fy">Acero HSS</label><select id="hss-fy">${Object.entries(HSS_MATS).map(([k, m]) => `<option value="${k}" ${state.hss === k ? 'selected' : ''}>${esc(m.n)}</option>`).join('')}</select>`;
+  const rows = r.rows.map(([lbl, phi]) => `<span class="lbl">${esc(lbl)}</span><span class="val">φRn ${nf(phi / 1000, 2)} t${dem != null ? ` · ${nf(dem / phi, 2)}` : ''}</span>${dem != null ? ratioBar(dem / phi) : ''}`).join('');
+  let gov = '';
+  if (dem != null) { const w = r.rows.reduce((a, b) => (b[1] < a[1] ? b : a)); const rr = dem / w[1]; gov = `<div class="gov ${rr > 1 ? 'crit' : rr > 0.8 ? 'warn' : 'ok'}">Rige: ${esc(w[0])} · relación ${nf(rr, 2)}</div>`; }
+  const demTxt = dem != null ? `<p class="small mono">${esc(r.demandTxt)} = <b>${nf(dem / 1000, 2)} t</b> · barra ${r.d.mid} · LC ${r.c[2]}</p>` : `<p class="small muted">El .ANL no trae la fuerza en este nudo (la sección crítica de la barra ${r.d.mid} está a x = ${nf(r.c[3], 0)} cm). Solo se muestran capacidades.</p>`;
+  const tmax = r.tmax != null ? `<p class="small">Pared del HSS: espesor máximo de placa ${nf(r.tmax * 10, 1)} mm ≥ ${nf(r.q.tp * 10, 1)} mm ${r.tmax >= r.q.tp ? '✓' : '✗'}</p>` : '';
+  return `<section class="insp-sec"><h5>Revisión rápida · AISC 360-16 (LRFD)</h5><div class="row">${sel}</div>${demTxt}<div class="qc">${rows}</div>${tmax}
+    <p class="small">Tornillos: el plano no los especifica, así que no se revisan tornillos ni aplastamiento en el patín de la viga.</p>${gov}
+    <p class="small muted">Placa A-36 (Fy 2,530 · Fu 4,080 kg/cm²); HSS con espesor de diseño 0.93 × 6.35 = 5.9 mm; electrodo de 70 ksi. Fuerzas del CHECK CODE en el nudo: una sola combinación, no la envolvente.${r.q.approx ? ' El ángulo se revisa como placa.' : ''}</p></section>`;
+}
+function renderInspector() {
+  const mesh = focus.mesh; if (!mesh) { insp.hidden = true; return; }
+  const u = mesh.userData, P = PART[u.part], p = POSBY[u.pos], mk = MARKS[u.mark];
+  const list = instancesOf(u.part), idx = list.indexOf(mesh), it = itemOf(u.mark, u.part), g = globalDir(mesh);
+  const yS = { cub: STAAD_MM.cub, mez: STAAD_MM.mez, fac: STAAD_MM.fac }[u.lvl];
+  const elev = u.role === 'hss' ? `de 15.9 a ${nf(u.y, 1)} mm` : u.role === 'base' ? 'de 0 a 15.9 mm (desplante)' : u.role === 'cartabon' ? 'de 15.9 a 115.9 mm' : u.role === 'cart-asiento' ? `de ${nf(u.y - 100, 1)} a ${nf(u.y, 1)} mm` : `cara superior a ${nf(u.y, 1)} mm${yS != null ? ` · nudo STAAD a ${nf(yS, 0)}` : ''}`;
+  const kg = u.role === 'hss' ? mk.lista[0][4] : P.kg, ck = u.role === 'hss' ? null : calcKg(u.part);
+  const nbGroups = new Map();
+  for (const m of focus.nb) { const v = m.userData; if (v.sub) continue; const k = v.part; if (!nbGroups.has(k)) nbGroups.set(k, { n: 0, it: itemOf(v.mark, k) }); nbGroups.get(k).n++; }
+  const nbHtml = [...nbGroups.entries()].sort((a, b) => (a[1].it ?? 99) - (b[1].it ?? 99)).map(([k, v]) => `<button type="button" class="nbb${k === u.part ? ' on' : ''}" data-act="insp-nb" data-part="${k}"><span class="item">${v.it ?? '·'}</span>${cnBadge(k)}<span class="sw" style="background:${PART[k].col}"></span><span>${esc(k === 'P025SVH001' ? 'HSS 6″×6″×1/4″' : PART[k].d)} ×${v.n}</span></button>`).join('');
+  insp.innerHTML = `
+    <div class="insp-head"><span class="sw" style="background:${P.col}"></span><div class="ttl"><b>${connNum(u.part) ? `${cnBadge(u.part)} Conexión ${connNum(u.part)} · ` : ''}${esc(u.part === 'P025SVH001' ? 'HSS 6″×6″×1/4″' : u.part)}</b><small>${esc(u.role === 'hss' ? `${mk.lista[0][1]} · L = ${mk.L} mm` : P.d)}</small></div><button type="button" class="insp-x" data-act="insp-close" aria-label="Cerrar y volver a la vista completa">×</button></div>
+    <div class="insp-nav"><button type="button" class="btn sm" data-act="insp-prev" aria-label="Anterior">‹</button><span class="grow">${idx + 1} de ${list.length} en el edificio · ${esc(u.mark)}${it != null ? ` · ítem <span class="item">${it}</span>` : ''}</span><button type="button" class="btn sm" data-act="insp-next" aria-label="Siguiente">›</button>${list.length > 1 ? '<button type="button" class="btn sm" data-act="insp-all">Todas</button>' : ''}<button type="button" class="btn sm" data-act="insp-toggle" aria-expanded="${!inspCollapsed}" aria-controls="insp-body">${inspCollapsed ? 'Detalles' : 'Ocultar'}</button></div>
+    <div class="insp-body" id="insp-body">
+      <section class="insp-sec"><h5>Dónde va</h5><dl class="kv">
+        <dt>Columna</dt><dd>Eje ${p.id} · ${TIPOTXT[p.tipo].toLowerCase()} · ${esc(u.mark)}</dd>
+        <dt>Nivel</dt><dd>${LEVEL_NAME[u.lvl]}${u.face ? ` · cara ${u.face} del plano → ${g} STAAD` : ''}</dd>
+        <dt>Función</dt><dd>${esc(u.label)}</dd>
+        <dt>Elevación</dt><dd>${elev}</dd></dl></section>
+      <section class="insp-sec"><h5>Pieza</h5><dl class="kv">
+        <dt>Medidas</dt><dd>${u.role === 'hss' ? `152.4 × 152.4 × 6.35 · L = ${mk.L}` : esc(DIM_TXT[u.part] || '')} mm</dd>
+        ${FACE_W[u.part] ? `<dt>En el paño</dt><dd>${FACE_W[u.part]}</dd>` : ''}
+        <dt>Espesor</dt><dd>${u.role === 'hss' ? '1/4″ (diseño 5.9 mm)' : `${nf(P.t, 1)} mm (${INCH[P.t] || ''})`}</dd>
+        <dt>Material</dt><dd>${u.role === 'hss' ? 'no indicado en plano (STAAD: Fy 2,582 kg/cm²)' : u.part === 'S07605000096' ? 'lámina cal 12' : 'A-36 (plano de pieza)'}</dd>
+        ${P.holes ? `<dt>Barrenos</dt><dd>${esc(P.holes)}</dd>` : ''}
+        <dt>Peso</dt><dd>${kg != null ? `${nf(kg, 3)} kg (plano)` : '—'}${ck != null ? ` · ${nf(ck, 3)} kg con la forma modelada` : ''}</dd></dl></section>
+      <section class="insp-sec"><h5>Soldadura según plano</h5><p class="small">${esc(WELD_TXT[weldKey(u)] || '—')}</p></section>
+      <section class="insp-sec"><h5>Conecta con (STAAD)</h5>${connectsHtml(mesh)}</section>
+      <section class="insp-sec"><h5>Planos</h5><div class="part-thumb">${P.hoja ? `<button type="button" class="th" data-act="sheet" data-sheet="${P.hoja}" aria-label="Abrir plano de la pieza"><img src="planos/hoja-${String(P.hoja).padStart(2, '0')}.png" alt="Plano de ${esc(u.part)}" loading="lazy"></button>` : ''}
+        <div class="row" style="flex-direction:column;align-items:flex-start">${P.hoja ? `<button type="button" class="btn sm" data-act="sheet" data-sheet="${P.hoja}">Conexión ${connNum(u.part)} · p.${P.hoja}</button>` : ''}<button type="button" class="btn sm" data-act="sheet" data-sheet="${mk.hojas[0]}">Ensamble ${esc(u.mark)} · p.${mk.hojas[0]}</button><button type="button" class="btn sm" data-act="sheet" data-sheet="${mk.hojas[1]}">Soldaduras · p.${mk.hojas[1]}</button></div></div></section>
+      <section class="insp-sec"><h5>Piezas aledañas en color</h5><div class="nbl">${nbHtml}</div></section>
+    </div>`;
+  insp.classList.toggle('collapsed', inspCollapsed);
+  insp.hidden = false;
+}
+let inspCollapsed = window.matchMedia('(max-width: 600px)').matches;
+insp.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-act]'); if (!t) return; ev.stopPropagation();
+  const a = t.dataset.act;
+  if (a === 'insp-close') exitFocus();
+  else if (a === 'insp-toggle') { inspCollapsed = !inspCollapsed; renderInspector(); }
+  else if (a === 'insp-prev') stepInstance(-1);
+  else if (a === 'insp-next') stepInstance(1);
+  else if (a === 'insp-all') { const part = focus.mesh.userData.part; exitFocus(); state.part = part; updateHighlight(); renderPartsTab(); setView('iso'); setTab('pie'); }
+  else if (a === 'insp-nb') { const m = [...focus.nb].find(x => x.userData.part === t.dataset.part && !x.userData.sub); if (m) focusPlate(m); }
+  else if (a === 'sheet') openSheet(+t.dataset.sheet);
+  else if (a === 'member') { const mid = +t.dataset.mid; const [na, nb] = MEM[mid]; const c = S(...J[na]).add(S(...J[nb])).multiplyScalar(0.5); const dir = camera.position.clone().sub(controls.target).normalize(); flyTo(c.clone().add(dir.multiplyScalar(2.2)), c); }
+});
+function reanalyzeAll() {
+  for (const p of POS) {
+    ANA[p.id] = analyze(p, state.assign[p.id] || null);
+    const lab = labelObjs.get(p.id); if (lab) lab.element.className = `tag${state.assign[p.id] ? '' : ' none'}${state.sel === p.id ? ' sel' : ''}`;
+  }
+  refreshMarkers(); renderColumnTab(); markDirty();
+}
+insp.addEventListener('change', ev => { if (ev.target.id === 'hss-fy') { state.hss = ev.target.value; reanalyzeAll(); renderInspector(); } });
+['pointerdown', 'wheel'].forEach(e => insp.addEventListener(e, ev => ev.stopPropagation()));
+document.addEventListener('keydown', ev => {
+  if (!lb.hidden) return;
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName || '')) return;
+  if (ev.key === 'Escape' && focus.mesh) exitFocus();
+  else if (focus.mesh && (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft')) { ev.preventDefault(); stepInstance(ev.key === 'ArrowRight' ? 1 : -1); }
+});
+
+/* =====================================================================
+   16. Tema, tamaño y bucle de render
+   ===================================================================== */
+function applyTheme() {
+  scene.background = new THREE.Color(cssVar('--scene') || '#e1e6e9');
+  edgeMat.color.set(cssVar('--edge') || '#1b2329');
+  markDirty();
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+function resize() {
+  const r = stage.getBoundingClientRect(); const w = Math.max(10, r.width), h = Math.max(10, r.height);
+  renderer.setSize(w, h, false); labelRenderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); markDirty();
+}
+new ResizeObserver(resize).observe(stage);
+controls.addEventListener('change', markDirty);
+function loop(now) {
+  requestAnimationFrame(loop);
+  if (tween) {
+    const t = Math.min(1, (now - tween.start) / tween.ms); const e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.t0, tween.t1, e);
+    camera.fov = tween.f0 + (tween.f1 - tween.f0) * e; camera.updateProjectionMatrix();
+    if (t >= 1) tween = null; dirty = true;
+  }
+  processMove();
+  if (focus.mesh) {
+    const m = selMat(focus.mesh.userData.part);
+    const k = now < focus.pulseUntil ? 0.3 + 0.55 * (0.5 + 0.5 * Math.cos((focus.pulseUntil - now) / 1800 * Math.PI * 6)) : 0.5;
+    if (Math.abs(m.emissiveIntensity - k) > 0.005) { m.emissiveIntensity = k; dirty = true; }
+  }
+  if (controls.update()) dirty = true;
+  if (dirty) { const near = camera.position.distanceTo(controls.target) < 6; if (near !== gridNear) { gridNear = near; for (const o of gridBubbles) o.visible = !near && state.layers.grid; } }
+  if (dirty) {
+    updateConnLabels();
+    const dist = camera.position.distanceTo(controls.target);
+    const nr = Math.min(1, Math.max(0.01, dist / 350)), fr = dist + 90;
+    if (Math.abs(camera.near - nr) > 1e-4 || Math.abs(camera.far - fr) > 0.5) { camera.near = nr; camera.far = fr; camera.updateProjectionMatrix(); }
+    renderer.render(scene, camera); labelRenderer.render(scene, camera); dirty = false;
+  }
+}
+
+/* ---------- arranque ---------- */
+applyTheme(); renderLegend();
+if (window.matchMedia('(pointer: coarse)').matches) $('#hint').textContent = '1 dedo: girar · 2 dedos: zoom y mover · Toque: seleccionar';
+resize();
+const [p0, t0] = VIEWS.iso(); camera.position.copy(p0); controls.target.copy(t0);
+if (stage.clientHeight < 640 || stage.clientWidth < 720) $('#legend').open = false;
+rebuildAll(); updateBeams(); applyLayerVisibility();
+$('#loading').remove();
+requestAnimationFrame(loop);
+// Autoverificación: las placas generadas deben coincidir con la lista de partes de cada marca
+for (const [id, a] of assemblies) {
+  const mk = MARKS[state.assign[id]]; const c = {};
+  for (const m of a.meshes) if (!m.userData.sub) c[m.userData.part] = (c[m.userData.part] || 0) + 1;
+  for (const r of mk.lista) { const k = r[1].startsWith('P025SVH001') ? 'P025SVH001' : r[1]; if ((c[k] || 0) !== r[3]) console.warn(`Conteo distinto en ${id} ${state.assign[id]} ${k}: 3D ${c[k] || 0} vs lista ${r[3]}`); }
+}
+window.__visor = { state, ANA, POS, MARKS, assemblies, selectPos, focusPos, setView, setLevel, setTab, openSheet, camera, controls, focusPlate, exitFocus, instancesOf, shapeArea, calcKg, quickCheck, hssWallRows, focus, connNum };
+</script>
