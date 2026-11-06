@@ -30,7 +30,7 @@ del **1 al 16** (la 16 sale del esquema CAJON-HSS), en el orden del PDF, con un 
 | 13 | 34 | P038SVH005 | PLC conexión 140.7×60 mm 3/16″ |
 | 14 | 35 | P038SVH006 | PLC conexión 157.1×140.3 mm 3/16″ |
 | 15 | 36 | P038SVH007 | PLC momento 296.4×168 mm 1/4″ (en U) |
-| 16 | — | PL-U-ESQ | Placa en U de esquina 316.2×316.2 mm 3/8″, 6 oblongos (esquema CAJON-HSS) |
+| 16 | — | PL-U-ESQ | Placa en U de esquina 416.2×416.2 mm 3/8″, 14 oblongos (esquema CAJON-HSS) |
 
 En el visor, cada placa lleva ese mismo número en azul. Desde lejos se ve uno por nivel
 de cada columna (por ejemplo «4 · 3 · 11» en cubierta). Al acercarte a menos de unos 4.6 m
@@ -93,12 +93,12 @@ o `×` regresan a la vista completa.
 
 ## Llevarlo a otra sesión o a otra computadora
 
-El paquete `.zip` trae esta carpeta completa más `fuentes/` con el PDF de conexiones y
-el `.ANL` originales.
+El paquete `.zip` trae esta carpeta completa más `fuentes/` con el PDF de conexiones, el
+`.ANL` y los DXF del esquema CAJON-HSS y de placas de conexión (de ahí sale la pieza 16).
 
 - **Solo verlo**: descomprime y abre `index_offline.html`.
 - **Seguir trabajándolo con Claude**: sube el `.zip` a la nueva sesión (o clona la rama
-  `claude/dreamy-bardeen-4o6zgi` del repo) y pide que lo descomprima. Este README y
+  `claude/intelligent-bell-c3f2qt` del repo) y pide que lo descomprima. Este README y
   `src/visor.html` bastan para retomar: todo el visor está en esa plantilla y los datos
   salen de `fuentes/` con los comandos de abajo.
 - La asignación de marcas que cambies en el panel se guarda solo en ese navegador.
