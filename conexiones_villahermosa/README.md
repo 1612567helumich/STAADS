@@ -5,7 +5,7 @@ Visor interactivo para revisar los planos de taller de columnas **SYR-01 … SYR
 
 Muestra la estructura completa del STAAD con el perfil real de cada barra y, en cada
 columna, las placas de conexión modeladas con sus dimensiones reales (chaflanes,
-muescas, barrenos y oblongos), en la elevación que indican los planos. Cada conexión se
+muescas y barrenos), en la elevación que indican los planos. Cada conexión se
 cruza contra las barras STAAD que llegan a ese nudo.
 
 ## Números de conexión
