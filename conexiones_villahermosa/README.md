@@ -1,4 +1,4 @@
-# Visor 3D de conexiones · Villahermosa
+# Visor 3D de conexiones · Villahermosa 2
 
 Visor interactivo para revisar los planos de taller de columnas **SYR-01 … SYR-07**
 (GMI, planos S07713000573–579) contra el modelo **STAAD 001_VILLAHERMOSA_SAYER R1.3**.

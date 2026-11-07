@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 <body>
-<title>Conexiones Villahermosa</title>
+<title>Conexiones Villahermosa 2</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -285,7 +285,7 @@ tr[data-act]:hover td{background:var(--surface)}
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <h1>Conexiones Villahermosa</h1>
+      <h1>Conexiones Villahermosa 2</h1>
       <p>Planos GMI S07713000573–579 (SYR-01…07) · STAAD 001_VILLAHERMOSA_SAYER R1.3 · <span style="color:var(--conn)">conexiones 1–15 = hojas 22–36 del PDF · 16 = esquema CAJON-HSS</span></p>
     </div>
     <div class="ctls">
@@ -762,14 +762,11 @@ function buildAssembly(p, markId, k) {
       add('P038SVH001', 'P038SVH001', 6.4, mPlan([0, -1, 1, 0], [148.2, -168], yTop, 6.4), { lvl: 'fac', face: 'S', role: 'fachada', y: yTop, label: 'Placa en L (fachada)' });
     } else add('P038SVH007', 'P038SVH007', 6.4, mPlan([0, 1, -1, 0], [-168, 148.2], yTop, 6.4), { lvl: 'fac', face: 'W', role: 'fachada', y: yTop, label: 'Placa en U (fachada)' });
   }
-  // cartabones de asiento bajo la placa inferior, a 18.7 mm de las orillas del HSS (esquema CAJON-HSS):
-  // en esquina, 2 en cada cara que la placa en U cubre completa (W, S) y 1 en cada media cara (mitad sur de E, mitad oeste de N);
-  // en borde, 2 en la cara de fachada
+  // cartabones de asiento bajo la placa inferior, en la parte plana del HSS (2 por cara de fachada) y, en la esquina, uno más en cada pata
   if (mk.fac) {
     const yC = mk.fac.botTop - (mk.fac.kind === 'UE' ? 9.5 : 6.4);
-    const cart = mk.fac.kind === 'UE' ? [['W', -54.35], ['W', 54.35], ['S', -54.35], ['S', 54.35], ['E', -54.35], ['N', 54.35]]
-      : facFacesLocal(mk).flatMap(f => [[f, -54.35], [f, 54.35]]);
-    for (const [f, off] of cart) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
+    for (const f of facFacesLocal(mk)) for (const off of [-54.325, 54.325]) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
+    if (mk.fac.kind === 'UE') for (const [f, off] of [['E', -54.325], ['N', 54.325]]) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
   }
   if (mk.n412) {
     add('P038SVH005', 'P038SVH005', 4.8, mPlan([1, 0, 0, -1], [-162, -76.2], 412.7, 4.8), { lvl: 'fac', role: 'n412', y: 412.7, label: 'Placa a 412.7 mm' });
