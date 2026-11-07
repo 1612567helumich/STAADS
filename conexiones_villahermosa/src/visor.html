@@ -466,9 +466,9 @@ const STAAD_MM = { cub: 6040, mez: 3270, fac: 200 };          // nudo STAAD
 
 const L_HSS6178 = [1, 'P025SVH001-05', 'HSS 6″x6″x1/4″ L=6178 mm', 1, 174.054];
 const MARKS = {
-  'SYR-01': { plano: 'S07713000573', hojas: [1, 2, 3], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 216.621,
+  'SYR-01': { plano: 'S07713000573', hojas: [1, 2, 3], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 217.149,
     cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
-    lista: [L_HSS6178, [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [4, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 4, 1.819], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 2, 0.490], [6, 'PL-U-ESQ', 'PLACA EN U - ESQUINA 416.2x416.2 mm E=3/8″', 2, 6.717], [7, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [8, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 4, 0.264]] },
+    lista: [L_HSS6178, [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [4, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 4, 1.819], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 2, 0.490], [6, 'PL-U-ESQ', 'PLACA EN U - ESQUINA 416.2x416.2 mm E=3/8″', 2, 6.717], [7, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [8, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 6, 0.264]] },
   'SYR-02': { plano: 'S07713000574', hojas: [4, 5, 6], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476,
     cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
     lista: [L_HSS6178, [2, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [3, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [4, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 3, 0.490], [6, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 6, 1.819], [7, 'P038SVH007', 'PLC MOMENTO 296.4x168 mm E=1/4″', 2, 1.843], [8, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 2, 0.264]] },
@@ -484,7 +484,7 @@ const MARKS = {
   'SYR-06': { plano: 'S07713000578', hojas: [16, 17, 18], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476, tabFlip: ['E'],
     cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
     lista: null },
-  'SYR-07': { plano: 'S07713000579', hojas: [19, 20, 21], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 216.621,
+  'SYR-07': { plano: 'S07713000579', hojas: [19, 20, 21], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 217.149,
     cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
     lista: null },
 };
@@ -754,10 +754,14 @@ function buildAssembly(p, markId, k) {
       add('P038SVH001', 'P038SVH001', 6.4, mPlan([0, -1, 1, 0], [148.2, -168], yTop, 6.4), { lvl: 'fac', face: 'S', role: 'fachada', y: yTop, label: 'Placa en L (fachada)' });
     } else add('P038SVH007', 'P038SVH007', 6.4, mPlan([0, 1, -1, 0], [-168, 148.2], yTop, 6.4), { lvl: 'fac', face: 'W', role: 'fachada', y: yTop, label: 'Placa en U (fachada)' });
   }
-  // cartabones de asiento bajo la placa inferior, en las orillas del HSS (2 por cara de fachada)
+  // cartabones de asiento bajo la placa inferior, a 18.7 mm de las orillas del HSS (esquema CAJON-HSS):
+  // en esquina, 2 en cada cara que la placa en U cubre completa (W, S) y 1 en cada media cara (mitad sur de E, mitad oeste de N);
+  // en borde, 2 en la cara de fachada
   if (mk.fac) {
     const yC = mk.fac.botTop - (mk.fac.kind === 'UE' ? 9.5 : 6.4);
-    for (const f of facFacesLocal(mk)) for (const off of [-73.025, 73.025]) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
+    const cart = mk.fac.kind === 'UE' ? [['W', -54.35], ['W', 54.35], ['S', -54.35], ['S', 54.35], ['E', -54.35], ['N', 54.35]]
+      : facFacesLocal(mk).flatMap(f => [[f, -54.35], [f, 54.35]]);
+    for (const [f, off] of cart) add('CART-ASIENTO', 'CART-ASIENTO', 6.35, mTab(f, yC - 100, off, 6.35), { lvl: 'fac', face: f, role: 'cart-asiento', y: yC, label: 'Cartabón de asiento' });
   }
   if (mk.n412) {
     add('P038SVH005', 'P038SVH005', 4.8, mPlan([1, 0, 0, -1], [-162, -76.2], 412.7, 4.8), { lvl: 'fac', role: 'n412', y: 412.7, label: 'Placa a 412.7 mm' });
