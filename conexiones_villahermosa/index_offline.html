@@ -444,7 +444,7 @@ const PART = {
   'P038MVV-005': { d: 'PL MOMENTO 67×110 mm ESP 3/16″ T5', t: 4.8, kg: 0.256, col: '#3f93c6', hoja: 29, rol: 'Cortante · cubierta (SYR-03)', holes: '2 barrenos Ø14.29' },
   'P038SVH001': { d: 'PLC MOMENTO 168×148.2 mm E=1/4″ (en L)', t: 6.4, kg: 0.922, col: '#3b9a62', hoja: 30, rol: 'Fachada · esquina', holes: '2 oblongos 9/16″×1″' },
   'P038SVH007': { d: 'PLC MOMENTO 296.4×168 mm E=1/4″ (en U)', t: 6.4, kg: 1.843, col: '#26877f', hoja: 36, rol: 'Fachada · borde', holes: '4 oblongos 9/16″×1″' },
-  'PL-U-ESQ': { d: 'PLACA EN U - ESQUINA 416.2×416.2 mm E=3/8″', t: 9.5, kg: 6.717, col: '#4f9d69', hoja: null, n: 16, rol: 'Fachada · esquina', holes: '14 oblongos 9/16″×1″' },
+  'PL-U-ESQ': { d: 'PLACA EN U - ESQUINA 441.7×441.7 mm E=3/8″', t: 9.5, kg: 7.362, col: '#4f9d69', hoja: null, n: 16, rol: 'Fachada · esquina', holes: '14 barrenos Ø14.29 (9/16″)' },
   'CART-ASIENTO': { d: 'CARTABÓN DE ASIENTO 90×100 mm E=1/4″', t: 6.4, kg: 0.264, col: '#8f9aa2', hoja: null, rol: 'Fachada · bajo placa inferior', holes: '' },
   'P038SVH004': { d: 'PLC CONEXIÓN 139.5×51.3 mm E=3/16″', t: 4.8, kg: 0.210, col: '#8e5cc2', hoja: 33, rol: 'Nivel 412.7 (SYR-04)', holes: '1 barreno Ø14.3' },
   'P038SVH005': { d: 'PLC CONEXIÓN 140.7×60 mm E=3/16″', t: 4.8, kg: 0.308, col: '#b083dc', hoja: 34, rol: 'Nivel 412.7 (SYR-04)', holes: '1 barreno Ø14.3' },
@@ -474,9 +474,9 @@ const STAAD_MM = { cub: 6040, mez: 3270, fac: 200 };          // nudo STAAD
 
 const L_HSS6178 = [1, 'P025SVH001-05', 'HSS 6″x6″x1/4″ L=6178 mm', 1, 174.054];
 const MARKS = {
-  'SYR-01': { plano: 'S07713000573', hojas: [1, 2, 3], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 217.149,
+  'SYR-01': { plano: 'S07713000573', hojas: [1, 2, 3], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 218.439,
     cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
-    lista: [L_HSS6178, [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [4, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 4, 1.819], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 2, 0.490], [6, 'PL-U-ESQ', 'PLACA EN U - ESQUINA 416.2x416.2 mm E=3/8″', 2, 6.717], [7, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [8, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 6, 0.264]] },
+    lista: [L_HSS6178, [2, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [3, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [4, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 4, 1.819], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 2, 0.490], [6, 'PL-U-ESQ', 'PLACA EN U - ESQUINA 441.7x441.7 mm E=3/8″', 2, 7.362], [7, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [8, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 6, 0.264]] },
   'SYR-02': { plano: 'S07713000574', hojas: [4, 5, 6], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476,
     cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
     lista: [L_HSS6178, [2, 'P038MVV-001', 'PL BASE 300X300MM ESP 5/8″', 1, 10.829], [3, 'P038ESM-006', 'PL MOMENTO 167X130MM ESP 1/4″', 4, 1.009], [4, 'P038ESM-005', 'PL MOMENTO 67X110MM ESP 3/16″', 2, 0.264], [5, 'P038MVV-004', 'PL MOMENTO 125X110MM ESP 3/16″', 3, 0.490], [6, 'P038SVH002', 'PLC MOMENTO 225x175 mm E=1/4″', 6, 1.819], [7, 'P038SVH007', 'PLC MOMENTO 296.4x168 mm E=1/4″', 2, 1.843], [8, 'P038SVH003', 'PLC TAPA 152.4x152.4 mm E=1/4″', 1, 1.141], [9, 'P008SVH001', 'CARTABON 74x100 mm E=5/16″', 8, 0.411], [10, 'CART-ASIENTO', 'CARTABON DE ASIENTO 90x100 mm E=1/4″', 2, 0.264]] },
@@ -492,7 +492,7 @@ const MARKS = {
   'SYR-06': { plano: 'S07713000578', hojas: [16, 17, 18], tipo: 'borde', L: 6178, base: 'P038MVV-001', peso: 210.476, tabFlip: ['E'],
     cub: { ...CUB, dirs: ['N', 'S'] }, mez: { ...MEZ, dirs: ['N', 'S', 'E'] }, fac: { ...FAC, kind: 'U' },
     lista: null },
-  'SYR-07': { plano: 'S07713000579', hojas: [19, 20, 21], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 217.149,
+  'SYR-07': { plano: 'S07713000579', hojas: [19, 20, 21], tipo: 'esquina', L: 6178, base: 'P038MVV-001', peso: 218.439,
     cub: { ...CUB, dirs: ['N', 'E'] }, mez: { ...MEZ, dirs: ['N', 'E'] }, fac: { ...FAC, kind: 'UE' },
     lista: null },
 };
@@ -637,8 +637,8 @@ const SHAPES = {
   'P038MVV-004': () => makeShape(rect(0, 0, 125, 110), [50, 100].flatMap(a => [25, 85].map(b => circ(a, b, H14)))),
   'P038SVH001': () => makeShape([[0, 0], [168, 0], [168, 72], ...arc(104.5, 84.7, 12.7, -90, -180), [91.8, 148.2], [0, 148.2]], [slot(31.8, 31, 14.3, 25.4, 'y'), slot(95.3, 31, 14.3, 25.4, 'y')]),
   'P038SVH007': () => makeShape([[0, 0], [296.4, 0], [296.4, 168], [224.4, 168], ...arc(211.7, 104.5, 12.7, 0, -90), ...arc(84.7, 104.5, 12.7, -90, -180), [72, 168], [0, 168]], [[31, 31.8], [265.4, 31.8], [31, 95.3], [265.4, 95.3]].map(([x, y]) => slot(x, y, 14.3, 25.4, 'x'))),
-  'PL-U-ESQ': () => makeShape([[248.2, 0], [76.2, 0], ...arc(63.5, -63.5, 12.7, 0, -90), ...arc(-63.5, -63.5, 12.7, -90, -180), ...arc(-63.5, 63.5, 12.7, 180, 90), [0, 76.2], [0, 248.2], [-168, 248.2], [-168, -168], [248.2, -168]],
-    [...[117.2, 167.2, 217.2].flatMap(d => [[d, -72.7, 'x'], [d, -136.2, 'x'], [-72.7, d, 'y'], [-136.2, d, 'y']]), [0, -136.2, 'x'], [-136.2, 0, 'y']].map(([x, y, a]) => slot(x, y, 14.3, 25.4, a))),
+  'PL-U-ESQ': () => makeShape([[248.2, -45], [76.2, -45], ...arc(63.5, -63.5, 12.7, 0, -90), ...arc(-63.5, -63.5, 12.7, -90, -180), ...arc(-63.5, 63.5, 12.7, 180, 90), [-45, 76.2], [-45, 248.2], [-193.5, 248.2], [-193.5, -193.5], [248.2, -193.5]],
+    [...[117.2, 167.2, 217.2].flatMap(d => [[d, -98.2], [d, -161.7], [-98.2, d], [-161.7, d]]), [0, -161.7], [-161.7, 0]].map(([x, y]) => circ(x, y, H14))),
   'CART-ASIENTO': () => makeShape([[0, 0], [90, 80], [90, 100], [15, 100], [0, 85]]),
   'P038SVH005': () => makeShape([[6, 0], [134.7, 0], [140.7, 6], [140.7, 54], [134.7, 60], [6, 60], [0, 54], [0, 6]], [circ(40, 25.6, 14.3)]),
   'P038SVH004': () => makeShape([[6, 0], [139.5, 0], [139.5, 24.4], ...arc(95.9, 30.8, 6.4, -90, -180, 5), [89.5, 51.3], [6, 51.3], [0, 45.3], [0, 6]], [circ(40, 25.7, 14.3)]),
@@ -1559,7 +1559,7 @@ function renderLayersTab() {
     <label><input type="checkbox" id="align" ${state.align ? 'checked' : ''}><span class="sw" style="background:var(--accent)"></span>Alinear niveles con los planos<small>perfiles 3D · apagado = nudos STAAD</small></label></div>${secTable}`;
 }
 function renderLegend() {
-  const items = [['P038SVH002', 'Patín mezz. 225×175'], ['P038MVV-004', 'Cortante mezz. 125×110'], ['P038ESM-006', 'Patín cubierta 167×130'], ['P038ESM-005', 'Cortante cubierta 67×110'], ['PL-U-ESQ', 'Fachada esquina U 416×416'], ['P038SVH007', 'Fachada U 296×168'], ['P038MVV-001', 'Placa base 300×300'], ['P038SVH005', 'Placas a 412.7 (SYR-04)']];
+  const items = [['P038SVH002', 'Patín mezz. 225×175'], ['P038MVV-004', 'Cortante mezz. 125×110'], ['P038ESM-006', 'Patín cubierta 167×130'], ['P038ESM-005', 'Cortante cubierta 67×110'], ['PL-U-ESQ', 'Fachada esquina U 442×442'], ['P038SVH007', 'Fachada U 296×168'], ['P038MVV-001', 'Placa base 300×300'], ['P038SVH005', 'Placas a 412.7 (SYR-04)']];
   const secs = Object.keys(SECDEF).filter(s => SEC.includes(s));
   $('#legend-list').innerHTML = `<li class="lg-h">Perfiles STAAD${state.barMode === 'lin' ? ' (color de línea)' : ''}</li>` +
     secs.map(s => `<li><span class="sw" style="background:${SECDEF[s].c}"></span>${esc(s)}</li>`).join('') +
@@ -1685,7 +1685,7 @@ const DIMS = {
   'P038MVV-004': [[62.5, -14, '125'], [142, 55, '110']],
   'P038SVH001': [[84, -16, '168'], [-20, 74, '148.2']],
   'P038SVH007': [[148.2, -16, '296.4'], [-20, 84, '168']],
-  'PL-U-ESQ': [[40.1, -186, '416.2'], [266, 40.1, '416.2']],
+  'PL-U-ESQ': [[27.35, -211.5, '441.7'], [266.2, 27.35, '441.7']],
   'CART-ASIENTO': [[45, -14, '90'], [-18, 50, '100']],
   'P038SVH005': [[70, -14, '140.7'], [-20, 30, '60']],
   'P038SVH004': [[70, -14, '139.5'], [-20, 26, '51.3']],
@@ -1696,7 +1696,7 @@ const DIMS = {
   'P008SVH001': [[37, -14, '74'], [-18, 50, '100']],
   'S07605000096': [[19.5, -12, '39'], [-14, 31, '62']],
 };
-const DIM_TXT = { 'PL-U-ESQ': '416.2 × 416.2 (envuelve el HSS, R12.7)', 'CART-ASIENTO': '90 × 100 (despunte 15 × 15)', 'P038SVH002': '225 × 175', 'P038ESM-006': '167 × 130', 'P022MVV-001': '167 × 130, pierna de 40', 'P038ESM-005': '67 × 110', 'P038MVV-005': '67 × 110 (chaflán 20×20)', 'P038MVV-004': '125 × 110', 'P038SVH001': '168 × 148.2 (muesca 76.2 × 76.2, R12.7)', 'P038SVH007': '296.4 × 168 (muesca 152.4 × 76.2, R12.7)', 'P038SVH005': '140.7 × 60', 'P038SVH004': '139.5 × 51.3 (muesca 50 × 26.9)', 'P038SVH006': '157.1 × 140.3 (muesca 50 × 50)', 'P038SVH003': '152.4 × 152.4 (R9.3)', 'P038MVV-001': '300 × 300', 'P038MVV-002': '300 × 300', 'P008SVH001': '74 × 100 (chaflán a 45°)', 'S07605000096': '39 × 62' };
+const DIM_TXT = { 'PL-U-ESQ': '441.7 × 441.7 (envuelve el HSS, R12.7)', 'CART-ASIENTO': '90 × 100 (despunte 15 × 15)', 'P038SVH002': '225 × 175', 'P038ESM-006': '167 × 130', 'P022MVV-001': '167 × 130, pierna de 40', 'P038ESM-005': '67 × 110', 'P038MVV-005': '67 × 110 (chaflán 20×20)', 'P038MVV-004': '125 × 110', 'P038SVH001': '168 × 148.2 (muesca 76.2 × 76.2, R12.7)', 'P038SVH007': '296.4 × 168 (muesca 152.4 × 76.2, R12.7)', 'P038SVH005': '140.7 × 60', 'P038SVH004': '139.5 × 51.3 (muesca 50 × 26.9)', 'P038SVH006': '157.1 × 140.3 (muesca 50 × 50)', 'P038SVH003': '152.4 × 152.4 (R9.3)', 'P038MVV-001': '300 × 300', 'P038MVV-002': '300 × 300', 'P008SVH001': '74 × 100 (chaflán a 45°)', 'S07605000096': '39 × 62' };
 const FACE_W = { 'P038SVH002': '95 mm (chaflanes 40×40 a 45°)', 'P038ESM-006': '90 mm (chaflanes 25×20)', 'P022MVV-001': '130 mm (pierna de 40 mm soldada al HSS)' };
 const WELD_TXT = {
   'patin-mez': 'Filete de 5 mm por ambos lados al paño del HSS, ER70S-6 (DET-02 y DET-03).',

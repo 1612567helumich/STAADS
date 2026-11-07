@@ -30,7 +30,7 @@ del **1 al 16** (la 16 sale del esquema CAJON-HSS), en el orden del PDF, con un 
 | 13 | 34 | P038SVH005 | PLC conexión 140.7×60 mm 3/16″ |
 | 14 | 35 | P038SVH006 | PLC conexión 157.1×140.3 mm 3/16″ |
 | 15 | 36 | P038SVH007 | PLC momento 296.4×168 mm 1/4″ (en U) |
-| 16 | — | PL-U-ESQ | Placa en U de esquina 416.2×416.2 mm 3/8″, 14 oblongos (esquema CAJON-HSS) |
+| 16 | — | PL-U-ESQ | Placa en U de esquina 441.7×441.7 mm 3/8″, 14 barrenos Ø9/16″ (esquema CAJON-HSS) |
 
 En el visor, cada placa lleva ese mismo número en azul. Desde lejos se ve uno por nivel
 de cada columna (por ejemplo «4 · 3 · 11» en cubierta). Al acercarte a menos de unos 4.6 m
