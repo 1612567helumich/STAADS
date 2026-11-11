@@ -51,6 +51,58 @@ def seismic_factors(g, R):
     return out
 
 
+SHEET_MODES = 43      # renglones de la tabla modal de la hoja SISMO_VIENTO
+
+
+def _xl_round(x, nd):
+    """ROUND de Excel (mitad hacia afuera) sobre el valor decimal impreso."""
+    from decimal import Decimal, ROUND_HALF_UP
+    q = Decimal(1).scaleb(-nd)
+    return float(Decimal(repr(float(x))).quantize(q, rounding=ROUND_HALF_UP))
+
+
+def csm_sheet(c, T):
+    """Ordenada del espectro de la hoja (columna I de la tabla Tm-Csm)."""
+    base = c['I'] * c['A'] / c['R']
+    if T < c['TO'] / 3:
+        return base * (1 + 3 * (c['CO'] - 1) * T / c['TO'])
+    if T <= c['TO']:
+        return base * c['CO']
+    return base * c['CO'] * (c['TO'] / T) ** (2.0 / 3.0)
+
+
+def sheet_factors(g, R, nrows=SHEET_MODES):
+    """Factores de escala del espectro calculados igual que la hoja de calculo
+    'CARGAS Y SISMO F1' (tabla de los primeros 43 modos con los valores como los
+    imprime STAAD: f con 3 decimales, T con 5 y participaciones con 2)."""
+    c = g.c
+    mr = R.modal
+    n = min(nrows, len(mr.T))
+    W = round(float(mr.wtot['X']), 2)
+    rows = []
+    for i in range(n):
+        T = round(float(mr.T[i]), 5)
+        rows.append(dict(mode=i + 1, f=round(float(mr.freq[i]), 3), T=T,
+                         px=round(float(mr.part['X'][i]), 2), pz=round(float(mr.part['Z'][i]), 2),
+                         csm=csm_sheet(c, _xl_round(T, 2))))
+    hn = 0.5 * (g.yroof(c['Z3']) + g.yroof(c['Z1'])) / 100.0
+    ta = 0.085 * hn ** 0.75
+    Ta = c['TO'] if ta <= c['TO'] else (ta if ta <= 6 * c['TO'] else 6 * c['TO'])
+    cs_a = c['A'] * c['I'] * c['CO'] / c['R'] * (c['TO'] / Ta) ** (2.0 / 3.0)
+    out = dict(rows=rows, W=W, hn=hn, Ta=Ta, cs_a=cs_a)
+    for d, key in (('X', 'px'), ('Z', 'pz')):
+        vb = [r['csm'] * W * r[key] / 100.0 for r in rows]
+        vmod = math.sqrt(sum(v * v for v in vb))
+        pmax = max(r[key] for r in rows)
+        dom = next(r for r in rows if r[key] == pmax)
+        vest1 = W * dom['csm']
+        vest2 = W * cs_a
+        vmin = max(0.8 * vest2, 0.9 * vest1)
+        out[d] = dict(dom=dom['mode'], T=dom['T'], part=pmax, sum=sum(r[key] for r in rows), Vmod=vmod, Vest1=vest1,
+                      Vest2=vest2, Vmin=vmin, factor=max(vmin / vmod, 1.0))
+    return out
+
+
 def evaluate(g, m, verbose=True, R=None, tc_state='last'):
     c = g.c
     t0 = time.time()
@@ -98,10 +150,19 @@ def evaluate(g, m, verbose=True, R=None, tc_state='last'):
     n90z = int(np.argmax(cz >= 90) + 1) if cz[-1] >= 90 else None
     P('  modos para 90%%: X=%s Z=%s' % (n90x, n90z))
     sf = seismic_factors(g, R)
+    sh = sheet_factors(g, R)
+    rep['sheet'] = sh
+    for d in 'XZ':
+        sf[d]['factor_80modos'] = sf[d]['factor']
+        sf[d]['factor'] = sh[d]['factor']
+        sf[d]['dom'] = sh[d]['dom']
+    for d in 'XZ':
+        P('  hoja (43 modos): sismo %s modo %d T=%.5f part=%.2f%% suma=%.2f%% Vmod=%.1f 0.9Vest1=%.1f 0.8Vest2=%.1f -> factor=%.4f' % (
+            d, sh[d]['dom'], sh[d]['T'], sh[d]['part'], sh[d]['sum'], sh[d]['Vmod'], 0.9 * sh[d]['Vest1'], 0.8 * sh[d]['Vest2'], sh[d]['factor']))
     for d in 'XZ':
         s = sf[d]
-        P('  sismo %s: modo dominante %d T=%.4f (%.1f%%), W=%.0f, Vmod(f=1)=%.1f, 0.9Vest(T)=%.1f, 0.8Vest(Ta)=%.1f -> factor=%.4f (en archivo %.4f)' % (
-            d, s['dom'], s['T'], s['part'], s['W'], s['Vmod'], 0.9 * s['Vest_T'], 0.8 * s['Vest_A'], s['factor'], s['f_now']))
+        P('  sismo %s (80 modos, T exacto): modo dominante %d T=%.4f (%.1f%%), W=%.0f, Vmod(f=1)=%.1f, 0.9Vest(T)=%.1f, 0.8Vest(Ta)=%.1f -> factor=%.4f | hoja=%.4f (en archivo %.4f)' % (
+            d, s['dom'], s['T'], s['part'], s['W'], s['Vmod'], 0.9 * s['Vest_T'], 0.8 * s['Vest_A'], s['factor_80modos'], s['factor'], s['f_now']))
     rep['sf'] = sf
     rep['part'] = (float(cx[-1]), float(cz[-1]))
     # ---------------- derivas

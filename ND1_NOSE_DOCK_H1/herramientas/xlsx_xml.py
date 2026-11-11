@@ -1,10 +1,8 @@
 """Edicion de un .xlsx a nivel XML (conserva formatos, imagenes y graficas que
 openpyxl perderia) y recalculo de valores con LibreOffice para dejar al dia los
 valores guardados de las formulas."""
-import io
 import os
 import re
-import shutil
 import subprocess
 import tempfile
 import zipfile
@@ -106,6 +104,12 @@ class Sheet:
             return '<c r="%s"%s/>' % (ref, s)
         return '<c r="%s"%s><v>%s</v></c>' % (ref, s, repr(float(value)) if not isinstance(value, int) else value)
 
+    def clear(self, ref):
+        """Elimina la celda (valor, formula y formato)."""
+        m = re.search(self.CELL % ref, self.xml, re.S)
+        if m:
+            self.xml = self.xml[:m.start()] + self.xml[m.end():]
+
     def style_of(self, ref):
         m = re.search(self.CELL % ref, self.xml, re.S)
         if not m:
@@ -157,24 +161,26 @@ class Sheet:
             self.xml = self.xml[:pos] + rowxml + self.xml[pos:]
 
 
+CELLRE = re.compile(r'<c r="([A-Z]+\d+)"((?:\s[^>]*?)?)(?:/>|>(.*?)</c>)', re.S)
+VRE = re.compile(r'<v(?:\s[^>]*)?>.*?</v>|<v\s*/>', re.S)
+TRE = re.compile(r'\st="[a-zA-Z]+"')
+
+
 def _strip_cached(xml):
     """Quita los valores guardados de las celdas con formula (fuerza el calculo)."""
     def rep(m):
-        cell = m.group(0)
-        if '<f' not in cell:
-            return cell
-        cell = re.sub(r'<v>.*?</v>', '', cell, flags=re.S)
-        cell = re.sub(r'<v/>', '', cell)
-        head = re.match(r'<c [^>]*>', cell).group(0)
-        head2 = re.sub(r'\st="(str|b|e|n)"', '', head)
-        return head2 + cell[len(head):]
-    return re.sub(r'<c r="[A-Z]+\d+"[^>]*>.*?</c>', rep, xml, flags=re.S)
+        ref, attrs, body = m.group(1), m.group(2), m.group(3)
+        if body is None or '<f' not in body:
+            return m.group(0)
+        return '<c r="%s"%s>%s</c>' % (ref, TRE.sub('', attrs), VRE.sub('', body))
+    return CELLRE.sub(rep, xml)
 
 
 def recalc_and_inject(book, out_path, workdir=None):
     """Guarda el libro, lo recalcula con LibreOffice y vuelve a escribir en el XML
     original los valores calculados de cada formula."""
     import openpyxl
+    from xml.sax.saxutils import unescape
     workdir = workdir or tempfile.mkdtemp()
     tmp_in = os.path.join(workdir, 'in')
     tmp_out = os.path.join(workdir, 'out')
@@ -183,8 +189,8 @@ def recalc_and_inject(book, out_path, workdir=None):
     sheets = {}
     wbx = book.text('xl/workbook.xml')
     for name in re.findall(r'<sheet[^>]*name="([^"]+)"', wbx):
-        from xml.sax.saxutils import unescape
-        sheets[unescape(name, {'&quot;': '"'})] = book.sheet_path(unescape(name, {'&quot;': '"'}))
+        title = unescape(name, {'&quot;': '"'})
+        sheets[title] = book.sheet_path(title)
     b2 = Book.__new__(Book)
     b2.files = dict(book.files)
     b2.order = list(book.order)
@@ -201,32 +207,31 @@ def recalc_and_inject(book, out_path, workdir=None):
     nupd = 0
     for title, p in sheets.items():
         ws = wv[title]
-        xml = book.text(p)
 
         def rep(m):
             nonlocal nupd
-            cell = m.group(0)
-            if '<f' not in cell:
-                return cell
-            ref = re.match(r'<c r="([A-Z]+\d+)"', cell).group(1)
+            ref, attrs, body = m.group(1), m.group(2), m.group(3)
+            if body is None or '<f' not in body:
+                return m.group(0)
             v = ws[ref].value
-            head = re.match(r'<c [^>]*>', cell).group(0)
-            body = cell[len(head):-4]
-            body = re.sub(r'<v>.*?</v>', '', body, flags=re.S).replace('<v/>', '')
-            head = re.sub(r'\st="[a-zA-Z]+"', '', head)
+            attrs = TRE.sub('', attrs)
+            body = VRE.sub('', body)
             if v is None:
                 newv = ''
             elif isinstance(v, bool):
-                head = head[:-1] + ' t="b">'
+                attrs += ' t="b"'
                 newv = '<v>%d</v>' % int(v)
             elif isinstance(v, (int, float)):
                 newv = '<v>%s</v>' % repr(float(v))
+            elif isinstance(v, str) and v.startswith('#') and v.endswith(('!', '?', '/A', '/0')):
+                attrs += ' t="e"'
+                newv = '<v>%s</v>' % escape(v)
             else:
-                head = head[:-1] + ' t="str">'
-                newv = '<v>%s</v>' % escape(str(v))
+                attrs += ' t="str"'
+                sp = ' xml:space="preserve"' if (v != v.strip() or '  ' in v) else ''
+                newv = '<v%s>%s</v>' % (sp, escape(str(v)))
             nupd += 1
-            return head + body + newv + '</c>'
-        xml = re.sub(r'<c r="[A-Z]+\d+"[^>]*>.*?</c>', rep, xml, flags=re.S)
-        book.put(p, xml)
+            return '<c r="%s"%s>%s%s</c>' % (ref, attrs, body, newv)
+        book.put(p, CELLRE.sub(rep, book.text(p)))
     book.save(out_path)
     return nupd

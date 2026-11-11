@@ -52,9 +52,15 @@ def main(out_std, out_json, cfg0=None, comment=None):
     S['towards'] = g.towards
     S['wind'] = dict(q=g.wind['q'], info=g.wind['info'], cases={str(k): v for k, v in g.wind['cases'].items()},
                      strip=g.wind_extra['strip'], door_w=g.wind_extra['door_w'], edoor_w=g.wind_extra['edoor_w'])
+    from nd1_gen import fmt_list
+    lowm = {k: ' '.join(fmt_list(v)) for k, v in g.wind_extra['low'].items()}
+    lowm['pc'] = ' '.join(fmt_list(g.wind_extra['pc']))
+    lowm['pe'] = ' '.join(fmt_list(g.wind_extra['pe']))
+    S['wind']['low_members'] = lowm
     S['modal'] = dict(T=[float(t) for t in mr.T], f=[float(f) for f in mr.freq], px=[float(v) for v in mr.part['X']], pz=[float(v) for v in mr.part['Z']],
                       W=float(mr.wtot['X']), tc_inactive=sorted(R.tc_modal))
     S['sf'] = {d: {k: (float(v) if not isinstance(v, int) else v) for k, v in s.items()} for d, s in rep['sf'].items()}
+    S['sheet'] = rep['sheet']
     S['base_shear'] = {str(k): {d: float(v[1]) for d, v in R.base_shear(k).items()} for k in R.spec_cases}
     # derivas
     dr = {}
