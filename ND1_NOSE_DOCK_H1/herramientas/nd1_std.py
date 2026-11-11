@@ -396,19 +396,29 @@ def build_std(g, extra_comment=None):
             else:
                 A('%s ONE %s %s' % (grp, fnum(p, 4), d))
         ml = []
-        for wall, dirn in (('_OESTE', 'GX'), ('_ESTE', 'GX'), ('_NORTE', 'GZ')):
-            p = v[wall]['staad']
-            if abs(p) < 1e-9:
-                continue
-            ml.append((low[wall], dirn, p * strip))
+        if c['WIND_STRIP']:
+            for wall, dirn in (('_OESTE', 'GX'), ('_ESTE', 'GX'), ('_NORTE', 'GZ')):
+                p = v[wall]['staad']
+                if abs(p) < 1e-9:
+                    continue
+                ml.append((low[wall], dirn, p * strip))
         p = v['_NORTE']['staad']
-        if abs(p) > 1e-9:
+        if c['WIND_CORTINA'] and abs(p) > 1e-9:
             ml.append((bt['PC'], 'GZ', p * door_w))
         p = v['_OESTE']['staad']
-        if abs(p) > 1e-9:
+        if c['WIND_EDOOR'] and abs(p) > 1e-9:
             ml.append((pe_low, 'GX', p * edoor_w))
-        if ml and c['WIND_EXTRA']:
-            A('* FRANJA INFERIOR DE MUROS (BAJO EL PRIMER LARGUERO) Y VIENTO SOBRE PUERTAS')
+        if ml:
+            if c['WIND_STRIP']:
+                A('* VIENTO COMO CARGA LINEAL: FRANJA INFERIOR DE MUROS Y PUERTAS')
+            else:
+                A('* VIENTO SOBRE PUERTAS, EN SUS POSTES (PRESION DEL MURO X MEDIO ANCHO):')
+                parts = []
+                if c['WIND_CORTINA']:
+                    parts.append('CORTINA = MURO 3 X %s CM' % fnum(door_w, 1))
+                if c['WIND_EDOOR']:
+                    parts.append('PUERTA DE EMERGENCIA = MURO A X %s CM' % fnum(edoor_w, 1))
+                A('* ' + '; '.join(parts))
             A('MEMBER LOAD')
             for ids, dirn, w in ml:
                 L.extend(wrap(fmt_list(ids) + ['UNI', dirn, fnum(w, 4)]))

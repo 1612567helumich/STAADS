@@ -68,7 +68,7 @@ def main(template, resumen, out):
     # ------------------------------------------------ largueros de muro
     ws['E37'] = '=R13+R14+R15'
     ws['E38'] = '=R19'
-    ws['C39'] = 'Redondo Liso Ø= 3/4"(MUROS LATERAL)'
+    ws['C39'] = 'Redondo Liso Ø= 1/2"(MUROS LATERAL)'
     ws['E39'] = '=R21'
     tmp = out + '.tmp.xlsx'
     wb.save(tmp)
