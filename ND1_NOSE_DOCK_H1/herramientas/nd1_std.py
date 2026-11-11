@@ -194,6 +194,7 @@ def build_std(g, extra_comment=None):
         ('_LARGUEROS_CUB', bt['LC']),
         ('_CONTRAFLAMBEOS', bt['CFC']),
         ('_LARGUEROS_MURO', bt['LM']),
+        ('_LARGUEROS_CAJON', bt['LMT']),
         ('_DINTELES', bt['DIN'] + bt['DINE']),
         ('_FLAMBEOS_MUROS', bt['CF']),
         ('_POSTES_CORTINA', bt['PC']),
@@ -206,7 +207,7 @@ def build_std(g, extra_comment=None):
         a, b = g.members[e]
         return abs(g.nodes[a][axis] - val) < 1e-6 and abs(g.nodes[b][axis] - val) < 1e-6
     cub = bt['VR'] + bt['VT'] + bt['CS'] + bt['CSL'] + bt['LC'] + bt['CFC']
-    wall_tags = ('COL', 'LM', 'DIN', 'DINE', 'CF', 'PC', 'PE', 'DE')
+    wall_tags = ('COL', 'LM', 'LMT', 'DIN', 'DINE', 'CF', 'PC', 'PE', 'DE')
     oeste = [e for e in g.members if (g.minfo[e]['tag'] in wall_tags or g.minfo[e]['tag'] == 'VR') and inplane(e, 0, XA)]
     este = [e for e in g.members if (g.minfo[e]['tag'] in wall_tags or g.minfo[e]['tag'] == 'VR') and inplane(e, 0, XC)]
     norte = [e for e in g.members if (g.minfo[e]['tag'] in wall_tags or g.minfo[e]['tag'] == 'VT') and inplane(e, 2, Z3)]
@@ -257,7 +258,7 @@ def build_std(g, extra_comment=None):
         for s, ids in pris:
             L.extend(wrap(fmt_list(ids) + ['PRIS', 'YD', fnum(s[1], 4)]))
     A('CONSTANTS')
-    beta90 = [e for e in g.members if g.minfo[e]['tag'] in ('LM', 'DIN', 'DINE', 'DE') or g.minfo[e].get('beta') == 90.0]
+    beta90 = [e for e in g.members if g.minfo[e]['tag'] in ('LM', 'LMT', 'DIN', 'DINE', 'DE') or g.minfo[e].get('beta') == 90.0]
     L.extend(wrap(['BETA', '90', 'MEMB'] + fmt_list(beta90)))
     A('MATERIAL STEEL ALL')
     # ------------------------------------------------------------ apoyos
@@ -293,11 +294,11 @@ def build_std(g, extra_comment=None):
     isx = lambda v: (lambda p: abs(p[0] - v) < 1e-6)
     isz = lambda v: (lambda p: abs(p[2] - v) < 1e-6)
     chain_ends(bt['CS'] + bt['CI'], isx(XA), isx(XC))
-    chain_ends([e for e in bt['CI'] if g.minfo[e].get('truss') == 'T3'], isx(XB), isx(XB))
     chain_ends([e for e in bt['CSL'] + bt['CIL'] if g.minfo[e]['truss'] == 'TL1'], isz(Z3), isz(Z2))
     chain_ends([e for e in bt['CSL'] + bt['CIL'] if g.minfo[e]['truss'] == 'TL2'], isz(Z2), isz(Z1))
     if c['RAFTER_PINNED']:
         chain_ends(bt['VR'], lambda p: isz(Z3)(p) or isz(Z2)(p), lambda p: isz(Z2)(p) or isz(Z1)(p))
+    if c['VT_PINNED']:
         chain_ends(bt['VT'], lambda p: isx(XA)(p) or isx(XB)(p), lambda p: isx(XB)(p) or isx(XC)(p))
     A('MEMBER RELEASE')
     L.extend(wrap(fmt_list(rs) + ['START', 'MY', 'MZ']))
@@ -436,7 +437,12 @@ def build_std(g, extra_comment=None):
     lzmap = {}
     for name, keys in g.col_nodes.items():
         top = g.yroof(keys[0][2])
-        hk = g.ybot(keys[0][2], at_column=True) if (name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3') or c['BACK_TRUSS']) else top
+        if name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3'):
+            hk = g.ybot(keys[0][2], at_column=True)
+        elif c['BACK_TRUSS']:
+            hk = c['GIRTS'][-1]
+        else:
+            hk = top
         for e in bt['COL']:
             if g.minfo[e]['col'] != name:
                 continue
@@ -448,18 +454,21 @@ def build_std(g, extra_comment=None):
         L.extend(wrap(['LZ', fnum(lz, 2), 'MEMB'] + fmt_list(ids)))
     g.lz_cols = lzmap
     A('* ARMADURAS: LY = FUERA DEL PLANO (CONTRAFLAMBEOS / LARGUEROS), LZ = TABLERO')
-    L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(bt['CS'] + bt['CI'])))
-    L.extend(wrap(['LZ', fnum(c['PANEL_T'], 2), 'MEMB'] + fmt_list(bt['CS'] + bt['CI'])))
+    # con armadura en el eje 3 la viga superior VT trabaja como su cuerda superior
+    chords = bt['CS'] + bt['CI'] + (bt['VT'] if c['BACK_TRUSS'] else [])
+    L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(chords)))
+    L.extend(wrap(['LZ', fnum(c['PANEL_T'], 2), 'MEMB'] + fmt_list(chords)))
     lpan = max(g.L(e) for e in bt['CSL'])
     L.extend(wrap(['LY', fnum(c['PURLIN'], 2), 'MEMB'] + fmt_list(bt['CSL'] + bt['CIL'])))
     L.extend(wrap(['LZ', fnum(lpan, 2), 'MEMB'] + fmt_list(bt['CSL'] + bt['CIL'])))
     A('* VIGAS DE BORDE Y LARGUEROS: LY = ARRIOSTRAMIENTO, LZ = CLARO')
     L.extend(wrap(['LY', fnum(c['PURLIN'], 2), 'MEMB'] + fmt_list(bt['VR'])))
     L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(bt['VR'])))
-    lm_side = [e for e in bt['LM'] + bt['DINE'] if g.minfo[e]['wall'] in ('A', 'C')]
-    lm_back = [e for e in bt['LM'] + bt['DIN'] if g.minfo[e]['wall'] == '3']
-    L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(bt['VT'] + bt['LC'] + lm_back)))
-    L.extend(wrap(['LZ', '750', 'MEMB'] + fmt_list(bt['VT'] + bt['LC'] + lm_back)))
+    lm_side = [e for e in bt['LM'] + bt['LMT'] + bt['DINE'] if g.minfo[e]['wall'] in ('A', 'C')]
+    lm_back = [e for e in bt['LM'] + bt['LMT'] + bt['DIN'] if g.minfo[e]['wall'] == '3']
+    vt_beam = [] if c['BACK_TRUSS'] else bt['VT']
+    L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(vt_beam + bt['LC'] + lm_back)))
+    L.extend(wrap(['LZ', '750', 'MEMB'] + fmt_list(vt_beam + bt['LC'] + lm_back)))
     L.extend(wrap(['LY', '266.67', 'MEMB'] + fmt_list(lm_side)))
     L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(lm_side)))
     L.extend(wrap(['LY', fnum(dh, 2), 'MEMB'] + fmt_list(bt['PC'])))

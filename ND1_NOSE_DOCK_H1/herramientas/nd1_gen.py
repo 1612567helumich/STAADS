@@ -28,6 +28,7 @@ DEFAULT = dict(
         VT=('UPT', 3, 'MCE6-14'),       # viga superior muro eje 3
         LC=('UPT', 2, 'MC10-14'),       # largueros de cubierta
         LM=('UPT', 2, 'MC10-14'),       # largueros de muro
+        LMT=('UPT', 4, 'MCC10-14'),     # larguero de remate en cajon (donde terminan los contraflambeos de muro)
         DIN=('UPT', 4, 'MCC10-14'),     # dintel cortina
         DINE=('UPT', 4, 'MCC10-14'),    # larguero-dintel sobre puerta de emergencia
         CS=('UPT', 3, 'MCE6-14'),       # cuerdas superiores armaduras transversales
@@ -49,8 +50,11 @@ DEFAULT = dict(
     DIAE_PANELS=0,          # tableros extremos con diagonal reforzada en armaduras transversales (por lado)
     DIAE_PANELS_L=1,        # idem en cada claro de la armadura longitudinal
     RAFTER_PINNED=True,
+    VT_PINNED=True,         # viga superior del eje 3 articulada en columnas
+    TOP_BOX=True,           # larguero superior de muros en cajon (remate de contraflambeos, como ND23 / H5-H6)
+    ROD_DOOR=True,          # el tensor del claro de la puerta de emergencia arranca sobre su cajon (no cruza la puerta)
     BACK_BRACE=False,       # sin tensores en el muro de fondo (peticion del cliente)
-    BACK_TRUSS=False,       # armadura superior en el muro de fondo (eje 3)
+    BACK_TRUSS=False,       # armadura en el plano del muro de fondo (viga superior - cajon de remate)
     # ----- cargas
     CM_ROOF=19.32, CM_WALL=5.85, CV_ROOF=20.0,
     W_CORTINA=11.82, W_EDOOR=31.0, EDOOR_LINE=0.8,
@@ -200,7 +204,7 @@ class Gen:
         for name, x, z in cols:
             top = yr(z)
             ys = [0.0] + [g for g in G if g < top - 1e-6]
-            if name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3') or c['BACK_TRUSS']:
+            if name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3'):
                 ys.append(self.ybot(z, at_column=True))
             ys.append(top)
             ys = sorted(set(round(v, 3) for v in ys))
@@ -218,11 +222,12 @@ class Gen:
         if c['BACK_TRUSS']:
             npb = int(round((XC - XA) / c['PANEL_T']))
             xs_top = [XA + c['PANEL_T'] * i for i in range(npb + 1)]
+        self.xs_top = xs_top
         self.chain('VT', [(x, yr(Z3), Z3) for x in xs_top])
         if c['BACK_TRUSS']:
+            # cuerda superior = viga VT, cuerda inferior = cajon de remate (larguero superior del muro)
             yt = yr(Z3)
-            yb = yt - D
-            self.chain('CI', [(x, yb, Z3) for x in xs_top], truss='T3')
+            yb = G[-1]
             for x in xs_top[1:-1]:
                 if abs(x - XB) < 1e-6:
                     continue
@@ -310,6 +315,8 @@ class Gen:
                     if any(abs(z1 - q) < 1e-6 for q in cols_z) or any(abs(z1 - q) < 1e-6 for q in posts):
                         rel.append('END')
                     tag = 'LM'
+                    if c['TOP_BOX'] and abs(g - G[-1]) < 1e-6:
+                        tag = 'LMT'
                     if side == 'A' and abs(g - c['EDOOR_TOP']) < 1e-6 and z0 >= Z2 - 1e-6:
                         tag = 'DINE'
                     self.mb(tag, a, b, rel=rel, wall=side, lvl=g)
@@ -339,6 +346,8 @@ class Gen:
             else:
                 runs = [[XA] + [s for s in c['SAG_BACK_X'] if s < XB] + [XB],
                         [XB] + [s for s in c['SAG_BACK_X'] if s > XB] + [XC]]
+            if c['BACK_TRUSS'] and abs(g - G[-1]) < 1e-6:
+                runs = [[x for x in self.xs_top if x <= XB + 1e-6], [x for x in self.xs_top if x >= XB - 1e-6]]
             for run in runs:
                 keys = [self.nd(x, g, Z3) for x in run]
                 for (a, b, x0, x1) in zip(keys[:-1], keys[1:], run[:-1], run[1:]):
@@ -349,6 +358,8 @@ class Gen:
                     if any(abs(x1 - q) < 1e-6 for q in ends):
                         rel.append('END')
                     tag = 'LM'
+                    if c['TOP_BOX'] and abs(g - G[-1]) < 1e-6:
+                        tag = 'LMT'
                     if abs(g - dh) < 1e-6 and x1 <= XB + 1e-6:
                         # dintel de cortina: cajon continuo de columna A a columna B
                         tag = 'DIN'
@@ -378,7 +389,14 @@ class Gen:
         for s in ('A', 'C'):
             self.mb('TM', base(s + '-3'), t[s + '-2'], wall=s)
             self.mb('TM', base(s + '-2'), t[s + '-3'], wall=s)
-            self.mb('TM', base(s + '-2'), t[s + '-1'], wall=s)
+            low2 = base(s + '-2')
+            if s == 'A' and c['ROD_DOOR']:
+                # la puerta de emergencia queda junto a la columna A-2: el tensor arranca en
+                # el cajon de +3.00 (criterio H5-H6) para no atravesar el vano
+                low2 = self.key(XA, c['EDOOR_TOP'], Z2)
+                if low2 not in self._nodes:
+                    raise ValueError('no existe el nudo de arranque del tensor sobre la puerta')
+            self.mb('TM', low2, t[s + '-1'], wall=s, door=(s == 'A' and c['ROD_DOOR']))
             self.mb('TM', base(s + '-1'), t[s + '-2'], wall=s)
         if c['BACK_BRACE']:
             self.mb('TMF', base('B-3'), t['C-3'], wall='3')
@@ -396,8 +414,8 @@ class Gen:
         self.mb('TC', cT2, t['C-1'])
 
     # ------------------------------------------------------------ numeracion
-    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'DIN', 'DINE', 'CF',
-             'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
+    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'DIN', 'DINE',
+             'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
 
     def number(self):
         keys = list(self._nodes)

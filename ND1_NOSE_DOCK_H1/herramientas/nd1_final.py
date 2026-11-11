@@ -6,24 +6,36 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import nd1_eval, nd1_std
 from staadlite import design
 
-CFG = {"DIAE_PANELS_L": 3, "DIAE_PANELS": 0}
+CFG = {
+    "DIAE_PANELS_L": 3, "DIAE_PANELS": 0,
+    "BACK_TRUSS": True,                      # armadura en el plano del muro del eje 3 (sin tensores atras)
+    "SEC": {
+        "COL": ("AISC", "W12X26"),           # unico perfil IR
+        "TM": ("PRIS", 1.905),               # tensores de muros laterales 3/4"
+        "PE": ("UPT", 10, "PTR4-14"),        # postes de puerta de emergencia (como H5-H6)
+    },
+}
 COMMENT = [
-    'NOSE DOCK H1 (ND1) - SUPERESTRUCTURA.  R1.0',
+    'NOSE DOCK H1 (ND1) - SUPERESTRUCTURA.  R1.1',
     'PLANTA 15.00 X 16.00 M, EJES A-B-C (X) Y 3-2-1 (Z), FRENTE ABIERTO EN EJE 1',
     'N.S.E. = 11.66 M (EJE 3), PENDIENTE 5.1 %, CUERDA INFERIOR EN N.I.E. = 9.36 M',
     'FORMA TIPO ND23 (ARMADURAS), CARGAS TIPO H5-H6 (ONEWAY POR GRUPOS Y MASA',
     'SISMICA EN PUNTA DE COLUMNAS).  NTDS / NTDV / RESESCO EL SALVADOR',
-    'COLUMNAS: UN SOLO PERFIL IR (W16X26, A572 GR.50).  SIN TENSORES EN EJE 3',
+    'COLUMNAS: UN SOLO PERFIL IR (W12X26, A572 GR.50)',
+    'EJE 3 SIN TENSORES: ARMADURA EN EL PLANO DEL MURO (VIGA SUPERIOR - CAJON)',
+    'MONTEN CAJON (MCC) DONDE REMATAN CONTRAFLAMBEOS DE MURO Y POSTES DE PUERTAS',
+    'EL TENSOR JUNTO A LA PUERTA DE EMERGENCIA ARRANCA EN EL CAJON DE +3.00',
 ]
 
-def main(out_std, out_json):
-    cfg = dict(CFG)
-    g, m = nd1_eval.build(cfg, out_std, COMMENT)
+def main(out_std, out_json, cfg0=None, comment=None):
+    cfg = dict(cfg0 or CFG)
+    COMMENT_ = comment or COMMENT
+    g, m = nd1_eval.build(cfg, out_std, COMMENT_)
     rep = nd1_eval.evaluate(g, m, verbose=False)
     sf = rep['sf']
     cfg.update(FX=math.ceil(sf['X']['factor'] * 1000 - 1e-6) / 1000.0, FZ=math.ceil(sf['Z']['factor'] * 1000 - 1e-6) / 1000.0,
                DOM_X=sf['X']['dom'], DOM_Z=sf['Z']['dom'])
-    g, m = nd1_eval.build(cfg, out_std, COMMENT)
+    g, m = nd1_eval.build(cfg, out_std, COMMENT_)
     rep = nd1_eval.evaluate(g, m, verbose=True)
     R = rep['R']; st = R.st; mr = R.modal
     c = g.c
@@ -102,5 +114,21 @@ def main(out_std, out_json):
     print('\nfactores finales FX=%.3f FZ=%.3f  dominantes X=%d Z=%d' % (cfg['FX'], cfg['FZ'], cfg['DOM_X'], cfg['DOM_Z']))
     print('lineas > 79:', sum(1 for l in open(out_std, encoding='latin-1').read().splitlines() if len(l) > 79))
 
+ALT = {
+    'W14X22': (
+        {"DIAE_PANELS_L": 3, "DIAE_PANELS": 0, "BACK_TRUSS": True,
+         "SEC": {"COL": ("AISC", "W14X22"), "TM": ("PRIS", 1.905)}},
+        ['NOSE DOCK H1 (ND1) - SUPERESTRUCTURA.  R1.1 - ALTERNATIVA CON W14X22',
+         'MISMA GEOMETRIA Y CARGAS QUE EL MODELO PRINCIPAL (W12X26); SOLO CAMBIA LA',
+         'COLUMNA.  ES MAS LIGERA PERO SUS MODOS EN Z SALEN REPARTIDOS (MODOS',
+         'LOCALES DE MUROS POR EL EJE DEBIL DE LA COLUMNA) Y EL FACTOR DE ESCALA',
+         'DEL ESPECTRO EN Z RESULTA ALTO.  VER RESUMEN_ND1'],
+    ),
+}
+
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    if len(sys.argv) > 3:
+        cfg, com = ALT[sys.argv[3]]
+        main(sys.argv[1], sys.argv[2], cfg, com)
+    else:
+        main(sys.argv[1], sys.argv[2])
