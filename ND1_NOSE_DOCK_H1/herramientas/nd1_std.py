@@ -407,7 +407,7 @@ def build_std(g, extra_comment=None):
         p = v['_OESTE']['staad']
         if abs(p) > 1e-9:
             ml.append((pe_low, 'GX', p * edoor_w))
-        if ml:
+        if ml and c['WIND_EXTRA']:
             A('* FRANJA INFERIOR DE MUROS (BAJO EL PRIMER LARGUERO) Y VIENTO SOBRE PUERTAS')
             A('MEMBER LOAD')
             for ids, dirn, w in ml:

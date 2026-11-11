@@ -59,6 +59,8 @@ DEFAULT = dict(
     CM_ROOF=19.32, CM_WALL=5.85, CV_ROOF=20.0,
     W_CORTINA=11.82, W_EDOOR=31.0, EDOOR_LINE=0.8,
     VMAX=120.0, GUST=1.3, ZONE_K=1.0, ZONE_A=4.5,
+    WIND_EXTRA=False,       # viento como carga lineal en la franja bajo el primer larguero y en postes de puertas
+                            # (asi lo tiene el ND23; H5-H6 y la hoja de viento solo llevan ONEWAY por grupos)
     A=0.4, CO=3.0, TO=0.6, I=1.0, R=7.0, CD=6.0,
     FX=1.0, FZ=1.0, DOM_X=1, DOM_Z=2, NMODES=80,
     FY_COL=3515.0,
