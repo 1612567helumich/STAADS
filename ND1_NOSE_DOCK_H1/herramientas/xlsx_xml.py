@@ -44,17 +44,21 @@ class Book:
         rid = m.group(1)
         t = re.search(r'<Relationship[^>]*Id="%s"[^>]*Target="([^"]+)"' % rid, rels) or \
             re.search(r'<Relationship[^>]*Target="([^"]+)"[^>]*Id="%s"' % rid, rels)
-        return 'xl/' + t.group(1).lstrip('/')
+        target = t.group(1)
+        # openpyxl escribe rutas absolutas ("/xl/worksheets/sheet1.xml"); Excel, relativas
+        return target.lstrip('/') if target.startswith('/') else 'xl/' + target
 
     def force_recalc(self):
+        """Pide a Excel recalcular todo al abrir y elimina la cadena de calculo."""
         wb = self.text('xl/workbook.xml')
         wb = re.sub(r'<calcPr[^>]*/>', '', wb)
-        wb = wb.replace('</workbook>', '<calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>') if '<definedNames' not in wb else \
-            re.sub(r'(</definedNames>)', r'\1<calcPr calcId="191029" fullCalcOnLoad="1"/>', wb, count=1)
-        # calcPr debe ir despues de sheets/definedNames y antes de extLst
-        if '<extLst>' in wb and wb.index('<calcPr') > wb.index('<extLst>'):
-            wb = re.sub(r'<calcPr[^>]*/>', '', wb)
-            wb = wb.replace('<extLst>', '<calcPr calcId="191029" fullCalcOnLoad="1"/><extLst>', 1)
+        calc = '<calcPr calcId="191029" fullCalcOnLoad="1"/>'
+        # orden del esquema: sheets, externalReferences, definedNames, calcPr, ..., extLst
+        for pat in (r'<definedNames\s*/>', r'</definedNames>', r'</externalReferences>', r'</sheets>'):
+            m = re.search(pat, wb)
+            if m:
+                wb = wb[:m.end()] + calc + wb[m.end():]
+                break
         self.put('xl/workbook.xml', wb)
         if 'xl/calcChain.xml' in self.files:
             del self.files['xl/calcChain.xml']
