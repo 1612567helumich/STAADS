@@ -148,6 +148,7 @@ ALT = {
          "MAX_GAP": 120.0, "TOP_DROP": 100.0, "SNAP": 15.0, "FALDON_GIRT": True,
          "STUB_MIN": 0.0,                                    # tambien los largueros cortos entre columna y poste
          "CF_BELOW_TOP": True,                               # PIPS de muro hasta +10.08, no al larguero superior (R1.2)
+         "FALDON_STRIP": True,                               # faldon completo: franja de 10.4 cm abajo de la cuerda (R1.3)
          "DOOR_X": (952.0, 1462.0), "DOOR_H": 607.0,         # cortina 5.00 x 6.00 en el claro B-C, dintel a +6.07
          "EDOOR_WALL": "3", "EDOOR_X": (766.0, 897.0), "EDOOR_H": 227.0, "EDOOR_TOP": 288.0,
          "ROD_DOOR": False,                                  # los muros laterales no tienen puertas

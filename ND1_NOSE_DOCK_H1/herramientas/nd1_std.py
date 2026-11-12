@@ -340,6 +340,11 @@ def build_std(g, extra_comment=None):
     A('* PUERTA DE EMERGENCIA (CARGA LINEAL EN POSTES, IGUAL QUE H5-H6)')
     A('MEMBER LOAD')
     L.extend(wrap(fmt_list(pe_low) + ['UNI', 'GY', '-' + fnum(c['EDOOR_LINE'], 3)]))
+    # franja del faldon abajo de la cuerda inferior (de su eje al N.I.E.)
+    h_fs = g.yroof(c['Z1']) - c['D_TRUSS'] - c['NIE']
+    t1_bot = [e for e in bt['CI'] if g.minfo[e].get('truss') == 'T1']
+    if c['FALDON_STRIP'] and h_fs > 1e-6:
+        L.extend(wrap(fmt_list(t1_bot) + ['UNI', 'GY', '-' + fnum(cm_w * h_fs, 6)]))
     A('* CORTINA METALICA 5.00 X 6.00 M (%s KG/M2): DOS CARGAS EN SUS APOYOS' % fnum(c['W_CORTINA'], 2))
     A('JOINT LOAD')
     L.extend(wrap(fmt_list(pc_nodes_top) + ['FY', '-' + fnum(w_cort / 2.0, 2)]))
@@ -406,6 +411,9 @@ def build_std(g, extra_comment=None):
                 if abs(p) < 1e-9:
                     continue
                 ml.append((low[wall], dirn, p * strip))
+        p = v['_SUR']['staad']
+        if c['FALDON_STRIP'] and h_fs > 1e-6 and abs(p) > 1e-9:
+            ml.append((t1_bot, 'GZ', p * h_fs))
         p = v['_NORTE']['staad']
         if c['WIND_CORTINA'] and abs(p) > 1e-9:
             ml.append((bt['PC'], 'GZ', p * door_w))

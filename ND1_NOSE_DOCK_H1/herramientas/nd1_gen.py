@@ -66,6 +66,8 @@ DEFAULT = dict(
     RAFTER_PINNED=True,
     VT_PINNED=True,         # viga superior del eje 3 articulada en columnas
     TOP_BOX=True,           # larguero superior de muros en cajon (remate de contraflambeos, como ND23 / H5-H6)
+    FALDON_STRIP=False,     # lamina del faldon entre la cuerda inferior (a ejes) y el N.I.E.: carga lineal en la
+                            # cuerda inferior de la armadura del eje 1 (muerta y viento), para cargar el faldon completo
     CF_BELOW_TOP=False,     # con larguero extra junto a la cubierta (MAX_GAP): los contraflambeos rematan en el
                             # larguero anterior (cajon) y el de arriba queda sin contraflambeo (tag LS)
     ROD_DOOR=True,          # el tensor del claro de la puerta de emergencia arranca sobre su cajon (no cruza la puerta)
