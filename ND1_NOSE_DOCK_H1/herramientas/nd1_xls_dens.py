@@ -3,16 +3,24 @@
 la plantilla: solo cambian los perfiles y pesos de la cuantificacion.
 
 uso: python3 nd1_xls_dens.py PLANTILLA.xlsx resumen.json SALIDA.xlsx"""
-import sys, os, json, copy
+import sys, os, json, copy, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import openpyxl
 from xlsx_xml import Book, recalc_and_inject
+
+
+def hss_txt(name):
+    """'HSST6X6X0.25' -> 'HSS 6"×6"×1/4"' (texto de la plantilla)."""
+    m = re.match(r'HSST(\d+)X(\d+)X([\d.]+)$', name)
+    fr = {'0.125': '1/8', '0.188': '3/16', '0.25': '1/4', '0.313': '5/16', '0.375': '3/8', '0.5': '1/2'}
+    return 'HSS %s"×%s"×%s"' % (m.group(1), m.group(2), fr[m.group(3)])
 
 
 def main(template, resumen, out):
     S = json.load(open(resumen))
     to = S['takeoff']
     tg = S['takeoff_tag']
+    pc = S['sections'].get('PC', 'HSST4X4X0.25')     # postes de cortina
     wb = openpyxl.load_workbook(template)
     ws = wb.active
     # ------------------------------------------------ tabla PROFILE / WEIGHT (Q:R)
@@ -28,7 +36,7 @@ def main(template, resumen, out):
         ('MCC10-14', to['MCC10-14']['W']),             # R14
         ('MC4-14', to['MC4-14']['W']),                 # R15
         ('PTR4-14', to['PTR4-14']['W']),               # R16
-        ('HSST4X4X0.25', to['HSST4X4X0.25']['W']),     # R17
+        (pc, to[pc]['W']),                             # R17
         ('PIPS7 CUBIERTA', tg['CFC']),                 # R18
         ('PIPS7 MUROS', tg['CF']),                     # R19
         ('REDONDOS CUBIERTA', tg['TC']),               # R20
@@ -56,7 +64,7 @@ def main(template, resumen, out):
     # ------------------------------------------------ columnas
     ws['C7'] = 'W12×26'
     ws['E7'] = '=R6'
-    ws['C8'] = 'HSS 4"×4"×1/4"'
+    ws['C8'] = hss_txt(pc)
     ws['E8'] = '=R17'
     ws['C9'] = 'PTR 4×4 Cal. 14'
     ws['E9'] = '=R16'
