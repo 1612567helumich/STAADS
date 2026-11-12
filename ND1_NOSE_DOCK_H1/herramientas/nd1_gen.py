@@ -38,8 +38,9 @@ DEFAULT = dict(
         LC=('UPT', 2, 'MC10-14'),       # largueros de cubierta
         LM=('UPT', 2, 'MC10-14'),       # largueros de muro
         LMT=('UPT', 4, 'MCC10-14'),     # larguero de remate en cajon (donde terminan los contraflambeos de muro)
-        LS=('UPT', 4, 'MCC10-14'),      # larguero superior de muros laterales sin contraflambeos (CF_BELOW_TOP):
-                                        # salva el claro de columna a columna sin apoyos intermedios -> cajon
+        LS=('UPT', 4, 'MCC10-14'),      # larguero de cubierta de muros laterales (CF_BELOW_TOP): salva el claro
+                                        # de columna a columna sin PIPS; en cajon para KL/r < 200
+        LST=('UPT', 3, 'MCE10-14'),     # larguero de cubierta del eje 3 (CF_BELOW_TOP): cuerda inferior de T3
         DIN=('UPT', 4, 'MCC10-14'),     # dintel cortina
         DINE=('UPT', 4, 'MCC10-14'),    # larguero-dintel sobre puerta de emergencia
         CS=('UPT', 3, 'MCE6-14'),       # cuerdas superiores armaduras transversales
@@ -475,8 +476,8 @@ class Gen:
                 tag = 'LM'
                 if c['TOP_BOX'] and abs(g - self.back_box) < 1e-6:
                     tag = 'LMT'
-                # arriba del cajon (CF_BELOW_TOP) queda un larguero normal: con armadura T3 es su cuerda
-                # inferior y se apoya en sus montantes a cada tablero
+                if g > self.back_box + 1e-6:
+                    tag = 'LST'     # larguero de cubierta sin contraflambeos (con armadura T3, su cuerda inferior)
                 if abs(g - dh) < 1e-6 and x0 >= cbay[0] - 1e-6 and x1 <= cbay[1] + 1e-6:
                     # dintel de cortina: cajon continuo de columna a columna
                     tag = 'DIN'
@@ -557,8 +558,8 @@ class Gen:
         self.mb('TC', cT2, t['C-1'])
 
     # ------------------------------------------------------------ numeracion
-    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'MONF', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'LS', 'LF', 'DIN',
-             'DINE', 'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
+    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'MONF', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'LS', 'LST', 'LF',
+             'DIN', 'DINE', 'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
 
     def number(self):
         keys = list(self._nodes)

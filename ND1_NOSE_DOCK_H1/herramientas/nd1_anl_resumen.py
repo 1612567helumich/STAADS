@@ -91,6 +91,9 @@ def main(resumen, anl, out):
     u = to['MC10-14']['W'] / to['MC10-14']['L']
     tg['LC'] = Ltag['LC'] * u
     tg['LM'] = to['MC10-14']['W'] - tg['LC']
+    if Ltag.get('LST') and S['sections'].get('LST') in to:      # larguero de cubierta del eje 3 (MCE)
+        sec = S['sections']['LST']
+        tg['LST'] = Ltag['LST'] * to[sec]['W'] / to[sec]['L']
     u = to['PIPS7']['W'] / to['PIPS7']['L']
     tg['CFC'] = Ltag['CFC'] * u
     tg['CF'] = to['PIPS7']['W'] - tg['CFC']
