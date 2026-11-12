@@ -189,12 +189,13 @@ def build_std(g, extra_comment=None):
         ('_VIGAS_BORDE', bt['VR'] + bt['VT']),
         ('_CUERDAS_ARM_T', bt['CS'] + bt['CI']),
         ('_CUERDAS_ARM_L', bt['CSL'] + bt['CIL']),
-        ('_MONTANTES', bt['MON']),
+        ('_MONTANTES', bt['MON'] + bt['MONF']),
         ('_DIAGONALES', bt['DIA'] + bt['DIAE']),
         ('_LARGUEROS_CUB', bt['LC']),
         ('_CONTRAFLAMBEOS', bt['CFC']),
         ('_LARGUEROS_MURO', bt['LM']),
         ('_LARGUEROS_CAJON', bt['LMT']),
+        ('_LARGUEROS_FALDON', bt['LF']),
         ('_DINTELES', bt['DIN'] + bt['DINE']),
         ('_FLAMBEOS_MUROS', bt['CF']),
         ('_POSTES_CORTINA', bt['PC']),
@@ -212,7 +213,7 @@ def build_std(g, extra_comment=None):
     este = [e for e in g.members if (g.minfo[e]['tag'] in wall_tags or g.minfo[e]['tag'] == 'VR') and inplane(e, 0, XC)]
     norte = [e for e in g.members if (g.minfo[e]['tag'] in wall_tags or g.minfo[e]['tag'] == 'VT') and inplane(e, 2, Z3)]
     yb1 = g.ybot(Z1, at_column=True)
-    sur = [e for e in g.members if g.minfo[e]['tag'] in ('CS', 'CI', 'MON') and g.minfo[e].get('truss') == 'T1']
+    sur = [e for e in g.members if g.minfo[e]['tag'] in ('CS', 'CI', 'MON', 'MONF', 'LF') and g.minfo[e].get('truss') == 'T1']
     for e in bt['COL']:
         a, b = g.members[e]
         if inplane(e, 2, Z1) and min(g.nodes[a][1], g.nodes[b][1]) >= yb1 - 1e-6:
@@ -258,7 +259,7 @@ def build_std(g, extra_comment=None):
         for s, ids in pris:
             L.extend(wrap(fmt_list(ids) + ['PRIS', 'YD', fnum(s[1], 4)]))
     A('CONSTANTS')
-    beta90 = [e for e in g.members if g.minfo[e]['tag'] in ('LM', 'LMT', 'DIN', 'DINE', 'DE') or g.minfo[e].get('beta') == 90.0]
+    beta90 = [e for e in g.members if g.minfo[e]['tag'] in ('LM', 'LMT', 'LF', 'DIN', 'DINE', 'DE') or g.minfo[e].get('beta') == 90.0]
     L.extend(wrap(['BETA', '90', 'MEMB'] + fmt_list(beta90)))
     A('MATERIAL STEEL ALL')
     # ------------------------------------------------------------ apoyos
@@ -312,13 +313,15 @@ def build_std(g, extra_comment=None):
     # ------------------------------------------------------------ cargas
     q, qinfo, wc = wind_cases(c, g)
     g.wind = dict(q=q, info=qinfo, cases=wc)
-    tow = [e for e in bt['MON'] if g.minfo[e]['truss'] == 'T1'][0]
+    t1mon = [e for e in bt['MON'] if g.minfo[e]['truss'] == 'T1']
+    tow = t1mon[0] if t1mon else None      # con larguero de faldon la lamina va a los miembros horizontales
     g.towards = tow
+    tow_txt = (' TOWARDS %d' % tow) if tow else ''
     cm_r = c['CM_ROOF'] / 1e4
     cm_w = c['CM_WALL'] / 1e4
     cv = c['CV_ROOF'] / 1e4
     dx, dh = c['DOOR_X'], c['DOOR_H']
-    ed = c['EDOOR_Z']
+    ed = c['EDOOR_X'] if c['EDOOR_WALL'] == '3' else c['EDOOR_Z']      # postes de la puerta de emergencia
     pc_nodes_top = [g.nid[g.key(x, dh, Z3)] for x in dx]
     w_cort = c['W_CORTINA'] * ((dx[1] - dx[0] - 10.16) / 100.0) * 6.0
     g.w_cortina = w_cort
@@ -332,7 +335,7 @@ def build_std(g, extra_comment=None):
     A('_ESTE ONE -%s GY INCLINED' % fnum(cm_w, 6))
     A('_OESTE ONE -%s GY INCLINED' % fnum(cm_w, 6))
     A('_NORTE ONE -%s GY INCLINED' % fnum(cm_w, 6))
-    A('_SUR ONE -%s GY INCLINED TOWARDS %d' % (fnum(cm_w, 6), tow))
+    A('_SUR ONE -%s GY INCLINED%s' % (fnum(cm_w, 6), tow_txt))
     A('* PUERTA DE EMERGENCIA (CARGA LINEAL EN POSTES, IGUAL QUE H5-H6)')
     A('MEMBER LOAD')
     L.extend(wrap(fmt_list(pe_low) + ['UNI', 'GY', '-' + fnum(c['EDOOR_LINE'], 3)]))
@@ -392,7 +395,7 @@ def build_std(g, extra_comment=None):
             if abs(p) < 1e-9:
                 continue
             if grp == '_SUR':
-                A('%s ONE %s %s TOWARDS %d' % (grp, fnum(p, 4), d, tow))
+                A('%s ONE %s %s%s' % (grp, fnum(p, 4), d, tow_txt))
             else:
                 A('%s ONE %s %s' % (grp, fnum(p, 4), d))
         ml = []
@@ -405,9 +408,10 @@ def build_std(g, extra_comment=None):
         p = v['_NORTE']['staad']
         if c['WIND_CORTINA'] and abs(p) > 1e-9:
             ml.append((bt['PC'], 'GZ', p * door_w))
-        p = v['_OESTE']['staad']
+        egrp, edir = {'A': ('_OESTE', 'GX'), 'C': ('_ESTE', 'GX'), '3': ('_NORTE', 'GZ')}[c['EDOOR_WALL']]
+        p = v[egrp]['staad']
         if c['WIND_EDOOR'] and abs(p) > 1e-9:
-            ml.append((pe_low, 'GX', p * edoor_w))
+            ml.append((pe_low, edir, p * edoor_w))
         if ml:
             if c['WIND_STRIP']:
                 A('* VIENTO COMO CARGA LINEAL: FRANJA INFERIOR DE MUROS Y PUERTAS')
@@ -417,7 +421,7 @@ def build_std(g, extra_comment=None):
                 if c['WIND_CORTINA']:
                     parts.append('CORTINA = MURO 3 X %s CM' % fnum(door_w, 1))
                 if c['WIND_EDOOR']:
-                    parts.append('PUERTA DE EMERGENCIA = MURO A X %s CM' % fnum(edoor_w, 1))
+                    parts.append('PUERTA DE EMERGENCIA = MURO %s X %s CM' % (c['EDOOR_WALL'], fnum(edoor_w, 1)))
                 A('* ' + '; '.join(parts))
             A('MEMBER LOAD')
             for ids, dirn, w in ml:
@@ -450,7 +454,7 @@ def build_std(g, extra_comment=None):
         if name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3'):
             hk = g.ybot(keys[0][2], at_column=True)
         elif c['BACK_TRUSS']:
-            hk = c['GIRTS'][-1]
+            hk = g.back_top
         else:
             hk = top
         for e in bt['COL']:
@@ -475,13 +479,16 @@ def build_std(g, extra_comment=None):
     L.extend(wrap(['LY', fnum(c['PURLIN'], 2), 'MEMB'] + fmt_list(bt['VR'])))
     L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(bt['VR'])))
     lm_side = [e for e in bt['LM'] + bt['LMT'] + bt['DINE'] if g.minfo[e]['wall'] in ('A', 'C')]
-    lm_back = [e for e in bt['LM'] + bt['LMT'] + bt['DIN'] if g.minfo[e]['wall'] == '3']
+    lm_back = [e for e in bt['LM'] + bt['LMT'] + bt['DIN'] + bt['DINE'] if g.minfo[e]['wall'] == '3']
     vt_beam = [] if c['BACK_TRUSS'] else bt['VT']
     L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(vt_beam + bt['LC'] + lm_back)))
     L.extend(wrap(['LZ', '750', 'MEMB'] + fmt_list(vt_beam + bt['LC'] + lm_back)))
     L.extend(wrap(['LY', '266.67', 'MEMB'] + fmt_list(lm_side)))
     L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(lm_side)))
     L.extend(wrap(['LY', fnum(dh, 2), 'MEMB'] + fmt_list(bt['PC'])))
+    if bt['MONF']:
+        L.extend(wrap(['LY', fnum(c['D_TRUSS'], 2), 'MEMB'] + fmt_list(bt['MONF'])))
+        L.extend(wrap(['LZ', fnum(c['D_TRUSS'], 2), 'MEMB'] + fmt_list(bt['MONF'])))
     pe_posts = bt['PE']
     L.extend(wrap(['LY', fnum(c['EDOOR_TOP'], 2), 'MEMB'] + fmt_list(pe_posts)))
     L.extend(wrap(['CHECK', 'CODE', 'MEMB'] + fmt_list(nonrod)))
@@ -523,28 +530,45 @@ def tributary_masses(g):
     det['B-3']['area_fondo'] = (XC - XA) / 2 / 100.0 * H3
     det['C-3']['area_fondo'] = (XC - XB) / 2 / 100.0 * H3
     # --- faldon del frente (de N.I.E. a cubierta)
-    hf = (yr(Z1) - 936.0) / 100.0
+    hf = (yr(Z1) - c['NIE']) / 100.0
     det['A-1']['area_faldon'] = (XC - XA) / 2 / 100.0 * hf
     det['C-1']['area_faldon'] = (XC - XA) / 2 / 100.0 * hf
-    # --- puertas: se descuenta la lamina y se suma el peso de la puerta
+    # --- puertas: se descuenta la lamina y se suma el peso de la puerta, repartidos a las dos
+    #     columnas del claro segun la posicion del centro de la puerta
+    def back_bay(xm):
+        return ('A-3', XA, 'B-3', XB) if xm < XB else ('B-3', XB, 'C-3', XC)
+
+    def add(col, key, val):
+        det[col][key] = det[col].get(key, 0.0) + val
     dx = c['DOOR_X']
     a_cort = 5.0 * 6.0
     xc = 0.5 * (dx[0] + dx[1])
-    fA = (XB - xc) / (XB - XA)
+    n0, x0, n1, x1 = back_bay(xc)
+    f0 = (x1 - xc) / (x1 - x0)
     w_cort = c['W_CORTINA'] * a_cort
-    det['A-3']['area_cortina'] = -a_cort * fA
-    det['B-3']['area_cortina'] = -a_cort * (1 - fA)
-    det['A-3']['w_cortina'] = w_cort * fA
-    det['B-3']['w_cortina'] = w_cort * (1 - fA)
-    ed = c['EDOOR_Z']
+    add(n0, 'area_cortina', -a_cort * f0)
+    add(n1, 'area_cortina', -a_cort * (1 - f0))
+    add(n0, 'w_cortina', w_cort * f0)
+    add(n1, 'w_cortina', w_cort * (1 - f0))
+    ew = c['EDOOR_WALL']
+    if ew == '3':
+        ed = c['EDOOR_X']
+        xm = 0.5 * (ed[0] + ed[1])
+        n0, x0, n1, x1 = back_bay(xm)
+        f0 = (x1 - xm) / (x1 - x0)
+    else:
+        ed = c['EDOOR_Z']
+        zc = 0.5 * (ed[0] + ed[1])
+        if zc > Z2:
+            n0, n1, f0 = ew + '-2', ew + '-1', (Z1 - zc) / (Z1 - Z2)
+        else:
+            n0, n1, f0 = ew + '-3', ew + '-2', (Z2 - zc) / (Z2 - Z3)
     a_ed = (ed[1] - ed[0]) / 100.0 * c['EDOOR_H'] / 100.0
-    zc = 0.5 * (ed[0] + ed[1])
-    f2 = (Z1 - zc) / (Z1 - Z2)
     w_ed = c['W_EDOOR'] * a_ed
-    det['A-2']['area_pemerg'] = -a_ed * f2
-    det['A-1']['area_pemerg'] = -a_ed * (1 - f2)
-    det['A-2']['w_pemerg'] = w_ed * f2
-    det['A-1']['w_pemerg'] = w_ed * (1 - f2)
+    add(n0, 'area_pemerg', -a_ed * f0)
+    add(n1, 'area_pemerg', -a_ed * (1 - f0))
+    add(n0, 'w_pemerg', w_ed * f0)
+    add(n1, 'w_pemerg', w_ed * (1 - f0))
     out = {}
     for k, d in det.items():
         aw = sum(v for kk, v in d.items() if kk.startswith('area_') and kk != 'area_cub')

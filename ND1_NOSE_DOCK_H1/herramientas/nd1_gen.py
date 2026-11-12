@@ -20,7 +20,16 @@ DEFAULT = dict(
     SAG_WALL_Z=[800.0 / 3, 1600.0 / 3, 800 + 800.0 / 3, 800 + 1600.0 / 3],
     SAG_BACK_X=[250.0, 500.0, 1000.0, 1250.0],
     DOOR_X=(33.0, 543.0), DOOR_H=660.0,           # cortina 5.00 x 6.00 (dintel en larguero 660)
+    EDOOR_WALL='A',                               # muro de la puerta de emergencia: 'A', 'C' o '3'
     EDOOR_Z=(830.0, 970.0), EDOOR_H=230.0, EDOOR_TOP=300.0,
+    EDOOR_X=None,                                 # postes de la puerta de emergencia si esta en el muro del eje 3
+    NIE=936.0,                                    # nivel inferior de estructura (borde del faldon)
+    STUB_MIN=20.0,                                # no se generan largueros mas cortos que esto entre columna y poste
+    MAX_GAP=None,                                 # separacion maxima de largueros de muro; None = sin revisar (ND1 R1.x)
+    FALDON_GIRT=False,                            # larguero intermedio en el faldon si el peralte de la armadura
+                                                  # del eje 1 excede MAX_GAP
+    TOP_DROP=100.0,                               # si la franja superior excede MAX_GAP: cajon de remate a esta distancia
+                                                  # bajo la cubierta (en el punto alto del muro), como ND23 / H5-H6
     # ----- secciones
     SEC=dict(
         COL=('AISC', 'W16X26'),
@@ -36,6 +45,7 @@ DEFAULT = dict(
         CSL=('UPT', 3, 'MCE4-14'),      # cuerdas armadura longitudinal
         CIL=('UPT', 3, 'MCE4-14'),
         MON=('UPT', 1, 'C-14'),         # montantes
+        MONF=('UPT', 1, 'C-14'),        # montantes de la armadura del frente cuando llevan larguero de faldon
         DIA=('UPT', 1, 'C-14'),         # diagonales
         DIAE=('UPT', 1, '2-14'),        # diagonales extremas (si se usan)
         CF=('AISC', 'PIPS7'),           # flambeos de muro
@@ -43,6 +53,7 @@ DEFAULT = dict(
         PC=('AISC', 'HSST4X4X0.25'),    # postes cortina
         PE=('AISC', 'HSST4X4X0.125'),   # postes puerta de emergencia
         DE=('UPT', 2, 'MC4-14'),        # dintel puerta de emergencia
+        LF=('UPT', 2, 'MC4-14'),        # larguero intermedio del faldon (entre cuerdas de la armadura del eje 1)
         TM=('PRIS', 1.5875),            # tensores de muros laterales (5/8")
         TMF=('PRIS', 1.905),            # tensores del muro de fondo (3/4")
         TC=('PRIS', 1.27),              # tensores de cubierta (1/2")
@@ -160,12 +171,24 @@ class Gen:
     def yroof(self, z):
         return self.c['Y_TOP'] - self.c['SLOPE'] * z
 
-    def ybot(self, z, at_column=False):
+    def zone_levels(self, zhigh):
+        """Niveles de largueros de una zona de muro cuya cubierta mas alta esta en zhigh
+        y nivel de su cajon de remate.  Si del ultimo larguero a la cubierta hay mas de
+        MAX_GAP se agrega un cajon TOP_DROP abajo de la cubierta."""
+        c = self.c
+        lv = list(c['GIRTS'])
+        top = lv[-1]
+        if c['MAX_GAP'] is not None and self.yroof(zhigh) - lv[-1] > c['MAX_GAP'] + 1e-6:
+            top = round(self.yroof(zhigh) - c['TOP_DROP'], 1)
+            lv.append(top)
+        return lv, top
+
+    def ybot(self, z, at_column=False, levels=None):
         """Nivel de la cuerda inferior en la posicion z.  En columna se ajusta al
         larguero de muro mas cercano si queda a menos de SNAP (evita tramos cortos)."""
         y = self.yroof(z) - self.c['D_TRUSS']
         if at_column:
-            for g in self.c['GIRTS']:
+            for g in (levels if levels is not None else self.c['GIRTS']):
                 if abs(g - y) <= self.c['SNAP'] + 1e-9:
                     return g
         return y
@@ -203,14 +226,36 @@ class Gen:
         yr = self.yroof
         self.tips = {}
         self.col_nodes = {}
+        # ---------------- niveles de largueros por zona de muro
+        dh = c['DOOR_H']
+        lv_back, self.back_top = self.zone_levels(Z3)          # muro del eje 3
+        lv_s32, top_s32 = self.zone_levels(Z3)                 # muros laterales, claro 3-2
+        lv_s21, top_s21 = self.zone_levels(Z2)                 # muros laterales, claro 2-1
+        self.lv_back, self.side_zones = lv_back, ((Z3, Z2, lv_s32, top_s32), (Z2, Z1, lv_s21, top_s21))
+        cbay = (XA, XB) if 0.5 * (c['DOOR_X'][0] + c['DOOR_X'][1]) < XB else (XB, XC)      # claro de la cortina
+        col_lv = {'A-3': set(lv_back) | set(lv_s32), 'C-3': set(lv_back) | set(lv_s32), 'B-3': set(lv_back),
+                  'A-2': set(lv_s32) | set(lv_s21), 'C-2': set(lv_s32) | set(lv_s21),
+                  'A-1': set(lv_s21), 'C-1': set(lv_s21)}
+        for name, xcol in (('A-3', XA), ('B-3', XB), ('C-3', XC)):
+            if abs(xcol - cbay[0]) < 1e-6 or abs(xcol - cbay[1]) < 1e-6:
+                col_lv[name].add(dh)                           # el dintel de la cortina llega a sus dos columnas
+        self.faldon_lv = []
+        if c['FALDON_GIRT'] and c['MAX_GAP'] is not None and D > c['MAX_GAP'] + 1e-6:
+            nfg = int(math.ceil(D / c['MAX_GAP'] - 1e-9)) - 1
+            self.faldon_lv = [round(yr(Z1) - D + D * k / (nfg + 1), 3) for k in range(1, nfg + 1)]
+            # si queda junto a un larguero del muro lateral se lleva a ese nivel (evita tramos cortos de columna)
+            self.faldon_lv = [next((q for q in sorted(col_lv['A-1']) if abs(q - v) <= c['SNAP'] + 1e-9), v) for v in self.faldon_lv]
+            for name in ('A-1', 'C-1'):
+                col_lv[name] |= set(self.faldon_lv)
+        self.col_lv = col_lv
         # ---------------- columnas
         cols = [('A-1', XA, Z1), ('C-1', XC, Z1), ('A-2', XA, Z2), ('C-2', XC, Z2),
                 ('A-3', XA, Z3), ('B-3', XB, Z3), ('C-3', XC, Z3)]
         for name, x, z in cols:
             top = yr(z)
-            ys = [0.0] + [g for g in G if g < top - 1e-6]
+            ys = [0.0] + [g for g in sorted(col_lv[name]) if g < top - 1e-6]
             if name in ('A-1', 'C-1', 'A-2', 'C-2', 'B-3'):
-                ys.append(self.ybot(z, at_column=True))
+                ys.append(self.ybot(z, at_column=True, levels=sorted(col_lv[name])))
             ys.append(top)
             ys = sorted(set(round(v, 3) for v in ys))
             self.nd(x, 0.0, z, prio=0)
@@ -232,7 +277,7 @@ class Gen:
         if c['BACK_TRUSS']:
             # cuerda superior = viga VT, cuerda inferior = cajon de remate (larguero superior del muro)
             yt = yr(Z3)
-            yb = G[-1]
+            yb = self.back_top
             for x in xs_top[1:-1]:
                 if abs(x - XB) < 1e-6:
                     continue
@@ -254,8 +299,20 @@ class Gen:
             yb = yt - D
             self.chain('CS', [(x, yt, z) for x in xt], truss=tn)
             self.chain('CI', [(x, yb, z) for x in xt], truss=tn)
+            flv = self.faldon_lv if tn == 'T1' else []
             for i, x in enumerate(xt[1:-1], start=1):
-                self.mb('MON', self.nd(x, yb, z), self.nd(x, yt, z), truss=tn)
+                if flv:
+                    # montante continuo (viga articulada en las cuerdas) que recibe el larguero del faldon
+                    ks = [self.nd(x, y, z) for y in [yb] + flv + [yt]]
+                    for j, (a, b) in enumerate(zip(ks[:-1], ks[1:])):
+                        rel = (['START'] if j == 0 else []) + (['END'] if j == len(ks) - 2 else [])
+                        self.mb('MONF', a, b, truss=tn, rel=rel)
+                else:
+                    self.mb('MON', self.nd(x, yb, z), self.nd(x, yt, z), truss=tn)
+            for yg in flv:
+                ks = [self.nd(x, yg, z) for x in xt]
+                for a, b in zip(ks[:-1], ks[1:]):
+                    self.mb('LF', a, b, truss=tn, rel=['START', 'END'], lvl=yg)
             mid = np_ // 2
             for i in range(np_):
                 ext = (i < c['DIAE_PANELS']) or (i >= np_ - c['DIAE_PANELS'])
@@ -267,7 +324,7 @@ class Gen:
         # ---------------- armadura longitudinal (eje B)
         for (za, zb, span) in ((Z3, Z2, 'TL1'), (Z2, Z1, 'TL2')):
             zs = [z for z in zp if za - 1e-6 <= z <= zb + 1e-6]
-            yb = lambda z: self.ybot(z, at_column=(abs(z - Z3) < 1e-6))
+            yb = lambda z: self.ybot(z, at_column=(abs(z - Z3) < 1e-6), levels=sorted(col_lv['B-3']))
             self.chain('CSL', [(XB, yr(z), z) for z in zs], truss=span)
             self.chain('CIL', [(XB, yb(z), z) for z in zs], truss=span)
             for z in zs[1:-1]:
@@ -301,92 +358,152 @@ class Gen:
         for x in c['SAG_ROOF']:
             self.chain('CFC', [(x, yr(z), z) for z in zp])
         # ---------------- muros laterales (ejes A y C)
-        ed = c['EDOOR_Z']
+        ew = c['EDOOR_WALL']
+        ed = c['EDOOR_Z'] if ew in ('A', 'C') else None
+        et = c['EDOOR_TOP']
         for x, side in ((XA, 'A'), (XC, 'C')):
-            for g in G:
-                zs = sorted(set([Z3, Z2, Z1] + c['SAG_WALL_Z']))
-                if side == 'A' and g <= c['EDOOR_TOP'] + 1e-6:
-                    zs = sorted(set(zs + list(ed)))
-                pts = [(x, g, z) for z in zs]
-                keys = [self.nd(*p) for p in pts]
-                for (a, b, z0, z1) in zip(keys[:-1], keys[1:], zs[:-1], zs[1:]):
-                    if side == 'A' and g < c['EDOOR_TOP'] - 1e-6 and abs(z0 - ed[0]) < 1e-6 and abs(z1 - ed[1]) < 1e-6:
-                        continue     # hueco de puerta de emergencia
-                    rel = []
-                    cols_z = (Z3, Z2, Z1)
-                    posts = ed if (side == 'A' and g < c['EDOOR_TOP'] - 1e-6) else ()
-                    if any(abs(z0 - q) < 1e-6 for q in cols_z) or any(abs(z0 - q) < 1e-6 for q in posts):
-                        rel.append('START')
-                    if any(abs(z1 - q) < 1e-6 for q in cols_z) or any(abs(z1 - q) < 1e-6 for q in posts):
-                        rel.append('END')
-                    tag = 'LM'
-                    if c['TOP_BOX'] and abs(g - G[-1]) < 1e-6:
-                        tag = 'LMT'
-                    if side == 'A' and abs(g - c['EDOOR_TOP']) < 1e-6 and z0 >= Z2 - 1e-6:
-                        tag = 'DINE'
-                    self.mb(tag, a, b, rel=rel, wall=side, lvl=g)
+            door = (ed is not None and side == ew)
+            for g in sorted(set(lv_s32) | set(lv_s21)):
+                for (za, zb, lv, ztop) in self.side_zones:
+                    if not any(abs(g - q) < 1e-6 for q in lv):
+                        continue
+                    dbay = door and za - 1e-6 <= ed[0] and ed[1] <= zb + 1e-6      # la puerta esta en este claro
+                    zs = [za] + [sz for sz in c['SAG_WALL_Z'] if za + 1e-6 < sz < zb - 1e-6] + [zb]
+                    if dbay and g <= et + 1e-6:
+                        zs = sorted(set(zs + list(ed)))
+                    keys = [self.nd(x, g, z) for z in zs]
+                    for (a, b, z0, z1) in zip(keys[:-1], keys[1:], zs[:-1], zs[1:]):
+                        if dbay and g < et - 1e-6 and abs(z0 - ed[0]) < 1e-6 and abs(z1 - ed[1]) < 1e-6:
+                            continue     # hueco de puerta de emergencia
+                        rel = []
+                        ends = [za, zb] + (list(ed) if (dbay and g < et - 1e-6) else [])
+                        if any(abs(z0 - q) < 1e-6 for q in ends):
+                            rel.append('START')
+                        if any(abs(z1 - q) < 1e-6 for q in ends):
+                            rel.append('END')
+                        tag = 'LM'
+                        if c['TOP_BOX'] and abs(g - ztop) < 1e-6:
+                            tag = 'LMT'
+                        if dbay and abs(g - et) < 1e-6:
+                            tag = 'DINE'
+                        self.mb(tag, a, b, rel=rel, wall=side, lvl=g)
             # flambeos
             for z in c['SAG_WALL_Z']:
-                ys = [0.0] + G
+                lv = next(zn[2] for zn in self.side_zones if zn[0] - 1e-6 <= z <= zn[1] + 1e-6)
+                ys = [0.0] + list(lv)
                 self.nd(x, 0.0, z, prio=2)
                 self.chain('CF', [(x, y, z) for y in ys], wall=side)
-        # puerta de emergencia (muro eje A)
-        for z in ed:
-            ys = [0.0] + [g for g in G if g < c['EDOOR_TOP'] - 1e-6] + [c['EDOOR_H'], c['EDOOR_TOP']]
-            ys = sorted(set(ys))
-            self.nd(XA, 0.0, z, prio=1)
-            keys = [self.nd(XA, y, z) for y in ys]
-            for i, (a, b) in enumerate(zip(keys[:-1], keys[1:])):
-                self.mb('PE', a, b, wall='A', rel=(['END'] if i == len(keys) - 2 else []))
-        self.mb('DE', self.nd(XA, c['EDOOR_H'], ed[0]), self.nd(XA, c['EDOOR_H'], ed[1]), rel=['START', 'END'], wall='A')
-        # ---------------- muro eje 3 (fondo)
+        # puerta de emergencia en un muro lateral
+        if ed is not None:
+            xw = XA if ew == 'A' else XC
+            for z in ed:
+                ys = [0.0] + [g for g in G if g < et - 1e-6] + [c['EDOOR_H'], et]
+                ys = sorted(set(ys))
+                self.nd(xw, 0.0, z, prio=1)
+                keys = [self.nd(xw, y, z) for y in ys]
+                for i, (a, b) in enumerate(zip(keys[:-1], keys[1:])):
+                    self.mb('PE', a, b, wall=ew, rel=(['END'] if i == len(keys) - 2 else []))
+            self.mb('DE', self.nd(xw, c['EDOOR_H'], ed[0]), self.nd(xw, c['EDOOR_H'], ed[1]), rel=['START', 'END'], wall=ew)
+        # ---------------- muro eje 3 (fondo): cortina y, en su caso, puerta de emergencia
         dx = c['DOOR_X']
-        dh = c['DOOR_H']
-        for g in G:
+        ex = c['EDOOR_X'] if ew == '3' else None
+        cols_x = (XA, XB, XC)
+        G3 = lv_back
+        dh_reg = any(abs(dh - q) < 1e-6 for q in G3)       # el dintel de la cortina coincide con un larguero
+
+        def inside(xv, rng):
+            return rng is not None and rng[0] + 1e-6 < xv < rng[1] - 1e-6
+
+        def cf_from(xv):
+            """Nivel desde el que existe la linea de contraflambeo en xv (0 = desde el piso)."""
+            if inside(xv, dx):
+                return dh
+            if inside(xv, ex):
+                return et
+            return 0.0
+        # tramo del cajon donde rematan los postes de la puerta de emergencia: entre los
+        # apoyos (columna o poste de cortina) que la flanquean
+        espan = None
+        if ex is not None:
+            sup = sorted(set(list(cols_x) + (list(dx) if et < dh + 1e-6 else [])))
+            espan = (max(v for v in sup if v <= ex[0] + 1e-6), min(v for v in sup if v >= ex[1] - 1e-6))
+        for g in sorted(set(G3) | {dh}):
+            only_din = (abs(g - dh) < 1e-6 and not dh_reg)   # nivel exclusivo del dintel: solo en el claro de la cortina
+            xs = set(cols_x)
+            xs |= {sx for sx in c['SAG_BACK_X'] if g >= cf_from(sx) - 1e-6}
+            if g <= dh + 1e-6:
+                xs |= set(dx)
+            if ex is not None and g <= et + 1e-6:
+                xs |= set(ex)
+            if c['BACK_TRUSS'] and abs(g - self.back_top) < 1e-6:
+                xs |= set(self.xs_top)
+            if only_din:
+                xs = {xv for xv in xs if cbay[0] - 1e-6 <= xv <= cbay[1] + 1e-6}
+            xs = sorted(xs)
+            # postes en los que termina un larguero de este nivel (queda articulado ahi)
+            ends = list(cols_x)
             if g < dh - 1e-6:
-                runs = [[XA, dx[0]], [dx[1], XB], [XB] + [s for s in c['SAG_BACK_X'] if s > XB] + [XC]]
-            elif abs(g - dh) < 1e-6:
-                runs = [sorted(set([XA, dx[0]] + [s for s in c['SAG_BACK_X'] if s < XB] + [dx[1], XB])),
-                        [XB] + [s for s in c['SAG_BACK_X'] if s > XB] + [XC]]
-            else:
-                runs = [[XA] + [s for s in c['SAG_BACK_X'] if s < XB] + [XB],
-                        [XB] + [s for s in c['SAG_BACK_X'] if s > XB] + [XC]]
-            if c['BACK_TRUSS'] and abs(g - G[-1]) < 1e-6:
-                runs = [[x for x in self.xs_top if x <= XB + 1e-6], [x for x in self.xs_top if x >= XB - 1e-6]]
-            for run in runs:
-                keys = [self.nd(x, g, Z3) for x in run]
-                for (a, b, x0, x1) in zip(keys[:-1], keys[1:], run[:-1], run[1:]):
+                ends += list(dx)
+            if ex is not None and g < et - 1e-6:
+                ends += list(ex)
+            for x0, x1 in zip(xs[:-1], xs[1:]):
+                if g < dh - 1e-6 and x0 >= dx[0] - 1e-6 and x1 <= dx[1] + 1e-6:
+                    continue        # vano de la cortina
+                if ex is not None and g < et - 1e-6 and x0 >= ex[0] - 1e-6 and x1 <= ex[1] + 1e-6:
+                    continue        # vano de la puerta de emergencia
+                rel = []
+                if any(abs(x0 - q) < 1e-6 for q in ends):
+                    rel.append('START')
+                if any(abs(x1 - q) < 1e-6 for q in ends):
+                    rel.append('END')
+                tag = 'LM'
+                if c['TOP_BOX'] and abs(g - self.back_top) < 1e-6:
+                    tag = 'LMT'
+                if abs(g - dh) < 1e-6 and x0 >= cbay[0] - 1e-6 and x1 <= cbay[1] + 1e-6:
+                    # dintel de cortina: cajon continuo de columna a columna
+                    tag = 'DIN'
                     rel = []
-                    ends = [XA, XB, XC] + ([dx[0], dx[1]] if g <= dh + 1e-6 else [])
-                    if any(abs(x0 - q) < 1e-6 for q in ends):
+                    if abs(x0 - cbay[0]) < 1e-6:
                         rel.append('START')
-                    if any(abs(x1 - q) < 1e-6 for q in ends):
+                    if abs(x1 - cbay[1]) < 1e-6:
                         rel.append('END')
-                    tag = 'LM'
-                    if c['TOP_BOX'] and abs(g - G[-1]) < 1e-6:
-                        tag = 'LMT'
-                    if abs(g - dh) < 1e-6 and x1 <= XB + 1e-6:
-                        # dintel de cortina: cajon continuo de columna A a columna B
-                        tag = 'DIN'
-                        rel = []
-                        if abs(x0 - XA) < 1e-6:
-                            rel.append('START')
-                        if abs(x1 - XB) < 1e-6:
-                            rel.append('END')
-                    self.mb(tag, a, b, rel=rel, wall='3', lvl=g)
-        for x in c['SAG_BACK_X']:
-            if x > XB:
-                ys = [0.0] + G
-                self.nd(x, 0.0, Z3, prio=2)
+                if espan is not None and abs(g - et) < 1e-6 and x0 >= espan[0] - 1e-6 and x1 <= espan[1] + 1e-6:
+                    # cajon donde rematan los postes de la puerta de emergencia
+                    tag = 'DINE'
+                    rel = []
+                    if abs(x0 - espan[0]) < 1e-6:
+                        rel.append('START')
+                    if abs(x1 - espan[1]) < 1e-6:
+                        rel.append('END')
+                iscol0 = any(abs(x0 - q) < 1e-6 for q in cols_x)
+                iscol1 = any(abs(x1 - q) < 1e-6 for q in cols_x)
+                if tag == 'LM' and (x1 - x0) < c['STUB_MIN'] - 1e-6 and (iscol0 != iscol1):
+                    continue        # larguero muy corto entre columna y poste: no se modela
+                self.mb(tag, self.nd(x0, g, Z3), self.nd(x1, g, Z3), rel=rel, wall='3', lvl=g)
+        for sx in c['SAG_BACK_X']:
+            y0 = cf_from(sx)
+            if y0 <= 1e-6:
+                ys = [0.0] + list(G3)
+                self.nd(sx, 0.0, Z3, prio=2)
             else:
-                ys = [g for g in G if g >= dh - 1e-6]
-            self.chain('CF', [(x, y, Z3) for y in ys], wall='3')
-        for x in dx:
-            ys = [0.0] + [g for g in G if g <= dh + 1e-6]
-            self.nd(x, 0.0, Z3, prio=1)
-            keys = [self.nd(x, y, Z3) for y in ys]
+                lvs = sorted(set(G3) | ({dh} if inside(sx, dx) else set()))
+                ys = [g for g in lvs if g >= y0 - 1e-6]
+            self.chain('CF', [(sx, y, Z3) for y in ys], wall='3')
+        for xp in dx:
+            ys = sorted(set([0.0] + [g for g in G3 if g < dh - 1e-6] + [dh]))
+            self.nd(xp, 0.0, Z3, prio=1)
+            keys = [self.nd(xp, y, Z3) for y in ys]
             for i, (a, b) in enumerate(zip(keys[:-1], keys[1:])):
                 self.mb('PC', a, b, wall='3', rel=(['END'] if i == len(keys) - 2 else []))
+        if ex is not None:
+            for xp in ex:
+                ys = [0.0] + [g for g in G if g < et - 1e-6] + [c['EDOOR_H'], et]
+                ys = sorted(set(ys))
+                self.nd(xp, 0.0, Z3, prio=1)
+                keys = [self.nd(xp, y, Z3) for y in ys]
+                for i, (a, b) in enumerate(zip(keys[:-1], keys[1:])):
+                    self.mb('PE', a, b, wall='3', rel=(['END'] if i == len(keys) - 2 else []))
+            self.mb('DE', self.nd(ex[0], c['EDOOR_H'], Z3), self.nd(ex[1], c['EDOOR_H'], Z3), rel=['START', 'END'], wall='3')
         # ---------------- tensores
         t = self.tips
         base = lambda n: self.key(*{'A-1': (XA, 0, Z1), 'C-1': (XC, 0, Z1), 'A-2': (XA, 0, Z2), 'C-2': (XC, 0, Z2),
@@ -395,15 +512,16 @@ class Gen:
             self.mb('TM', base(s + '-3'), t[s + '-2'], wall=s)
             self.mb('TM', base(s + '-2'), t[s + '-3'], wall=s)
             low2 = base(s + '-2')
-            if s == 'A' and c['ROD_DOOR']:
+            rod_door = (c['ROD_DOOR'] and c['EDOOR_WALL'] == s)
+            if rod_door:
                 # la puerta de emergencia queda junto a la columna A-2: el tensor arranca en
                 # el cajon de +3.00 (criterio H5-H6) para no atravesar el vano
-                low2 = self.key(XA, c['EDOOR_TOP'], Z2)
+                low2 = self.key(XA if s == 'A' else XC, c['EDOOR_TOP'], Z2)
                 if low2 not in self._nodes:
                     raise ValueError('no existe el nudo de arranque del tensor sobre la puerta')
-            self.mb('TM', low2, t[s + '-1'], wall=s, door=(s == 'A' and c['ROD_DOOR']))
+            self.mb('TM', low2, t[s + '-1'], wall=s, door=rod_door)
             self.mb('TM', base(s + '-1'), t[s + '-2'], wall=s)
-        if c['ROD_DOOR_TIE'] and c['ROD_DOOR']:
+        if c['ROD_DOOR_TIE'] and c['ROD_DOOR'] and c['EDOOR_WALL'] == 'A':
             self.mb('TM', base('A-3'), self.key(XA, c['EDOOR_TOP'], Z2), wall='A', tie=True)
         if c['BACK_BRACE']:
             self.mb('TMF', base('B-3'), t['C-3'], wall='3')
@@ -421,7 +539,7 @@ class Gen:
         self.mb('TC', cT2, t['C-1'])
 
     # ------------------------------------------------------------ numeracion
-    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'DIN', 'DINE',
+    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'MONF', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'LF', 'DIN', 'DINE',
              'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
 
     def number(self):

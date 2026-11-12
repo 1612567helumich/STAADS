@@ -24,7 +24,8 @@ def main(template, resumen, out):
     sh = Sheet(b, 'CARGAS Y SISMO F1')
     sheet = S['sheet']
     tips = S['tips']
-    sh.set('D3', text=PROY)
+    proy = S.get('proy', PROY)
+    sh.set('D3', text=proy)
     h3 = tips['A-3']['xyz'][1] / 100.0
     h1 = tips['A-1']['xyz'][1] / 100.0
     sh.set('F131', formula='(%s+%s)/2' % (repr(round(h3, 3)), repr(round(h1, 3))))
@@ -60,9 +61,9 @@ def main(template, resumen, out):
 
     # ------------------------------------------------------------ VIENTO
     sv = Sheet(b, 'VIENTO NTDV-97')
-    sv.set('D4', text=PROY)
+    sv.set('D4', text=proy)
     sv.set('D49', value=round(0.5 * (h3 + h1), 3))
-    sv.set('G86', formula='15*9.36')                      # abertura del frente: ancho x N.I.E.
+    sv.set('G86', formula='15*%s' % repr(round(S.get('nie', 9.36), 3)))      # abertura del frente: ancho x N.I.E.
     sv.set('G88', value=round(15 * h1, 3))                # fachada del frente: ancho x altura en eje 1
     sv.set('G94', text='Eje 1 abierto')
     sv.set('B106', text='Muro C (Eje C)')
@@ -70,7 +71,7 @@ def main(template, resumen, out):
     sv.set('B107', text='Muro 3 (Eje 3)')
     sv.set('B108', text='Eje 1 (faldón)')
     sv.set('F108', text='SI')
-    sv.set('H108', text='GZ INCLINED TOWARDS %d' % S['towards'])
+    sv.set('H108', text='GZ INCLINED' + ((' TOWARDS %d' % S['towards']) if S.get('towards') else ''))
     sv.commit()
 
     b.force_recalc()
