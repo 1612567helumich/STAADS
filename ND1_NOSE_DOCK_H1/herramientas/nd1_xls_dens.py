@@ -32,7 +32,7 @@ def main(template, resumen, out):
         ('C-14', to['C-14']['W']),                     # R10
         ('2-14', to['2-14']['W']),                     # R11
         ('MC10-14 CUBIERTA', tg['LC']),                # R12
-        ('MC10-14 MUROS', tg['LM']),                   # R13
+        ('MC10-14 MUROS', to['MC10-14']['W'] - tg['LC']),   # R13 (largueros de muro, todos los MC10-14 que no son de cubierta)
         ('MCC10-14', to['MCC10-14']['W']),             # R14
         ('MC4-14', to['MC4-14']['W']),                 # R15
         ('PTR4-14', to['PTR4-14']['W']),               # R16

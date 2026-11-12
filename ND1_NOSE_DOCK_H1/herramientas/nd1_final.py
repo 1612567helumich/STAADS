@@ -147,29 +147,35 @@ ALT = {
          "GIRTS": [48.0 + 120.0 * i for i in range(9)],      # largueros de muro a los niveles del DXF
          "MAX_GAP": 120.0, "TOP_DROP": 100.0, "SNAP": 15.0, "FALDON_GIRT": True,
          "STUB_MIN": 0.0,                                    # tambien los largueros cortos entre columna y poste
+         "CF_BELOW_TOP": True,                               # PIPS de muro hasta +10.08, no al larguero superior (R1.2)
          "DOOR_X": (952.0, 1462.0), "DOOR_H": 607.0,         # cortina 5.00 x 6.00 en el claro B-C, dintel a +6.07
          "EDOOR_WALL": "3", "EDOOR_X": (766.0, 897.0), "EDOOR_H": 227.0, "EDOOR_TOP": 288.0,
          "ROD_DOOR": False,                                  # los muros laterales no tienen puertas
          "DIAE_PANELS_L": 3, "DIAE_PANELS": 0, "BACK_TRUSS": True,
          "SEC": {"COL": ("AISC", "W12X26"), "TM": ("PRIS", 1.27), "PE": ("UPT", 10, "PTR4-14"),
                  "PC": ("AISC", "HSST6X6X0.25")}},             # postes de cortina HSS 6x6x1/4 (R1.1)
-        ['NOSE DOCK H4 (ND4) - SUPERESTRUCTURA.  R1.1',
+        ['NOSE DOCK H4 (ND4) - SUPERESTRUCTURA.  R1.2',
          'PLANTA 15.00 X 16.00 M, EJES A-B-C (X) Y 3-2-1 (Z), FRENTE ABIERTO EN EJE 1',
          'ALTURAS DEL DXF: N.S.E. = 11.60 M (EJE 3) Y N.I.E. = 9.30 M.  PENDIENTE 5.1 %',
          'FORMA TIPO ND23 (ARMADURAS), CARGAS TIPO H5-H6 (ONEWAY POR GRUPOS Y MASA',
          'SISMICA EN PUNTA DE COLUMNAS).  NTDS / NTDV / RESESCO EL SALVADOR',
          'COLUMNAS: UN SOLO PERFIL IR (W12X26, A572 GR.50)',
          'LARGUEROS DE MURO A LOS NIVELES DEL DXF (+0.48 Y A CADA 1.20 M).  NINGUNA',
-         'SEPARACION MAYOR A 1.20 M: CAJON DE REMATE A +10.60 EN EL EJE 3 Y EN LOS',
+         'SEPARACION MAYOR A 1.20 M: LARGUERO SUPERIOR A +10.60 EN EL EJE 3 Y EN LOS',
          'CLAROS 3-2 DE LOS EJES A Y C, Y LARGUERO INTERMEDIO EN EL FALDON DEL EJE 1',
+         'CONTRAFLAMBEOS DE MURO (PIPS) DEL PISO AL LARGUERO DE +10.08 (MONTEN CAJON',
+         'MCC): NO SUBEN AL LARGUERO SUPERIOR',
          'CORTINA 5.00 X 6.00 M (DINTEL A +6.07, POSTES HSS 6X6X1/4) Y PUERTA DE',
          'EMERGENCIA EN EL EJE 3, CLARO B-C, CON SU VIENTO APLICADO EN SUS POSTES.',
          'MONTEN CAJON (MCC) DONDE REMATAN LOS CONTRAFLAMBEOS DE MURO Y LOS POSTES',
          'DE PUERTAS',
-         'EJE 3 SIN TENSORES: ARMADURA EN EL PLANO DEL MURO (VIGA SUPERIOR - CAJON)',
+         'EJE 3 SIN TENSORES: ARMADURA EN EL PLANO DEL MURO ENTRE LA VIGA SUPERIOR Y',
+         'EL LARGUERO SUPERIOR',
          'TENSORES: REDONDO DE 1/2 IN, UNO POR DIAGONAL, EN MUROS A Y C Y CUBIERTA;',
          'NINGUNO CRUZA PUERTAS',
-         'R1.1: POSTES DE CORTINA HSS 6X6X1/4 (ANTES HSS 4X4X1/4)'],
+         'R1.1: POSTES DE CORTINA HSS 6X6X1/4 (ANTES HSS 4X4X1/4)',
+         'R1.2: LOS PIPS DE MURO REMATAN EN EL LARGUERO DE +10.08 (CAJON), UNO ANTES',
+         'DEL LARGUERO SUPERIOR; YA NO SUBEN HASTA ARRIBA'],
     ),
 }
 

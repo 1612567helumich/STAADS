@@ -38,6 +38,8 @@ DEFAULT = dict(
         LC=('UPT', 2, 'MC10-14'),       # largueros de cubierta
         LM=('UPT', 2, 'MC10-14'),       # largueros de muro
         LMT=('UPT', 4, 'MCC10-14'),     # larguero de remate en cajon (donde terminan los contraflambeos de muro)
+        LS=('UPT', 4, 'MCC10-14'),      # larguero superior de muros laterales sin contraflambeos (CF_BELOW_TOP):
+                                        # salva el claro de columna a columna sin apoyos intermedios -> cajon
         DIN=('UPT', 4, 'MCC10-14'),     # dintel cortina
         DINE=('UPT', 4, 'MCC10-14'),    # larguero-dintel sobre puerta de emergencia
         CS=('UPT', 3, 'MCE6-14'),       # cuerdas superiores armaduras transversales
@@ -63,6 +65,8 @@ DEFAULT = dict(
     RAFTER_PINNED=True,
     VT_PINNED=True,         # viga superior del eje 3 articulada en columnas
     TOP_BOX=True,           # larguero superior de muros en cajon (remate de contraflambeos, como ND23 / H5-H6)
+    CF_BELOW_TOP=False,     # con larguero extra junto a la cubierta (MAX_GAP): los contraflambeos rematan en el
+                            # larguero anterior (cajon) y el de arriba queda sin contraflambeo (tag LS)
     ROD_DOOR=True,          # el tensor del claro de la puerta de emergencia arranca sobre su cajon (no cruza la puerta)
     BACK_BRACE=False,       # sin tensores en el muro de fondo (peticion del cliente)
     BACK_TRUSS=False,       # armadura en el plano del muro de fondo (viga superior - cajon de remate)
@@ -232,6 +236,14 @@ class Gen:
         lv_s32, top_s32 = self.zone_levels(Z3)                 # muros laterales, claro 3-2
         lv_s21, top_s21 = self.zone_levels(Z2)                 # muros laterales, claro 2-1
         self.lv_back, self.side_zones = lv_back, ((Z3, Z2, lv_s32, top_s32), (Z2, Z1, lv_s21, top_s21))
+
+        def box_level(lv, top):
+            # nivel donde rematan los contraflambeos (cajon): el larguero superior, o el anterior
+            # si el superior es el extra junto a la cubierta y CF_BELOW_TOP
+            extra = not any(abs(top - q) < 1e-6 for q in G)
+            return lv[-2] if (c['CF_BELOW_TOP'] and extra) else top
+        self.back_box = box_level(lv_back, self.back_top)
+        self.side_box = {Z3: box_level(lv_s32, top_s32), Z2: box_level(lv_s21, top_s21)}
         cbay = (XA, XB) if 0.5 * (c['DOOR_X'][0] + c['DOOR_X'][1]) < XB else (XB, XC)      # claro de la cortina
         col_lv = {'A-3': set(lv_back) | set(lv_s32), 'C-3': set(lv_back) | set(lv_s32), 'B-3': set(lv_back),
                   'A-2': set(lv_s32) | set(lv_s21), 'C-2': set(lv_s32) | set(lv_s21),
@@ -368,7 +380,9 @@ class Gen:
                     if not any(abs(g - q) < 1e-6 for q in lv):
                         continue
                     dbay = door and za - 1e-6 <= ed[0] and ed[1] <= zb + 1e-6      # la puerta esta en este claro
-                    zs = [za] + [sz for sz in c['SAG_WALL_Z'] if za + 1e-6 < sz < zb - 1e-6] + [zb]
+                    zbox = self.side_box[za]
+                    is_ls = g > zbox + 1e-6               # larguero superior sin contraflambeo
+                    zs = [za] + [sz for sz in c['SAG_WALL_Z'] if za + 1e-6 < sz < zb - 1e-6 and not is_ls] + [zb]
                     if dbay and g <= et + 1e-6:
                         zs = sorted(set(zs + list(ed)))
                     keys = [self.nd(x, g, z) for z in zs]
@@ -382,15 +396,17 @@ class Gen:
                         if any(abs(z1 - q) < 1e-6 for q in ends):
                             rel.append('END')
                         tag = 'LM'
-                        if c['TOP_BOX'] and abs(g - ztop) < 1e-6:
+                        if c['TOP_BOX'] and abs(g - zbox) < 1e-6:
                             tag = 'LMT'
+                        if is_ls:
+                            tag = 'LS'
                         if dbay and abs(g - et) < 1e-6:
                             tag = 'DINE'
                         self.mb(tag, a, b, rel=rel, wall=side, lvl=g)
             # flambeos
             for z in c['SAG_WALL_Z']:
-                lv = next(zn[2] for zn in self.side_zones if zn[0] - 1e-6 <= z <= zn[1] + 1e-6)
-                ys = [0.0] + list(lv)
+                zn = next(zn for zn in self.side_zones if zn[0] - 1e-6 <= z <= zn[1] + 1e-6)
+                ys = [0.0] + [q for q in zn[2] if q <= self.side_box[zn[0]] + 1e-6]
                 self.nd(x, 0.0, z, prio=2)
                 self.chain('CF', [(x, y, z) for y in ys], wall=side)
         # puerta de emergencia en un muro lateral
@@ -430,7 +446,7 @@ class Gen:
         for g in sorted(set(G3) | {dh}):
             only_din = (abs(g - dh) < 1e-6 and not dh_reg)   # nivel exclusivo del dintel: solo en el claro de la cortina
             xs = set(cols_x)
-            xs |= {sx for sx in c['SAG_BACK_X'] if g >= cf_from(sx) - 1e-6}
+            xs |= {sx for sx in c['SAG_BACK_X'] if cf_from(sx) - 1e-6 <= g <= self.back_box + 1e-6}
             if g <= dh + 1e-6:
                 xs |= set(dx)
             if ex is not None and g <= et + 1e-6:
@@ -457,8 +473,10 @@ class Gen:
                 if any(abs(x1 - q) < 1e-6 for q in ends):
                     rel.append('END')
                 tag = 'LM'
-                if c['TOP_BOX'] and abs(g - self.back_top) < 1e-6:
+                if c['TOP_BOX'] and abs(g - self.back_box) < 1e-6:
                     tag = 'LMT'
+                # arriba del cajon (CF_BELOW_TOP) queda un larguero normal: con armadura T3 es su cuerda
+                # inferior y se apoya en sus montantes a cada tablero
                 if abs(g - dh) < 1e-6 and x0 >= cbay[0] - 1e-6 and x1 <= cbay[1] + 1e-6:
                     # dintel de cortina: cajon continuo de columna a columna
                     tag = 'DIN'
@@ -483,11 +501,11 @@ class Gen:
         for sx in c['SAG_BACK_X']:
             y0 = cf_from(sx)
             if y0 <= 1e-6:
-                ys = [0.0] + list(G3)
+                ys = [0.0] + [g for g in G3 if g <= self.back_box + 1e-6]
                 self.nd(sx, 0.0, Z3, prio=2)
             else:
                 lvs = sorted(set(G3) | ({dh} if inside(sx, dx) else set()))
-                ys = [g for g in lvs if g >= y0 - 1e-6]
+                ys = [g for g in lvs if y0 - 1e-6 <= g <= self.back_box + 1e-6]
             self.chain('CF', [(sx, y, Z3) for y in ys], wall='3')
         for xp in dx:
             ys = sorted(set([0.0] + [g for g in G3 if g < dh - 1e-6] + [dh]))
@@ -539,8 +557,8 @@ class Gen:
         self.mb('TC', cT2, t['C-1'])
 
     # ------------------------------------------------------------ numeracion
-    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'MONF', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'LF', 'DIN', 'DINE',
-             'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
+    ORDER = ['COL', 'VR', 'VT', 'CS', 'CI', 'CSL', 'CIL', 'MON', 'MONF', 'DIA', 'DIAE', 'LC', 'CFC', 'LM', 'LMT', 'LS', 'LF', 'DIN',
+             'DINE', 'CF', 'PC', 'PE', 'DE', 'TM', 'TMF', 'TC']
 
     def number(self):
         keys = list(self._nodes)
