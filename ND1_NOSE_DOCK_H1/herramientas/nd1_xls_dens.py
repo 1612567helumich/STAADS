@@ -9,9 +9,19 @@ import openpyxl
 from xlsx_xml import Book, recalc_and_inject
 
 
+def hss_name(name):
+    """Tubo por dimensiones del modelo ('TUBE15.24x15.24x0.476', cm) -> nombre HSS ('HSST6X6X0.188')."""
+    m = re.match(r'TUBE([\d.]+)x([\d.]+)x([\d.]+)$', name)
+    if not m:
+        return name
+    d, b, t = (float(v) / 2.54 for v in m.groups())
+    tt = min(('0.125', '0.188', '0.25', '0.313', '0.375', '0.5'), key=lambda s: abs(float(s) - t))
+    return 'HSST%gX%gX%s' % (round(d, 2), round(b, 2), tt)
+
+
 def hss_txt(name):
     """'HSST6X6X0.25' -> 'HSS 6"×6"×1/4"' (texto de la plantilla)."""
-    m = re.match(r'HSST(\d+)X(\d+)X([\d.]+)$', name)
+    m = re.match(r'HSST(\d+)X(\d+)X([\d.]+)$', hss_name(name))
     fr = {'0.125': '1/8', '0.188': '3/16', '0.25': '1/4', '0.313': '5/16', '0.375': '3/8', '0.5': '1/2'}
     return 'HSS %s"×%s"×%s"' % (m.group(1), m.group(2), fr[m.group(3)])
 
@@ -49,7 +59,7 @@ def main(template, resumen, out):
         ('MCC10-14', to['MCC10-14']['W'], 'wall'),
         ('MC4-14', to['MC4-14']['W'], 'wall'),
         ('PTR4-14', to['PTR4-14']['W'], 'ptr'),
-        (pc, to[pc]['W'], 'hss'),                                   # postes de cortina
+        (hss_name(pc), to[pc]['W'], 'hss'),                         # postes de cortina (como HSS)
         ('PIPS7 CUBIERTA', tg['CFC'], 'pips_roof'),
         ('PIPS7 MUROS', tg['CF'], 'pips_wall'),
         ('REDONDOS CUBIERTA', tg['TC'], 'rod_roof'),

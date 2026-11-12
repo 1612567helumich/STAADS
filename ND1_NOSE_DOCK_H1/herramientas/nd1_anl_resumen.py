@@ -84,6 +84,9 @@ def main(resumen, anl, out):
     for e, d in S['design'].items():
         Ltag[d['tag']] = Ltag.get(d['tag'], 0.0) + d['L']
     for name in list(S['takeoff']):
+        if name.startswith('TUBE') and 'TUBE' in to:      # STAAD cuantifica los tubos por dimensiones como 'TUBE'
+            S['takeoff'][name]['W'] = to['TUBE']['W']
+            S['takeoff'][name]['L'] = to['TUBE']['L']
         if name in to:
             S['takeoff'][name]['W'] = to[name]['W']
             S['takeoff'][name]['L'] = to[name]['L']

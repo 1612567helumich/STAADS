@@ -245,7 +245,7 @@ def build_std(g, extra_comment=None):
             continue
         byspec.setdefault(c['SEC'][tag], []).extend(bt[tag])
     upt = [(s, ids) for s, ids in byspec.items() if s[0] == 'UPT']
-    aisc = [(s, ids) for s, ids in byspec.items() if s[0] == 'AISC']
+    aisc = [(s, ids) for s, ids in byspec.items() if s[0] in ('AISC', 'TUBE')]
     pris = [(s, ids) for s, ids in byspec.items() if s[0] == 'PRIS']
     if upt:
         A('MEMBER PROPERTY')
@@ -254,7 +254,10 @@ def build_std(g, extra_comment=None):
     if aisc:
         A('MEMBER PROPERTY AMERICAN')
         for s, ids in aisc:
-            L.extend(wrap(fmt_list(ids) + ['TABLE', 'ST', s[1]]))
+            if s[0] == 'TUBE':         # tubo por dimensiones (como el ND23): TH espesor, WT ancho, DT peralte (cm)
+                L.extend(wrap(fmt_list(ids) + ['TABLE', 'ST', 'TUBE', 'TH', fnum(s[3], 3), 'WT', fnum(s[2], 2), 'DT', fnum(s[1], 2)]))
+            else:
+                L.extend(wrap(fmt_list(ids) + ['TABLE', 'ST', s[1]]))
     if pris:
         A('MEMBER PROPERTY')
         for s, ids in pris:

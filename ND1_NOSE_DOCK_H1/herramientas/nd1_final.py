@@ -155,7 +155,7 @@ ALT = {
          "DIAE_PANELS_L": 3, "DIAE_PANELS": 0,
          "BACK_TRUSS": False, "BACK_BRACE": True,            # R1.4: sin armadura en el eje 3, cruz de tensores en A-B
          "SEC": {"COL": ("AISC", "W12X26"), "TM": ("PRIS", 1.27), "PE": ("UPT", 10, "PTR4-14"),
-                 "PC": ("AISC", "HSST6X6X0.25"),              # postes de cortina HSS 6x6x1/4 (R1.1)
+                 "PC": ("TUBE", 15.24, 15.24, 0.476),         # postes de cortina: TUBE 6x6x3/16 (R1.5)
                  "TMF": ("PRIS", PAR_MEDIA),                  # tensores del muro de fondo: 2 redondos de 1/2"
                  "LST": ("UPT", 4, "MCC10-14")}},             # larguero de cubierta del eje 3 sin armadura: cajon
         ['NOSE DOCK H4 (ND4) - SUPERESTRUCTURA.  R1.2',
