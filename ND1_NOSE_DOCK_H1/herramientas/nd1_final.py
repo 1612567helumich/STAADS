@@ -152,9 +152,12 @@ ALT = {
          "DOOR_X": (952.0, 1462.0), "DOOR_H": 607.0,         # cortina 5.00 x 6.00 en el claro B-C, dintel a +6.07
          "EDOOR_WALL": "3", "EDOOR_X": (766.0, 897.0), "EDOOR_H": 227.0, "EDOOR_TOP": 288.0,
          "ROD_DOOR": False,                                  # los muros laterales no tienen puertas
-         "DIAE_PANELS_L": 3, "DIAE_PANELS": 0, "BACK_TRUSS": True,
+         "DIAE_PANELS_L": 3, "DIAE_PANELS": 0,
+         "BACK_TRUSS": False, "BACK_BRACE": True,            # R1.4: sin armadura en el eje 3, cruz de tensores en A-B
          "SEC": {"COL": ("AISC", "W12X26"), "TM": ("PRIS", 1.27), "PE": ("UPT", 10, "PTR4-14"),
-                 "PC": ("AISC", "HSST6X6X0.25")}},             # postes de cortina HSS 6x6x1/4 (R1.1)
+                 "PC": ("AISC", "HSST6X6X0.25"),              # postes de cortina HSS 6x6x1/4 (R1.1)
+                 "TMF": ("PRIS", PAR_MEDIA),                  # tensores del muro de fondo: 2 redondos de 1/2"
+                 "LST": ("UPT", 4, "MCC10-14")}},             # larguero de cubierta del eje 3 sin armadura: cajon
         ['NOSE DOCK H4 (ND4) - SUPERESTRUCTURA.  R1.2',
          'PLANTA 15.00 X 16.00 M, EJES A-B-C (X) Y 3-2-1 (Z), FRENTE ABIERTO EN EJE 1',
          'ALTURAS DEL DXF: N.S.E. = 11.60 M (EJE 3) Y N.I.E. = 9.30 M.  PENDIENTE 5.1 %',

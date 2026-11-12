@@ -488,7 +488,8 @@ def build_std(g, extra_comment=None):
     L.extend(wrap(['LY', fnum(c['PURLIN'], 2), 'MEMB'] + fmt_list(bt['VR'])))
     L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(bt['VR'])))
     lm_side = [e for e in bt['LM'] + bt['LMT'] + bt['DINE'] if g.minfo[e]['wall'] in ('A', 'C')]
-    lm_back = [e for e in bt['LM'] + bt['LMT'] + bt['LST'] + bt['DIN'] + bt['DINE'] if g.minfo[e]['wall'] == '3']
+    lst_free = [] if c['BACK_TRUSS'] else bt['LST']        # sin armadura T3 el larguero superior salva el claro
+    lm_back = [e for e in bt['LM'] + bt['LMT'] + bt['LST'] + bt['DIN'] + bt['DINE'] if g.minfo[e]['wall'] == '3' and e not in lst_free]
     ls_side = [e for e in bt['LS'] if g.minfo[e]['wall'] in ('A', 'C')]
     vt_beam = [] if c['BACK_TRUSS'] else bt['VT']
     L.extend(wrap(['LY', '250', 'MEMB'] + fmt_list(vt_beam + bt['LC'] + lm_back)))
@@ -499,6 +500,9 @@ def build_std(g, extra_comment=None):
         A('* LARGUERO SUPERIOR DE MUROS LATERALES SIN CONTRAFLAMBEOS: LY = LZ = CLARO')
         L.extend(wrap(['LY', '800', 'MEMB'] + fmt_list(ls_side)))
         L.extend(wrap(['LZ', '800', 'MEMB'] + fmt_list(ls_side)))
+    if lst_free:
+        L.extend(wrap(['LY', fnum(max(g.L(e) for e in lst_free), 2), 'MEMB'] + fmt_list(lst_free)))
+        L.extend(wrap(['LZ', fnum(max(g.L(e) for e in lst_free), 2), 'MEMB'] + fmt_list(lst_free)))
     L.extend(wrap(['LY', fnum(dh, 2), 'MEMB'] + fmt_list(bt['PC'])))
     if bt['MONF']:
         L.extend(wrap(['LY', fnum(c['D_TRUSS'], 2), 'MEMB'] + fmt_list(bt['MONF'])))

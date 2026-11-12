@@ -545,8 +545,13 @@ class Gen:
         if c['ROD_DOOR_TIE'] and c['ROD_DOOR'] and c['EDOOR_WALL'] == 'A':
             self.mb('TM', base('A-3'), self.key(XA, c['EDOOR_TOP'], Z2), wall='A', tie=True)
         if c['BACK_BRACE']:
-            self.mb('TMF', base('B-3'), t['C-3'], wall='3')
-            self.mb('TMF', base('C-3'), t['B-3'], wall='3')
+            # cruz de tensores en el muro de fondo, solo en los claros sin puertas (no cruzan vanos)
+            opens = [c['DOOR_X']] + ([c['EDOOR_X']] if c['EDOOR_WALL'] == '3' else [])
+            for (n0, x0), (n1, x1) in ((('A-3', XA), ('B-3', XB)), (('B-3', XB), ('C-3', XC))):
+                if any(min(x1, o[1]) - max(x0, o[0]) > 1e-6 for o in opens):
+                    continue
+                self.mb('TMF', base(n0), t[n1], wall='3')
+                self.mb('TMF', base(n1), t[n0], wall='3')
         cT2 = self.nd(XB, yr(Z2), Z2)
         cT1 = self.nd(XB, yr(Z1), Z1)
         self.center = {'T2': cT2, 'T1': cT1}

@@ -100,7 +100,8 @@ def main(resumen, anl, out):
     # redondos: cubierta por su diametro; muros = total de PRISMATIC STEEL - cubierta
     wtc = sum(d['L'] * d['A'] * RHO for d in S['rods'].values() if d['tag'] == 'TC')
     tg['TC'] = wtc
-    tg['TM'] = to['PRISMATIC STEEL']['W'] - wtc
+    tg['TM'] = to['PRISMATIC STEEL']['W'] - wtc          # todos los redondos de muros (laterales y fondo)
+    tg['TMF'] = 0.0
     print('take-off STAAD: total %.3f kg  (calculo previo %.3f)' % (to['TOTAL'], S['weight']))
     S['weight'] = to['TOTAL']
     S['fuente'] = os.path.basename(anl)

@@ -25,9 +25,11 @@ def main(template, resumen, out):
     ws = wb.active
     # ------------------------------------------------ tabla PROFILE / WEIGHT (Q:R)
     # (nombre, peso, bloque): col = columnas, roof = cubierta, wall = muros; los demas van a su propia celda
-    mce_wall = S['sections'].get('LST')          # larguero de cubierta del eje 3 en MCE (CF_BELOW_TOP)
-    w_lst = tg.get('LST', 0.0) if mce_wall else 0.0
     vr_sec = S['sections'].get('VR', 'MCE10-14')
+    mce_wall = S['sections'].get('LST')          # larguero de cubierta del eje 3 en MCE (CF_BELOW_TOP)
+    if mce_wall != vr_sec:
+        mce_wall = None                          # en cajon ya entra en el renglon MCC10-14 (muros)
+    w_lst = tg.get('LST', 0.0) if mce_wall else 0.0
     rows = [('W12X26', to['W12X26']['W'], 'col')]
     if mce_wall == vr_sec:
         rows.append((vr_sec + ' CUBIERTA', to[vr_sec]['W'] - w_lst, 'roof'))
@@ -51,7 +53,7 @@ def main(template, resumen, out):
         ('PIPS7 CUBIERTA', tg['CFC'], 'pips_roof'),
         ('PIPS7 MUROS', tg['CF'], 'pips_wall'),
         ('REDONDOS CUBIERTA', tg['TC'], 'rod_roof'),
-        ('REDONDOS MUROS', tg['TM'], 'rod_wall'),
+        ('REDONDOS MUROS', tg['TM'] + tg.get('TMF', 0.0), 'rod_wall'),
     ]
     assert abs(sum(w for _, w, _ in rows) - S['weight']) < 0.5, (sum(w for _, w, _ in rows), S['weight'])
     s_q, s_r = copy.copy(ws['Q6']._style), copy.copy(ws['R6']._style)
