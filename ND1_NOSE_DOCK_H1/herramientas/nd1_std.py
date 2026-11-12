@@ -541,21 +541,35 @@ def tributary_masses(g):
     hf = (yr(Z1) - c['NIE']) / 100.0
     det['A-1']['area_faldon'] = (XC - XA) / 2 / 100.0 * hf
     det['C-1']['area_faldon'] = (XC - XA) / 2 / 100.0 * hf
-    # --- puertas: se descuenta la lamina y se suma el peso de la puerta, repartidos a las dos
-    #     columnas del claro segun la posicion del centro de la puerta
+    # --- puertas: en el hueco no hay lamina (se quita el hueco completo, entre postes y hasta
+    #     el dintel, de la franja tributaria de cada columna) y la puerta entra con su peso
+    #     completo, repartido por palanca a las dos columnas del claro
     def back_bay(xm):
         return ('A-3', XA, 'B-3', XB) if xm < XB else ('B-3', XB, 'C-3', XC)
 
     def add(col, key, val):
         det[col][key] = det[col].get(key, 0.0) + val
+
+    def ov(a0, a1, b0, b1):
+        return max(0.0, min(a1, b1) - max(a0, b0))
+    strips3 = {'A-3': (XA, 0.5 * (XA + XB)), 'B-3': (0.5 * (XA + XB), 0.5 * (XB + XC)), 'C-3': (0.5 * (XB + XC), XC)}
+    stripsL = {'3': (Z3, zq1), '2': (zq1, zq2), '1': (zq2, Z1)}
+
+    def hole(wall, u0, u1, h, key):
+        """Quita el hueco (u0-u1, alto h, en cm) de las franjas de muro que toca."""
+        if wall == '3':
+            for col, (a, b) in strips3.items():
+                add(col, key, -ov(a, b, u0, u1) * h / 1e4)
+        else:
+            for ax_, (a, b) in stripsL.items():
+                add(wall + '-' + ax_, key, -ov(a, b, u0, u1) * h / 1e4)
     dx = c['DOOR_X']
     a_cort = 5.0 * 6.0
     xc = 0.5 * (dx[0] + dx[1])
     n0, x0, n1, x1 = back_bay(xc)
     f0 = (x1 - xc) / (x1 - x0)
     w_cort = c['W_CORTINA'] * a_cort
-    add(n0, 'area_cortina', -a_cort * f0)
-    add(n1, 'area_cortina', -a_cort * (1 - f0))
+    hole('3', dx[0], dx[1], c['DOOR_H'], 'area_cortina')
     add(n0, 'w_cortina', w_cort * f0)
     add(n1, 'w_cortina', w_cort * (1 - f0))
     ew = c['EDOOR_WALL']
@@ -573,8 +587,7 @@ def tributary_masses(g):
             n0, n1, f0 = ew + '-3', ew + '-2', (Z2 - zc) / (Z2 - Z3)
     a_ed = (ed[1] - ed[0]) / 100.0 * c['EDOOR_H'] / 100.0
     w_ed = c['W_EDOOR'] * a_ed
-    add(n0, 'area_pemerg', -a_ed * f0)
-    add(n1, 'area_pemerg', -a_ed * (1 - f0))
+    hole(ew, ed[0], ed[1], c['EDOOR_H'], 'area_pemerg')
     add(n0, 'w_pemerg', w_ed * f0)
     add(n1, 'w_pemerg', w_ed * (1 - f0))
     out = {}
