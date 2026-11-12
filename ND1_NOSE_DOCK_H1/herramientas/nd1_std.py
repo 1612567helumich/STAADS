@@ -500,6 +500,8 @@ def build_std(g, extra_comment=None):
     L.extend(wrap(['CHECK', 'CODE', 'MEMB'] + fmt_list(nonrod)))
     A('STEEL MEMBER TAKE OFF ALL')
     A('FINISH')
+    if not c.get('COMMENTS', False):            # sin lineas de comentario en el STD
+        L = [l for l in L if not l.lstrip().startswith('*')]
     return '\n'.join(L) + '\n'
 
 
