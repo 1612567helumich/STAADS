@@ -10,19 +10,19 @@ from xlsx_xml import Book, recalc_and_inject
 
 
 def hss_name(name):
-    """Tubo por dimensiones del modelo ('TUBE15.24x15.24x0.476', cm) -> nombre HSS ('HSST6X6X0.188')."""
+    """Tubo por dimensiones del modelo ('TUBE15.24x15.24x0.476', cm) -> nombre HSS ('HSST6X6X0.1875')."""
     m = re.match(r'TUBE([\d.]+)x([\d.]+)x([\d.]+)$', name)
     if not m:
         return name
     d, b, t = (float(v) / 2.54 for v in m.groups())
-    tt = min(('0.125', '0.188', '0.25', '0.313', '0.375', '0.5'), key=lambda s: abs(float(s) - t))
+    tt = min(('0.125', '0.1875', '0.25', '0.3125', '0.375', '0.5'), key=lambda s: abs(float(s) - t))   # como en la hoja del usuario
     return 'HSST%gX%gX%s' % (round(d, 2), round(b, 2), tt)
 
 
 def hss_txt(name):
     """'HSST6X6X0.25' -> 'HSS 6"×6"×1/4"' (texto de la plantilla)."""
     m = re.match(r'HSST(\d+)X(\d+)X([\d.]+)$', hss_name(name))
-    fr = {'0.125': '1/8', '0.188': '3/16', '0.25': '1/4', '0.313': '5/16', '0.375': '3/8', '0.5': '1/2'}
+    fr = {'0.125': '1/8', '0.1875': '3/16', '0.25': '1/4', '0.3125': '5/16', '0.375': '3/8', '0.5': '1/2'}
     return 'HSS %s"×%s"×%s"' % (m.group(1), m.group(2), fr[m.group(3)])
 
 
@@ -66,12 +66,15 @@ def main(template, resumen, out):
         ('REDONDOS MUROS', tg['TM'] + tg.get('TMF', 0.0), 'rod_wall'),
     ]
     assert abs(sum(w for _, w, _ in rows) - S['weight']) < 0.5, (sum(w for _, w, _ in rows), S['weight'])
+    def fila(txt):                              # renglon de la plantilla con ese texto en la columna Q
+        return next(r for r in range(6, ws.max_row + 1) if ws.cell(r, 17).value == txt)
+    rt0, rs0 = fila('TOTAL='), fila('SUMA TOTAL DE ELEMENTOS=')   # en la plantilla original: 18 y 21
     s_q, s_r = copy.copy(ws['Q6']._style), copy.copy(ws['R6']._style)
-    s_tot_q, s_tot_r = copy.copy(ws['Q18']._style), copy.copy(ws['R18']._style)
-    s_sum_q, s_sum_r = copy.copy(ws['Q21']._style), copy.copy(ws['R21']._style)
-    s_blank = copy.copy(ws['Q19']._style)
+    s_tot_q, s_tot_r = copy.copy(ws.cell(rt0, 17)._style), copy.copy(ws.cell(rt0, 18)._style)
+    s_sum_q, s_sum_r = copy.copy(ws.cell(rs0, 17)._style), copy.copy(ws.cell(rs0, 18)._style)
+    s_blank = copy.copy(ws.cell(rt0 + 1, 17)._style)
     rt = 6 + len(rows)                          # fila del TOTAL
-    for r in range(6, rt + 4):                  # limpia la tabla anterior
+    for r in range(6, max(rt + 4, rs0 + 1)):    # limpia la tabla anterior (tambien si la plantilla tenia mas renglones)
         for col in (17, 18):
             c = ws.cell(r, col)
             c.value = None
