@@ -493,7 +493,7 @@ $SKPOLY
   9
 $TDCREATE
  40
-2461358.939039352
+2461358.953101852
   9
 $TDUCREATE
  40
@@ -501,7 +501,7 @@ $TDUCREATE
   9
 $TDUPDATE
  40
-2461358.939039352
+2461358.953101852
   9
 $TDUUPDATE
  40
@@ -553,7 +553,7 @@ $SPLINESEGS
   9
 $HANDSEED
   5
-EFD
+F85
   9
 $SURFTAB1
  70
@@ -937,7 +937,7 @@ $FINGERPRINTGUID
   9
 $VERSIONGUID
   2
-{0A0ECB73-3258-4C72-865A-36FB53EA8522}
+{8B578A56-4DFB-400E-ABF9-278C21298E8E}
   9
 $EXTNAMES
 290
@@ -2287,7 +2287,7 @@ LAYER
 100
 AcDbSymbolTable
  70
-25
+26
   0
 LAYER
   5
@@ -2940,6 +2940,30 @@ Continuous
 21
 348
 0
+  0
+LAYER
+  5
+F6F
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+TABLA
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
   0
 ENDTAB
   0
@@ -56881,6 +56905,638 @@ AcDbLine
  31
 0.0
   0
+TEXT
+  5
+F70
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.0
+ 20
+-1.65
+ 30
+0.0
+ 40
+0.3
+  1
+NOSE DOCK H1 – Cargas muertas
+  7
+ARIAL
+ 11
+21.0
+ 21
+-1.65
+ 31
+0.0
+100
+AcDbText
+  0
+LINE
+  5
+F71
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-1.9
+ 30
+0.0
+ 11
+33.0
+ 21
+-1.9
+ 31
+0.0
+  0
+LINE
+  5
+F72
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-2.4
+ 30
+0.0
+ 11
+33.0
+ 21
+-2.4
+ 31
+0.0
+  0
+LINE
+  5
+F73
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-2.9
+ 30
+0.0
+ 11
+33.0
+ 21
+-2.9
+ 31
+0.0
+  0
+LINE
+  5
+F74
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-3.4
+ 30
+0.0
+ 11
+33.0
+ 21
+-3.4
+ 31
+0.0
+  0
+LINE
+  5
+F75
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-3.9
+ 30
+0.0
+ 11
+33.0
+ 21
+-3.9
+ 31
+0.0
+  0
+LINE
+  5
+F76
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-4.4
+ 30
+0.0
+ 11
+33.0
+ 21
+-4.4
+ 31
+0.0
+  0
+LINE
+  5
+F77
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+21.0
+ 20
+-1.9
+ 30
+0.0
+ 11
+21.0
+ 21
+-4.4
+ 31
+0.0
+  0
+LINE
+  5
+F78
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+30.4
+ 20
+-1.9
+ 30
+0.0
+ 11
+30.4
+ 21
+-4.4
+ 31
+0.0
+  0
+LINE
+  5
+F79
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbLine
+ 10
+33.0
+ 20
+-1.9
+ 30
+0.0
+ 11
+33.0
+ 21
+-4.4
+ 31
+0.0
+  0
+TEXT
+  5
+F7A
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+25.7
+ 20
+-2.15
+ 30
+0.0
+ 40
+0.25
+  1
+Elemento
+  7
+ARIAL
+ 72
+1
+ 11
+25.7
+ 21
+-2.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F7B
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+31.7
+ 20
+-2.15
+ 30
+0.0
+ 40
+0.25
+  1
+Peso
+  7
+ARIAL
+ 72
+1
+ 11
+31.7
+ 21
+-2.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F7C
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.15
+ 20
+-2.65
+ 30
+0.0
+ 40
+0.25
+  1
+Cubierta (panel Glamet 9.32 + instalaciones 10.00)
+  7
+ARIAL
+ 11
+21.15
+ 21
+-2.65
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F7D
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+31.7
+ 20
+-2.65
+ 30
+0.0
+ 40
+0.25
+  1
+19.32 kg/m²
+  7
+ARIAL
+ 72
+1
+ 11
+31.7
+ 21
+-2.65
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F7E
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.15
+ 20
+-3.15
+ 30
+0.0
+ 40
+0.25
+  1
+Muro (lámina KR-18 cal. 24)
+  7
+ARIAL
+ 11
+21.15
+ 21
+-3.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F7F
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+31.7
+ 20
+-3.15
+ 30
+0.0
+ 40
+0.25
+  1
+5.85 kg/m²
+  7
+ARIAL
+ 72
+1
+ 11
+31.7
+ 21
+-3.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F80
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.15
+ 20
+-3.65
+ 30
+0.0
+ 40
+0.25
+  1
+Puerta de emergencia, 1 hoja (1.20 × 2.30 m)
+  7
+ARIAL
+ 11
+21.15
+ 21
+-3.65
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F81
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+31.7
+ 20
+-3.65
+ 30
+0.0
+ 40
+0.25
+  1
+35.00 kg/m²
+  7
+ARIAL
+ 72
+1
+ 11
+31.7
+ 21
+-3.65
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F82
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.15
+ 20
+-4.15
+ 30
+0.0
+ 40
+0.25
+  1
+Cortina (5.10 × 6.60 m)
+  7
+ARIAL
+ 11
+21.15
+ 21
+-4.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F83
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+31.7
+ 20
+-4.15
+ 30
+0.0
+ 40
+0.25
+  1
+10.53 kg/m²
+  7
+ARIAL
+ 72
+1
+ 11
+31.7
+ 21
+-4.15
+ 31
+0.0
+100
+AcDbText
+ 73
+2
+  0
+TEXT
+  5
+F84
+330
+17
+100
+AcDbEntity
+  8
+TABLA
+100
+AcDbText
+ 10
+21.0
+ 20
+-4.800000000000001
+ 30
+0.0
+ 40
+0.18
+  1
+Puerta: ficha GC PAEM (lámina cal. 20, núcleo de lana mineral 1.5"), 97 kg. Cortina: 354.5 kg / 33.66 m², 177.2 kg en cada poste.
+  7
+ARIAL
+ 11
+21.0
+ 21
+-4.800000000000001
+ 31
+0.0
+100
+AcDbText
+  0
 ENDSEC
   0
 SECTION
@@ -65655,7 +66311,7 @@ DictionaryVariables
 280
 0
   1
-1.4.5 @ 2026-11-13T22:32:13.079985+00:00
+1.4.5 @ 2026-11-13T22:52:28.628646+00:00
   0
 DICTIONARY
   5
