@@ -1,0 +1,224 @@
+<title>Superposte 20-02</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one-screen viewer. 3D stage fills the window; the drawing's data (title block, BOM, notes)
+   lives in a side panel on desktop and in a bottom sheet on phones. */
+:root {
+  --bg: #e6eaee;          /* stage ground, cool drafting grey */
+  --bg-2: #f4f6f8;        /* stage top of the gradient */
+  --panel: #fbfcfd;
+  --ink: #1a222b;
+  --muted: #5b6874;
+  --line: #ccd4dc;
+  --chip: #edf1f4;
+  --accent: #9b3b25;      /* rojo óxido, the pole's primer */
+  --accent-ink: #ffffff;
+  --accent-soft: #f3e4df;
+  --ref: #2f6497;         /* reference items and dimensions */
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1418; --bg-2: #1a2229; --panel: #151c22; --ink: #e2e8ee; --muted: #94a2ae;
+    --line: #2a3541; --chip: #1e2830; --accent: #d9704f; --accent-ink: #1a0d08; --accent-soft: #3a211a;
+    --ref: #82b4e3; --warn: #e5b45a; --warn-soft: #33290f; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1418; --bg-2: #1a2229; --panel: #151c22; --ink: #e2e8ee; --muted: #94a2ae;
+  --line: #2a3541; --chip: #1e2830; --accent: #d9704f; --accent-ink: #1a0d08; --accent-soft: #3a211a;
+  --ref: #82b4e3; --warn: #e5b45a; --warn-soft: #33290f; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; overflow: hidden; }
+.app { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
+.stage { position: relative; min-width: 0; min-height: 0; overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, var(--bg-2), var(--bg)); }
+.stage canvas { display: block; outline: none; touch-action: none; }
+#labels { position: absolute; inset: 0; pointer-events: none; }
+.lbl { font: 500 11px/1.25 var(--font-mono); color: var(--ink); background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lbl b { font-family: var(--font-display); font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.lbl.dim { color: var(--ref); border-color: color-mix(in srgb, var(--ref) 45%, transparent); }
+.lbl.ref { color: var(--ref); border-style: dashed; }
+
+.toolbar { position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); right: 12px;
+  display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.toolbar button { pointer-events: auto; }
+.btn { font: 600 13px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 11px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:focus-visible, .seg button:focus-visible, .bom tbody tr:focus-visible, .tg input:focus-visible + span { outline: 2px solid var(--ref); outline-offset: 2px; }
+.hint { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); bottom: 12px; font-size: 12px; color: var(--muted);
+  background: color-mix(in srgb, var(--panel) 80%, transparent); padding: 4px 8px; border-radius: 4px; pointer-events: none; }
+.tip { position: absolute; pointer-events: none; font: 500 12px/1.3 var(--font-body); background: var(--ink); color: var(--panel);
+  padding: 5px 8px; border-radius: 4px; transform: translate(12px, 12px); max-width: 260px; }
+.tip small { display: block; color: color-mix(in srgb, var(--panel) 70%, transparent); font-family: var(--font-mono); font-size: 11px; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted);
+  font: 600 16px/1.4 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+
+.panel { min-width: 0; min-height: 0; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line);
+  padding-block: 20px 28px; padding-left: 20px; padding-right: max(20px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font: 500 11px/1.4 var(--font-mono); color: var(--muted); letter-spacing: .02em; }
+h1 { margin: 4px 0 6px; font: 700 34px/1 var(--font-display); letter-spacing: .01em; text-transform: uppercase; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.lede { margin: 0; color: var(--muted); line-height: 1.5; }
+h2 { margin: 0 0 10px; font: 600 13px/1 var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 8px; }
+h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin: 0; }
+.specs div { background: var(--panel); padding: 8px 10px; min-width: 0; }
+.specs dt { font: 600 11px/1.2 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.specs dd { margin: 3px 0 0; font: 500 14px/1.25 var(--font-mono); font-variant-numeric: tabular-nums; }
+.specs dd small { color: var(--muted); font-size: 11px; }
+.paint { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.paint i { width: 26px; height: 16px; border-radius: 2px; background: #8e3a26; border: 1px solid var(--line); flex: none; }
+.tgs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+.tg { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+.tg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.tg span { width: 30px; height: 18px; border-radius: 9px; background: var(--chip); border: 1px solid var(--line); position: relative; flex: none; transition: background .15s; }
+.tg span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.tg input:checked + span { background: var(--accent); border-color: var(--accent); }
+.tg input:checked + span::after { transform: translateX(12px); background: var(--accent-ink); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { font: 500 12px/1 var(--font-mono); padding: 7px 10px; background: var(--panel); color: var(--ink); border: 0; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+.bom { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.bom th { font: 600 11px/1.2 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 7px 8px; background: var(--chip); }
+.bom td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.bom td.n, .bom th.n { text-align: right; font-family: var(--font-mono); white-space: nowrap; }
+.bom td.fig { font-family: var(--font-mono); color: var(--muted); }
+.bom tbody tr { cursor: pointer; }
+.bom tbody tr:hover td { background: var(--chip); }
+.bom tbody tr.on td { background: var(--accent-soft); }
+.bom tbody tr.on td.fig { color: var(--accent); font-weight: 600; }
+.bom tfoot td { padding: 7px 8px; border-top: 1px solid var(--line); font-weight: 600; }
+.note { font-size: 12px; color: var(--muted); margin: 8px 0 0; line-height: 1.45; }
+.obs { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.obs li { font-size: 12.5px; line-height: 1.45; padding: 8px 10px; border-radius: 4px; background: var(--warn-soft); }
+.obs li strong { color: var(--warn); font-weight: 600; }
+.obs li.info { background: var(--chip); }
+.obs li.info strong { color: var(--ref); }
+footer.tb { font: 400 11px/1.5 var(--font-mono); color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 44%); }
+  .panel { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 24px; }
+  h1 { font-size: 28px; }
+  .toolbar { flex-wrap: nowrap; overflow-x: auto; right: 0; padding-right: 12px; scrollbar-width: none; }
+  .btn { padding: 7px 9px; font-size: 12px; }
+  .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <main class="stage" id="stage" aria-label="Modelo 3D del poste">
+    <div id="labels"></div>
+    <nav class="toolbar" id="views" aria-label="Vistas">
+      <button class="btn" data-view="todo" aria-pressed="true">Completo</button>
+      <button class="btn" data-view="corona">Corona</button>
+      <button class="btn" data-view="empotre">Empotramiento</button>
+      <button class="btn" data-view="base">Base</button>
+      <button class="btn" data-view="planta">Planta</button>
+      <button class="btn" data-view="anclas">Anclas</button>
+    </nav>
+    <div class="hint">Arrastra para girar · rueda o pellizco para zoom · clic derecho para mover · clic en una pieza para identificarla</div>
+    <div class="tip" id="tip" hidden></div>
+    <div class="overlay" id="overlay">Cargando modelo 3D…</div>
+  </main>
+
+  <aside class="panel">
+    <header>
+      <div class="eyebrow">PCP-20-02-14893-2CROX · PR 20-02 · Grupo Polesa</div>
+      <h1>Superposte <span>20-02</span></h1>
+      <p class="lede">Poste cónico poligonal tipo ráfaga de 20 m en dos secciones con empotramiento, placa base de 620 mm y cruceta en corona. Modelo armado a partir del plano de ensamble y detalles (hojas 1/2 y 2/2).</p>
+    </header>
+
+    <section>
+      <h2>Datos principales</h2>
+      <dl class="specs">
+        <div><dt>Altura</dt><dd>20 000 <small>mm</small></dd></div>
+        <div><dt>Sección</dt><dd id="spec-lados">12 lados</dd></div>
+        <div><dt>Base → corona</dt><dd>ø440 → ø130</dd></div>
+        <div><dt>Lámina</dt><dd>cal. 4.76 <small>A572</small></dd></div>
+        <div><dt>Secciones</dt><dd>2 × 10 300</dd></div>
+        <div><dt>Empotramiento</dt><dd>600 <small>mm</small></dd></div>
+        <div><dt>Placa base</dt><dd>620×620×44.45</dd></div>
+        <div><dt>Anclas</dt><dd>4 × ø50.8×2000</dd></div>
+        <div><dt>Escalones</dt><dd id="spec-esc">41 <small>@ 400 alt.</small></dd></div>
+        <div><dt>Peso en negro</dt><dd>850 <small>kg</small></dd></div>
+      </dl>
+      <div class="paint"><i aria-hidden="true"></i><span>Acabado: primario rojo óxido · PED NP-01664 · FT 14893 · 8 pzas</span></div>
+    </section>
+
+    <section>
+      <h2>Capas</h2>
+      <div class="tgs">
+        <label class="tg"><input type="checkbox" id="tg-acc" checked><span></span>Accesorios</label>
+        <label class="tg"><input type="checkbox" id="tg-cim" checked><span></span>Cimentación</label>
+        <label class="tg"><input type="checkbox" id="tg-cru" checked><span></span>Cruceta (ref.)</label>
+        <label class="tg"><input type="checkbox" id="tg-cot" checked><span></span>Cotas</label>
+        <label class="tg"><input type="checkbox" id="tg-cor"><span></span>Corte longitudinal</label>
+        <label class="tg"><input type="checkbox" id="tg-giro"><span></span>Giro automático</label>
+      </div>
+      <div class="row">
+        <span>Lados del polígono</span>
+        <div class="seg" role="group" aria-label="Lados del polígono">
+          <button id="lados-12" aria-pressed="true">12</button>
+          <button id="lados-8" aria-pressed="false">8</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Lista de materiales</h2>
+      <div class="tablewrap">
+        <table class="bom">
+          <thead><tr><th>Fig.</th><th class="n">Cant.</th><th>Descripción</th><th>Acero</th><th class="n">Peso T.</th></tr></thead>
+          <tbody id="bom"></tbody>
+          <tfoot><tr><td colspan="4">Peso en negro (según plano)</td><td class="n">850</td></tr></tfoot>
+        </table>
+      </div>
+      <p class="note">Toca una fila para resaltar la pieza en el modelo. Pesos en kg.</p>
+    </section>
+
+    <section>
+      <h2>Observaciones del plano</h2>
+      <ul class="obs">
+        <li><strong>12 u 8 lados.</strong> La elevación y la tapa corona indican 12 lados; el detalle A y la placa base dibujan un octágono (caras 1-3-5-7). El modelo usa 12; cambia a 8 arriba para comparar.</li>
+        <li><strong>Escalones: 41 contra 47.</strong> La nota (cada 400 mm alternados, de 3 000 mm hasta 800 mm de la corona) da 41 escalones; la lista pide 47 escalones y 47 porta escalones.</li>
+        <li><strong>Suma de pesos.</strong> La columna Peso T. suma 867 kg; el total indicado es 850 kg.</li>
+        <li><strong>Placa base.</strong> La leyenda dice "417 mm cuadrada"; 417 es el cuadro de barrenos (ø589 a 45°). La placa es de 620 × 620.</li>
+        <li class="info"><strong>Supuestos del modelo.</strong> Diámetros entre caras; registro Hubbell centrado a 458 mm; niple a unos 610 mm bajo la corona. La cruceta de 3 000 × 800 y el dado de concreto no tienen cotas en la lista: se muestran como referencia.</li>
+      </ul>
+    </section>
+
+    <footer class="tb">Dibujó ATM 15/09/07 (hoja 1, rev. 0) · Julio 19/05/05 (hoja 2, rev. A) · Escala NTS · Unidades en mm</footer>
+  </aside>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="superposte.js"></script>
+<script>
+  setTimeout(function () {
+    if (!window.__poste) document.getElementById('overlay').textContent = 'No se pudo cargar el motor 3D (three.js desde cdn.jsdelivr.net). Revisa la conexión y recarga la página.';
+  }, 12000);
+</script>
