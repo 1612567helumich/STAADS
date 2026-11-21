@@ -50,7 +50,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
 .stage canvas { display: block; outline: none; touch-action: none; }
 #labels { position: absolute; inset: 0; pointer-events: none; }
 .lbl { font: 500 11px/1.25 var(--font-mono); color: var(--ink); background: color-mix(in srgb, var(--panel) 88%, transparent);
-  border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; white-space: nowrap; font-variant-numeric: tabular-nums; will-change: transform; }
 .lbl b { font-family: var(--font-display); font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 .lbl.dim { color: var(--ref); border-color: color-mix(in srgb, var(--ref) 45%, transparent); }
 .lbl.ref { color: var(--ref); border-style: dashed; }
@@ -66,7 +66,7 @@ body { background: var(--bg); color: var(--ink); font-family: var(--font-body); 
 .hint { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); bottom: 12px; font-size: 12px; color: var(--muted);
   background: color-mix(in srgb, var(--panel) 80%, transparent); padding: 4px 8px; border-radius: 4px; pointer-events: none; }
 .tip { position: absolute; pointer-events: none; font: 500 12px/1.3 var(--font-body); background: var(--ink); color: var(--panel);
-  padding: 5px 8px; border-radius: 4px; transform: translate(12px, 12px); max-width: 260px; }
+  padding: 5px 8px; border-radius: 4px; left: 0; top: 0; will-change: transform; max-width: 260px; }
 .tip small { display: block; color: color-mix(in srgb, var(--panel) 70%, transparent); font-family: var(--font-mono); font-size: 11px; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--muted);
   font: 600 16px/1.4 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
@@ -232,8 +232,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
-window.__poste = true;
 const mm = (v) => v / 1000;
 const $ = (id) => document.getElementById(id);
 const stage = $('stage'), overlay = $('overlay'), tip = $('tip');
@@ -275,14 +275,18 @@ const BOM = [
 ];
 
 // ---------- Render ----------
+// Resolución: máximo 1.5× la densidad de la pantalla; si los cuadros salen lentos al mover, baja mientras se mueve
+// y vuelve a la resolución completa al soltar.
+const DPR_MAX = Math.min(window.devicePixelRatio || 1, 1.5);
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 } catch (e) {
   overlay.textContent = 'Este navegador no pudo iniciar WebGL. Prueba en otro navegador o activa la aceleración por hardware.';
   throw e;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+window.__poste = { renderer };
+renderer.setPixelRatio(DPR_MAX);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -296,13 +300,14 @@ const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.55;
+pmrem.dispose();
 const sun = new THREE.DirectionalLight(0xfff4e6, 1.9); sun.position.set(6, 14, 9); scene.add(sun);
 const fill = new THREE.DirectionalLight(0xdbe8ff, 0.6); fill.position.set(-8, 4, -6); scene.add(fill);
 scene.add(new THREE.HemisphereLight(0xe8f0ff, 0x6b5a4e, 0.45));
 
-const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 300);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 200);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.09;
+controls.enableDamping = true; controls.dampingFactor = 0.12;
 controls.minDistance = 0.25; controls.maxDistance = 90;
 controls.autoRotateSpeed = 0.9;
 // Navegación tipo CAD: botón izquierdo gira, rueda presionada (o botón derecho) desplaza, rueda hace zoom hacia el cursor.
@@ -312,35 +317,50 @@ renderer.domElement.addEventListener('mousedown', (e) => { if (e.button === 1) e
 
 // ---------- Materiales ----------
 const MAT = {
-  oxido: new THREE.MeshStandardMaterial({ color: 0x8e3a26, roughness: 0.58, metalness: 0.32, flatShading: true, side: THREE.DoubleSide }),
-  interior: new THREE.MeshStandardMaterial({ color: 0x5b4a42, roughness: 0.85, metalness: 0.15, flatShading: true, side: THREE.DoubleSide }),
-  oxidoAcc: new THREE.MeshStandardMaterial({ color: 0x86361f, roughness: 0.55, metalness: 0.3, side: THREE.DoubleSide }),
+  oxido: new THREE.MeshStandardMaterial({ color: 0x8e3a26, roughness: 0.58, metalness: 0.32, flatShading: true }),
+  interior: new THREE.MeshStandardMaterial({ color: 0x5b4a42, roughness: 0.85, metalness: 0.15, flatShading: true }),
+  oxidoAcc: new THREE.MeshStandardMaterial({ color: 0x86361f, roughness: 0.55, metalness: 0.3 }),
   galv: new THREE.MeshStandardMaterial({ color: 0xaab1b8, roughness: 0.34, metalness: 0.88 }),
   negro: new THREE.MeshStandardMaterial({ color: 0x3a3e43, roughness: 0.5, metalness: 0.75 }),
   rosca: new THREE.MeshStandardMaterial({ color: 0x5d6166, roughness: 0.85, metalness: 0.6, flatShading: true }),
-  hueco: new THREE.MeshBasicMaterial({ color: 0x160a07, side: THREE.DoubleSide }),
+  hueco: new THREE.MeshBasicMaterial({ color: 0x160a07 }),
   concreto: new THREE.MeshStandardMaterial({ color: 0x9c9a92, roughness: 1, metalness: 0, transparent: true, opacity: 0.15, depthWrite: false, side: THREE.DoubleSide }),
   ref: new THREE.MeshStandardMaterial({ color: 0x2f6497, roughness: 0.5, metalness: 0.2, transparent: true, opacity: 0.4, depthWrite: false }),
-  hi: new THREE.MeshStandardMaterial({ color: 0xff9a4d, emissive: 0xd9480f, emissiveIntensity: 0.6, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide }),
+  hi: new THREE.MeshStandardMaterial({ color: 0xff9a4d, emissive: 0xd9480f, emissiveIntensity: 0.6, roughness: 0.5, metalness: 0.2 }),
   hiX: new THREE.MeshBasicMaterial({ color: 0xff8a3d, depthTest: false, transparent: true, opacity: 0.95 }),
 };
 const lineMat = new THREE.LineBasicMaterial({ color: 0x2f6497 });
 const edgeMat = new THREE.LineBasicMaterial({ color: 0x8a8880, transparent: true, opacity: 0.5 });
 
-// ---------- Geometrías compartidas ----------
+// ---------- Geometrías compartidas (piezas repetidas, ya desplazadas a su lugar local) ----------
+const at = (g, x = 0, y = 0, z = 0) => g.translate(x, y, z);
+const rHex = (af) => af / 2 / Math.cos(Math.PI / 6);
+const ANC = (() => {
+  const A = P.ancla, yTop = mm(A.sobre), yBot = yTop - mm(A.L), yRos = yTop - mm(A.rosca);
+  return { A, yTop, yBot, yRos, tp: mm(P.placa.t) };
+})();
 const G = {
-  porta: new THREE.BoxGeometry(mm(31), mm(60), mm(38)),
-  varilla: new THREE.CylinderGeometry(mm(8), mm(8), mm(160), 14).rotateZ(Math.PI / 2),
-  tuerca16: new THREE.CylinderGeometry(mm(13.8), mm(13.8), mm(14), 6).rotateZ(Math.PI / 2),
-  disco: new THREE.CylinderGeometry(mm(25), mm(25), mm(4), 28).rotateZ(Math.PI / 2),
-  domo: new THREE.SphereGeometry(mm(25), 28, 10, 0, Math.PI * 2, 0, Math.PI / 2).rotateZ(-Math.PI / 2).scale(0.4, 1, 1),
-  tuerca25: new THREE.CylinderGeometry(mm(23.8), mm(23.8), mm(25), 6).rotateZ(Math.PI / 2),
-  barreno25: new THREE.CircleGeometry(mm(12.7), 18).rotateY(Math.PI / 2),
+  // Escalón: porta escalón soldado y tornillo ø16 × 203 con tuerca, disco y remate ø50
+  porta: at(new THREE.BoxGeometry(mm(31), mm(60), mm(38)), mm(15.5)),
+  escalon: mergeGeometries([
+    at(new THREE.CylinderGeometry(mm(8), mm(8), mm(160), 14).rotateZ(Math.PI / 2), mm(111)),
+    at(new THREE.CylinderGeometry(mm(13.8), mm(13.8), mm(14), 6).rotateZ(Math.PI / 2), mm(38)),
+    at(new THREE.CylinderGeometry(mm(25), mm(25), mm(4), 28).rotateZ(Math.PI / 2), mm(191)),
+    at(new THREE.SphereGeometry(mm(25), 28, 10, 0, Math.PI * 2, 0, Math.PI / 2).rotateZ(-Math.PI / 2).scale(0.4, 1, 1), mm(193)),
+  ]),
+  tuerca25: at(new THREE.CylinderGeometry(mm(23.8), mm(23.8), mm(25), 6).rotateZ(Math.PI / 2), mm(12.5)),
+  barreno25: at(new THREE.CircleGeometry(mm(12.7), 18).rotateY(Math.PI / 2), mm(25.3)),
+  ancla: at(new THREE.CylinderGeometry(mm(ANC.A.d / 2), mm(ANC.A.d / 2), ANC.yRos - ANC.yBot, 20), 0, (ANC.yRos + ANC.yBot) / 2),
+  rosca: at(new THREE.CylinderGeometry(mm(ANC.A.d / 2) * 1.012, mm(ANC.A.d / 2) * 1.012, ANC.yTop - ANC.yRos, 20), 0, (ANC.yTop + ANC.yRos) / 2),
+  tuercaNiv: at(new THREE.CylinderGeometry(rHex(mm(79.4)), rHex(mm(79.4)), mm(50.8), 6), 0, -ANC.tp - mm(25.4 + 0.5)),
+  tuercaSup: at(new THREE.CylinderGeometry(rHex(mm(79.4)), rHex(mm(79.4)), mm(50.8), 6), 0, mm(25.4 + 0.3)),
+  placaAncla: at(new THREE.BoxGeometry(mm(ANC.A.pl), mm(ANC.A.plt), mm(ANC.A.pl)), 0, ANC.yBot + mm(ANC.A.plOff + ANC.A.plt / 2)),
 };
+const SHARED = new Set(Object.values(G));
 
 const box = (x, y, z, mat) => new THREE.Mesh(new THREE.BoxGeometry(x, y, z), mat);
 const cylY = (r, h, mat, seg = 24) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
-const hexY = (af, h, mat) => cylY(af / 2 / Math.cos(Math.PI / 6), h, mat, 6);
+const hexY = (af, h, mat) => cylY(rHex(af), h, mat, 6);
 
 // Tubo cónico poligonal: N caras, diámetros entre caras, espesor t. Normales planas por cara.
 function tuboPoligonal(N, s, t) {
@@ -404,14 +424,22 @@ const groups = {};
 let pickables = [];
 let sides = 12;
 const labels = [];
+const dummy = new THREE.Object3D();
 
 function tag(m, fig, name, extra = '') { m.userData = { fig, name, extra }; pickables.push(m); return m; }
-function enCara(obj, cara, yMM) {
-  const th = CARA[cara], a = aAt(yMM);
-  obj.position.set(Math.cos(th) * a, mm(yMM), Math.sin(th) * a);
-  obj.rotation.y = -th;   // el eje local +X apunta hacia fuera de la cara
-  return obj;
+// Posición y giro sobre una cara a la altura y (mm): el eje local +X apunta hacia fuera de la cara.
+function onFace(cara, yMM) { const th = CARA[cara], a = aAt(yMM); return [Math.cos(th) * a, mm(yMM), Math.sin(th) * a, -th]; }
+function enCara(obj, cara, yMM) { const [x, y, z, ry] = onFace(cara, yMM); obj.position.set(x, y, z); obj.rotation.y = ry; return obj; }
+// Pieza repetida en una sola llamada de dibujo. items: nombre y dato de cada copia, para identificarla con el cursor.
+function instanced(geo, mat, places, fig = null, items = null) {
+  const im = new THREE.InstancedMesh(geo, mat, places.length);
+  places.forEach(([x, y, z, ry = 0], i) => { dummy.position.set(x, y, z); dummy.rotation.set(0, ry, 0); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix); });
+  im.instanceMatrix.needsUpdate = true;
+  im.computeBoundingSphere(); im.computeBoundingBox();
+  if (fig != null) { im.userData = { fig, items }; pickables.push(im); }
+  return im;
 }
+
 // win: [mín, máx] de distancia de la cámara en que se muestra; by 'self' mide a la etiqueta, 'target' al punto de giro.
 function label(html, pos, { cls = '', win = [0, Infinity], by = 'self', gate = null, anchor = [0.5, 0.5] } = {}) {
   const el = document.createElement('div');
@@ -430,7 +458,10 @@ function cota(x, z, y0, y1, html, { side = -1, win = [0, Infinity] } = {}) {
 }
 
 function disposeGroup(g) {
-  g.traverse((o) => { if (o.geometry && !Object.values(G).includes(o.geometry)) o.geometry.dispose(); });
+  g.traverse((o) => {
+    if (o.isInstancedMesh) o.dispose();
+    if (o.geometry && !SHARED.has(o.geometry)) o.geometry.dispose();
+  });
   for (const c of [...g.children]) g.remove(c);
 }
 
@@ -446,8 +477,7 @@ function build() {
   poste.add(tag(new THREE.Mesh(tuboPoligonal(sides, P.s1, P.t), [MAT.oxido, MAT.interior]), 1, 'Primera sección', '440 → 273.3 · 10 300 · cal. 4.76'));
   poste.add(tag(new THREE.Mesh(tuboPoligonal(sides, P.s2, P.t), [MAT.oxido, MAT.interior]), 2, 'Segunda sección', '296.6 → 130 · 10 300 · cal. 4.76'));
 
-  const placa = tag(new THREE.Mesh(placaBaseGeo(), MAT.oxidoAcc), 4, 'Placa base', '620 × 620 × 44.45 · 4 barrenos ø60 · hueco ø308');
-  poste.add(placa);
+  poste.add(tag(new THREE.Mesh(placaBaseGeo(), MAT.oxidoAcc), 4, 'Placa base', '620 × 620 × 44.45 · 4 barrenos ø60 · hueco ø308'));
 
   const tapa = tag(cylY(mm(73.5), mm(4.76), MAT.oxidoAcc, 48), 3, 'Tapa corona', 'ø147 × 4.76 · barreno ø16');
   tapa.position.y = mm(20000 + 2.38); poste.add(tapa);
@@ -457,27 +487,28 @@ function build() {
   contra.position.y = mm(20000 - 13 - 2.4); poste.add(contra);
 
   // Escalones: cada 400 mm alternados en caras 3 y 7, de 3 000 hasta 800 mm de la corona
-  let n = 0;
-  for (let y = P.escalones.y0; y <= P.escalones.hasta; y += P.escalones.paso) {
-    n++;
-    const cara = n % 2 ? 7 : 3, ex = `h = ${fmt(y)} mm · cara ${cara}`;
-    const g = new THREE.Group();
-    const porta = tag(new THREE.Mesh(G.porta, MAT.oxidoAcc), 9, `Porta escalón ${n}`, ex); porta.position.x = mm(15.5);
-    const varilla = tag(new THREE.Mesh(G.varilla, MAT.galv), 10, `Escalón ${n}`, ex); varilla.position.x = mm(31 + 80);
-    const tuerca = tag(new THREE.Mesh(G.tuerca16, MAT.galv), 10, `Escalón ${n}`, ex); tuerca.position.x = mm(31 + 7);
-    const disco = tag(new THREE.Mesh(G.disco, MAT.galv), 10, `Escalón ${n}`, ex); disco.position.x = mm(191);
-    const domo = tag(new THREE.Mesh(G.domo, MAT.galv), 10, `Escalón ${n}`, ex); domo.position.x = mm(193);
-    g.add(porta, varilla, tuerca, disco, domo);
-    acc.add(enCara(g, cara, y));
+  {
+    const places = [], esc = [], porta = [];
+    let n = 0;
+    for (let y = P.escalones.y0; y <= P.escalones.hasta; y += P.escalones.paso) {
+      n++;
+      const cara = n % 2 ? 7 : 3, extra = `h = ${fmt(y)} mm · cara ${cara}`;
+      places.push(onFace(cara, y));
+      esc.push({ name: `Escalón ${n}`, extra });
+      porta.push({ name: `Porta escalón ${n}`, extra });
+    }
+    acc.add(instanced(G.porta, MAT.oxidoAcc, places, 9, porta), instanced(G.escalon, MAT.galv, places, 10, esc));
+    $('spec-esc').innerHTML = `${n} <small>@ 400 alt.</small>`;
   }
-  $('spec-esc').innerHTML = `${n} <small>@ 400 alt.</small>`;
 
   // Tuercas de empotramiento: 4 niveles × caras 3 y 7
-  for (const y of P.tuercasEmp) for (const cara of [3, 7]) {
-    const g = new THREE.Group(), ex = `h = ${fmt(y)} mm · cara ${cara}`;
-    const t = tag(new THREE.Mesh(G.tuerca25, MAT.galv), 11, 'Tuerca de empotramiento ø25.4', ex); t.position.x = mm(12.5);
-    const b = new THREE.Mesh(G.barreno25, MAT.hueco); b.position.x = mm(25.3);
-    g.add(t, b); acc.add(enCara(g, cara, y));
+  {
+    const places = [], items = [];
+    for (const y of P.tuercasEmp) for (const cara of [3, 7]) {
+      places.push(onFace(cara, y));
+      items.push({ name: 'Tuerca de empotramiento ø25.4', extra: `h = ${fmt(y)} mm · cara ${cara}` });
+    }
+    acc.add(instanced(G.tuerca25, MAT.galv, places, 11, items), instanced(G.barreno25, MAT.hueco, places));
   }
 
   // Registro Hubbell en cara 3
@@ -511,33 +542,33 @@ function build() {
 
   // Anclas, tuercas 2H y dado (cimentación)
   {
-    const A = P.ancla, e = mm(P.placa.cb / 2) * Math.SQRT1_2, tp = mm(P.placa.t);
-    const yTop = mm(A.sobre), yBot = yTop - mm(A.L), yRos = yTop - mm(A.rosca);
-    for (const [x, z] of [[e, e], [-e, e], [-e, -e], [e, -e]]) {
-      const ex = 'redondo A36 ø50.8 × 2 000 · rosca 254 · PL 150×150×25.4';
-      const liso = tag(cylY(mm(A.d / 2), yRos - yBot, MAT.negro, 20), 'A', 'Ancla', ex); liso.position.set(x, (yRos + yBot) / 2, z);
-      const ros = tag(cylY(mm(A.d / 2) * 1.012, yTop - yRos, MAT.rosca, 20), 'A', 'Ancla (zona roscada)', ex); ros.position.set(x, (yTop + yRos) / 2, z);
-      const n1 = tag(hexY(mm(79.4), mm(50.8), MAT.negro), 'A', 'Tuerca 2H de nivelación', 'ø2″'); n1.position.set(x, -tp - mm(25.4), z);
-      const n2 = tag(hexY(mm(79.4), mm(50.8), MAT.negro), 'A', 'Tuerca 2H superior', 'ø2″'); n2.position.set(x, mm(25.4), z);
-      const pl = tag(box(mm(A.pl), mm(A.plt), mm(A.pl), MAT.negro), 'A', 'Placa de ancla', '150 × 150 × 25.4'); pl.position.set(x, yBot + mm(A.plOff + A.plt / 2), z);
-      cim.add(liso, ros, n1, n2, pl);
-    }
-    const yC = -tp - mm(P.grout), hD = 2.3;
+    const e = mm(P.placa.cb / 2) * Math.SQRT1_2;
+    const esquinas = [[e, 0, e], [-e, 0, e], [-e, 0, -e], [e, 0, -e]];
+    const cuatro = (name, extra) => esquinas.map(() => ({ name, extra }));
+    const exA = 'redondo A36 ø50.8 × 2 000 · rosca 254 · PL 150×150×25.4';
+    cim.add(
+      instanced(G.ancla, MAT.negro, esquinas, 'A', cuatro('Ancla', exA)),
+      instanced(G.rosca, MAT.rosca, esquinas, 'A', cuatro('Ancla (zona roscada)', exA)),
+      instanced(G.tuercaNiv, MAT.negro, esquinas, 'A', cuatro('Tuerca 2H de nivelación', 'ø2″')),
+      instanced(G.tuercaSup, MAT.negro, esquinas, 'A', cuatro('Tuerca 2H superior', 'ø2″')),
+      instanced(G.placaAncla, MAT.negro, esquinas, 'A', cuatro('Placa de ancla', '150 × 150 × 25.4')),
+    );
+    const yC = -ANC.tp - mm(P.grout), hD = 2.3;
     const dado = tag(new THREE.Mesh(new THREE.BoxGeometry(1, hD, 1), MAT.concreto), 'D', 'Dado de concreto', 'referencia, sin cotas en el plano');
     dado.position.y = yC - hD / 2; dado.renderOrder = 2;
     const aristas = new THREE.LineSegments(new THREE.EdgesGeometry(dado.geometry), edgeMat); aristas.position.copy(dado.position);
     cim.add(dado, aristas);
   }
 
-  // Cruceta de referencia (3 000 × 800) atornillada a los canales
+  // Cruceta de referencia (3 000 × 800) atornillada a los canales, en una sola pieza de dibujo
   {
-    const T = 0.076, W = 3.0, yT = 20, yB = 19.2, ex = 'referencia: no está en la lista de materiales';
-    const zP = aAt(P.canales[1]) + mm(27) + mm(6);
-    const placaC = tag(box(0.22, 0.95, 0.012, MAT.ref), 'R', 'Placa de montaje de cruceta', ex); placaC.position.set(0, 19.525, zP);
-    cru.add(placaC);
-    const zF = zP + 0.006 + T / 2;
-    for (const y of [yT - T / 2, yB + T / 2]) { const m = tag(box(W, T, T, MAT.ref), 'R', 'Cruceta 3 000 × 800', ex); m.position.set(0, y, zF); cru.add(m); }
-    for (const x of [-W / 2 + T / 2, -0.75, 0, 0.75, W / 2 - T / 2]) { const m = tag(box(T, 0.8 - 2 * T, T, MAT.ref), 'R', 'Cruceta 3 000 × 800', ex); m.position.set(x, (yT + yB) / 2, zF); cru.add(m); }
+    const T = 0.076, W = 3.0, yT = 20, yB = 19.2;
+    const zP = aAt(P.canales[1]) + mm(27) + mm(6), zF = zP + 0.006 + T / 2;
+    const partes = [at(new THREE.BoxGeometry(0.22, 0.95, 0.012), 0, 19.525, zP)];
+    for (const y of [yT - T / 2, yB + T / 2]) partes.push(at(new THREE.BoxGeometry(W, T, T), 0, y, zF));
+    for (const x of [-W / 2 + T / 2, -0.75, 0, 0.75, W / 2 - T / 2]) partes.push(at(new THREE.BoxGeometry(T, 0.8 - 2 * T, T), x, (yT + yB) / 2, zF));
+    cru.add(tag(new THREE.Mesh(mergeGeometries(partes), MAT.ref), 'R', 'Cruceta 3 000 × 800 con placa de montaje', 'referencia: no está en la lista de materiales'));
+    for (const g of partes) g.dispose();
   }
 
   // Cotas y etiquetas
@@ -669,25 +700,32 @@ for (const nSides of [12, 8]) {
 
 // ---------- Identificar piezas ----------
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let stageRect = stage.getBoundingClientRect();
 const shown = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
 function pick(ev) {
-  const r = renderer.domElement.getBoundingClientRect();
-  ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  const x = ev.clientX - stageRect.left, y = ev.clientY - stageRect.top;
+  ndc.set((x / stageRect.width) * 2 - 1, -(y / stageRect.height) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   const hit = ray.intersectObjects(pickables, false).find((h) => shown(h.object) && !(tg.cor.checked && h.point.z > 0));
-  return hit ? { obj: hit.object, x: ev.clientX - stage.getBoundingClientRect().left, y: ev.clientY - stage.getBoundingClientRect().top } : null;
+  return hit ? { obj: hit.object, inst: hit.instanceId, x, y } : null;
 }
+let tipKey = null;
 function showTip(h) {
-  if (!h) { tip.hidden = true; return; }
-  const u = h.obj.userData, fig = typeof u.fig === 'number' ? `Fig. ${u.fig} · ` : '';
-  tip.innerHTML = `${u.name}<small>${fig}${u.extra || FIG_NAME[u.fig] || ''}</small>`;
-  tip.style.left = Math.min(h.x, stage.clientWidth - 270) + 'px'; tip.style.top = h.y + 'px';
+  if (!h) { if (!tip.hidden) tip.hidden = true; tipKey = null; return; }
+  const u = h.obj.userData, it = u.items ? u.items[h.inst] : u;
+  const key = h.obj.id + ':' + (h.inst ?? '');
+  if (key !== tipKey) {
+    tipKey = key;
+    const fig = typeof u.fig === 'number' ? `Fig. ${u.fig} · ` : '';
+    tip.innerHTML = `${it.name}<small>${fig}${it.extra || FIG_NAME[u.fig] || ''}</small>`;
+  }
+  tip.style.transform = `translate(${Math.min(h.x, stageRect.width - 270) + 12}px, ${h.y + 12}px)`;
   tip.hidden = false;
 }
-let hoverEv = null, downAt = null;
-renderer.domElement.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && !e.buttons) hoverEv = e; });
-renderer.domElement.addEventListener('pointerleave', () => { hoverEv = null; tip.hidden = true; });
-renderer.domElement.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
+let hoverEv = null, hoverAt = 0, downAt = null;
+renderer.domElement.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && !e.buttons) hoverEv = e; else hoverEv = null; });
+renderer.domElement.addEventListener('pointerleave', () => { hoverEv = null; showTip(null); });
+renderer.domElement.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; showTip(null); });
 renderer.domElement.addEventListener('pointerup', (e) => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
   const h = pick(e);
@@ -695,10 +733,11 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   select(h ? h.obj.userData.fig : null, false);
 });
 
-// ---------- Bucle ----------
-let dirty = true;
+// ---------- Bucle: dibuja solo cuando algo cambia ----------
+let dirty = true, moving = false, lastRender = 0, slow = 0, dprMove = DPR_MAX;
 const resize = () => {
-  const w = stage.clientWidth, h = stage.clientHeight;
+  stageRect = stage.getBoundingClientRect();
+  const w = stageRect.width, h = stageRect.height;
   if (!w || !h) return;
   renderer.setSize(w, h); labelRenderer.setSize(w, h);
   camera.aspect = w / h; camera.updateProjectionMatrix(); dirty = true;
@@ -707,6 +746,22 @@ new ResizeObserver(resize).observe(stage);
 
 const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 const tmp = new THREE.Vector3();
+function draw() {
+  // Planos de recorte cercano/lejano según el zoom: buena precisión de profundidad sin búfer logarítmico.
+  const d = camera.position.distanceTo(controls.target);
+  const near = THREE.MathUtils.clamp(d * 0.004, 0.004, 0.3), far = d * 3 + 60;
+  if (Math.abs(camera.near - near) > near * 0.2 || Math.abs(camera.far - far) > far * 0.2) {
+    camera.near = near; camera.far = far; camera.updateProjectionMatrix();
+  }
+  for (const o of groups.dim.children) {
+    const u = o.userData;
+    if (!u.win) continue;
+    const dd = u.by === 'self' ? camera.position.distanceTo(o.getWorldPosition(tmp)) : d;
+    o.visible = (u.gate ? groups[u.gate].visible : true) && dd >= u.win[0] && dd < u.win[1];
+  }
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
 function loop(now) {
   requestAnimationFrame(loop);
   if (tw) {
@@ -716,18 +771,24 @@ function loop(now) {
     dirty = true;
   }
   if (controls.update()) dirty = true;
-  if (hoverEv) { showTip(pick(hoverEv)); hoverEv = null; }
-  if (!dirty) return;
-  dirty = false;
-  const camD = camera.position.distanceTo(controls.target);
-  for (const o of groups.dim.children) {
-    const u = o.userData;
-    if (!u.win) continue;
-    const d = u.by === 'self' ? camera.position.distanceTo(o.getWorldPosition(tmp)) : camD;
-    o.visible = (u.gate ? groups[u.gate].visible : true) && d >= u.win[0] && d < u.win[1];
+  if (hoverEv && !moving && now - hoverAt > 50) { hoverAt = now; showTip(pick(hoverEv)); hoverEv = null; }
+  if (!dirty) {
+    if (moving && now - lastRender > 250) {   // terminó el movimiento: un cuadro nítido
+      moving = false; slow = 0;
+      if (renderer.getPixelRatio() !== DPR_MAX) { renderer.setPixelRatio(DPR_MAX); draw(); }
+    }
+    return;
   }
-  renderer.render(scene, camera);
-  labelRenderer.render(scene, camera);
+  dirty = false;
+  if (!moving) {
+    moving = true;
+    if (renderer.getPixelRatio() !== dprMove) renderer.setPixelRatio(dprMove);
+  } else {
+    if (now - lastRender > 30) slow++; else if (slow > 0) slow--;
+    if (slow >= 8 && dprMove > 0.75) { dprMove = Math.max(0.75, dprMove - 0.25); renderer.setPixelRatio(dprMove); slow = 0; }
+  }
+  lastRender = now;
+  draw();
 }
 
 build();
