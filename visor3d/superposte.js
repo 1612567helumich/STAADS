@@ -77,6 +77,10 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.09;
 controls.minDistance = 0.25; controls.maxDistance = 90;
 controls.autoRotateSpeed = 0.9;
+// Navegación tipo CAD: botón izquierdo gira, rueda presionada (o botón derecho) desplaza, rueda hace zoom hacia el cursor.
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN };
+controls.zoomToCursor = true;
+renderer.domElement.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });   // sin autodesplazamiento del navegador
 
 // ---------- Materiales ----------
 const MAT = {
